@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1a20">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lin AI">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Lin AI 健身教練</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💪%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1a20; --bg2:#0e232b; --card:#122c35; --line:rgba(255,255,255,.10);
+  --ink:#eaf4f1; --mute:#93aeb3; --yellow:#ffd23f; --teal:#3dd6d0; --coral:#ff6b57; --dark:#0a1a20;
+  --num:"Barlow Condensed","Noto Sans TC",sans-serif;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{
+  margin:0; color:var(--ink); background-color:var(--bg);
+  background-image:repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.03) 119px 120px);
+  font:16px/1.65 "Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0 0 .5em; line-height:1.3}
+h2{font-size:1.5rem} h3{font-size:1.15rem} h4{font-size:1rem}
+p{margin:.4em 0}
+.mute{color:var(--mute)} .small{font-size:.875rem}
+:focus-visible{outline:3px solid var(--yellow); outline-offset:2px}
+
+/* 頂部 */
+.top{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 20px; max-width:1100px; margin:0 auto}
+.brand{font-family:var(--num); font-weight:800; font-size:1.9rem; letter-spacing:.01em}
+.brand small{font:700 .9rem "Noto Sans TC",sans-serif; color:var(--mute); margin-left:8px; letter-spacing:0}
+.stats{display:flex; gap:22px}
+.stat{text-align:right; line-height:1.15}
+.stat b{display:block; font:700 1.5rem var(--num); color:var(--yellow)}
+.stat span{font-size:.75rem; color:var(--mute)}
+@media(max-width:560px){.stats .opt{display:none}.stats{gap:16px}.brand small{display:none}}
+
+/* 分頁 */
+.tabs{display:flex; gap:2px; padding:0 12px; overflow-x:auto; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; background:rgba(10,26,32,.92); backdrop-filter:blur(8px)}
+.tab:first-child{margin-left:auto}.tab:last-child{margin-right:auto}
+.tab{appearance:none; background:none; border:0; border-bottom:3px solid transparent; color:var(--mute); font:inherit; font-weight:700; padding:13px 16px; cursor:pointer; white-space:nowrap}
+.tab[aria-selected=true]{color:var(--ink); border-color:var(--yellow)}
+main{max-width:1100px; margin:0 auto; padding:22px 16px 80px}
+.panel{display:none} .panel.active{display:block}
+
+/* 版面 */
+.grid2{display:grid; grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr); gap:22px; align-items:start}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.stack>*+*{margin-top:14px}
+.stack>label{display:block}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.row>.grow{flex:1 1 140px}
+label.f{display:block; font-size:.875rem; color:var(--mute); margin-bottom:6px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px}
+.rule{border:0; border-top:1px solid var(--line); margin:18px 0}
+
+/* 表單 */
+select,input[type=number],input[type=password],input[type=text],textarea{width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:inherit}
+input[type=range]{width:100%; accent-color:var(--yellow)}
+input[type=checkbox]{accent-color:var(--yellow); width:18px; height:18px; vertical-align:-3px}
+.slider{display:grid; grid-template-columns:1fr auto; gap:2px 12px; align-items:center}
+.slider output{font:700 1.25rem var(--num); color:var(--yellow)}
+.slider input{grid-column:1/-1}
+
+/* 按鈕 */
+.btn{appearance:none; border:0; border-radius:999px; padding:12px 24px; font:inherit; font-weight:700; cursor:pointer; background:var(--yellow); color:var(--dark); transition:filter .15s, transform .1s}
+.btn:hover{filter:brightness(1.07)} .btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent; color:var(--ink); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22)}
+.btn.teal{background:var(--teal)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.38; cursor:not-allowed; filter:none; transform:none}
+.seg{display:flex; gap:6px; flex-wrap:wrap}
+.seg button{appearance:none; border:0; background:var(--bg2); color:var(--ink); font:inherit; font-weight:600; padding:8px 16px; border-radius:999px; cursor:pointer; box-shadow:inset 0 0 0 1px var(--line)}
+.seg button.on{background:var(--yellow); color:var(--dark); box-shadow:none}
+
+/* 鏡頭舞台 */
+.stage{position:relative; border-radius:22px; overflow:hidden; background:#06121a; aspect-ratio:4/3; border:1px solid var(--line)}
+.stage .v,.stage .c{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform:scaleX(-1)}
+.stage .score{position:absolute; left:16px; top:10px; pointer-events:none; text-shadow:0 2px 14px rgba(0,0,0,.65)}
+.stage .n{font:800 clamp(64px,13vw,120px)/.9 var(--num); color:var(--yellow); font-variant-numeric:tabular-nums}
+.stage .u{font-weight:700; margin-left:6px; color:var(--ink)}
+.stage .nm{display:block; font-weight:700; font-size:.95rem; color:var(--ink); margin-top:2px}
+.stage .chip{position:absolute; left:14px; bottom:22px; padding:5px 14px; border-radius:8px; font-weight:700; font-size:.9rem; background:rgba(10,26,32,.78); color:var(--mute); border:1px solid var(--line)}
+.stage .chip.ready{color:var(--teal); border-color:var(--teal)}
+.stage .chip.low{color:var(--yellow); border-color:var(--yellow)}
+.stage .chip.warn{color:var(--coral); border-color:var(--coral)}
+.stage .gauge{position:absolute; left:0; right:0; bottom:0; height:8px; background:rgba(255,255,255,.12)}
+.stage .gauge i{display:block; height:100%; width:0; background:var(--teal); transition:width .08s linear}
+.stage .msg{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; background:rgba(6,18,26,.72); font-weight:700; color:var(--ink)}
+.stage .msg[hidden]{display:none}
+
+/* 計時器 */
+.tcard{border-radius:28px; padding:26px 20px 18px; text-align:center; background:var(--card); color:var(--ink); min-height:300px; display:flex; flex-direction:column; justify-content:center}
+.tcard.idle{border:2px dashed var(--line); background:transparent; color:var(--mute)}
+.tcard.work{background:var(--yellow); color:var(--dark)}
+.tcard.rest{background:var(--teal); color:var(--dark)}
+.tcard.prepare{background:#2b4750; color:var(--ink)}
+.tcard.done{background:var(--ink); color:var(--dark)}
+.tcard.danger{background:var(--coral); color:#fff}
+.tlabel{font-weight:900; font-size:1.35rem}
+.tbig{font:800 clamp(110px,30vw,220px)/.95 var(--num); font-variant-numeric:tabular-nums}
+.tcard.danger .tbig{animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.14)}}
+@media(prefers-reduced-motion:reduce){.tcard.danger .tbig{animation:none}}
+.thint{font-weight:700; min-height:1.7em}
+.tbar{height:10px; border-radius:99px; background:rgba(0,0,0,.2); overflow:hidden; margin:12px 0 10px}
+.tbar i{display:block; height:100%; background:currentColor; opacity:.85}
+.tmeta{display:flex; justify-content:space-between; font-size:.9rem; font-weight:600; opacity:.9}
+
+/* 其他 */
+.facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px}
+.fact{background:var(--bg2); border:1px solid var(--line); border-radius:12px; padding:12px 14px}
+.fact b{display:block; font:700 1.8rem/1.2 var(--num); color:var(--yellow)}
+.fact span{font-size:.8rem; color:var(--mute)}
+.bar{height:10px; border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden}
+.bar i{display:block; height:100%; background:var(--teal)}
+.bar.hp i{background:var(--coral)}
+.boss{text-align:center; padding:18px; border-radius:20px; background:var(--bg2); border:1px solid var(--line)}
+.boss .e{font-size:4.5rem; line-height:1.1}
+.boss .nm{font-weight:900; font-size:1.4rem; color:var(--yellow)}
+ul.log{list-style:none; padding:0; margin:0; font-size:.92rem; color:var(--mute)}
+ul.log li{padding:5px 0; border-bottom:1px solid var(--line)}
+.plan summary{cursor:pointer; font-weight:700; padding:10px 0}
+.plan ul{margin:.2em 0 .8em 1.2em; padding:0}
+table{border-collapse:collapse; width:100%; font-size:.92rem}
+th,td{border-bottom:1px solid var(--line); padding:6px 8px; text-align:left}
+th{color:var(--mute); font-weight:600}
+.notice{border-left:4px solid var(--teal); padding:8px 14px; background:rgba(61,214,208,.08); border-radius:0 10px 10px 0}
+.notice.warn{border-color:var(--coral); background:rgba(255,107,87,.08)}
+
+/* 教練聊天 */
+.chat{display:flex; flex-direction:column; gap:12px; min-height:200px; max-height:58vh; overflow-y:auto; padding:4px 2px}
+.msgb{max-width:92%; padding:10px 14px; border-radius:16px; word-wrap:break-word}
+.msgb.me{align-self:flex-end; background:var(--yellow); color:var(--dark); border-bottom-right-radius:4px}
+.msgb.ai{align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:4px}
+.msgb.ai pre{overflow:auto; background:var(--bg2); padding:10px; border-radius:8px}
+.msgb.ai h3,.msgb.ai h4{margin-top:.6em}
+.msgb.ai ul,.msgb.ai ol{margin:.3em 0 .3em 1.2em; padding:0}
+.msgb.ai table{display:block; overflow-x:auto}
+.top{flex-wrap:wrap}
+.top-right{display:flex; align-items:center; gap:18px}
+.btn.small{padding:7px 14px; font-size:.85rem}
+.badges{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px}
+.badge{display:flex; gap:12px; align-items:center; padding:12px 14px; border-radius:14px; background:var(--bg2); border:1px solid var(--line)}
+.badge svg{flex:none}
+.badge.locked{opacity:.5}
+.badge b{display:block; font-size:.95rem}
+.badge span{font-size:.78rem; color:var(--mute)}
+.toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:50; background:var(--yellow); color:var(--dark); padding:12px 24px; border-radius:999px; font-weight:800; box-shadow:0 10px 34px rgba(0,0,0,.45); max-width:92vw; text-align:center}
+.toast[hidden]{display:none}
+.stage .cue{position:absolute; left:50%; top:14px; transform:translateX(-50%); padding:8px 18px; border-radius:999px; font-weight:800; max-width:92%; text-align:center; pointer-events:none}
+.stage .cue.bad{background:var(--coral); color:#fff}
+.stage .cue.ok{background:rgba(61,214,208,.92); color:var(--dark)}
+.stage .cue[hidden]{display:none}
+.wbar{position:fixed; left:50%; bottom:20px; transform:translateX(-50%); z-index:49; display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; background:var(--teal); color:var(--dark); padding:12px 16px; border-radius:22px; font-weight:800; box-shadow:0 10px 34px rgba(0,0,0,.45); width:min(92vw,560px)}
+.wbar[hidden]{display:none}
+.wbar .btn{background:var(--dark); color:var(--ink)}
+.wbar .btn.ghost{background:transparent; color:var(--dark); box-shadow:inset 0 0 0 1.5px rgba(10,26,32,.45)}
+.wbar .x{appearance:none; border:0; background:none; color:var(--dark); font-size:1.4rem; line-height:1; cursor:pointer; padding:0 6px}
+.ach{display:flex; gap:14px; align-items:center; padding:14px 16px; border-radius:16px; background:var(--bg2); border:1px solid var(--line)}
+.ach svg{flex:none}
+.ach .grow{min-width:0; flex:1}
+.ach b{display:block; font-size:1rem}
+.ach .d{display:block; font-size:.8rem; color:var(--mute); margin:2px 0}
+.ach.locked{opacity:.62}
+.ach .bar{margin:6px 0}
+.tag{display:inline-block; font-size:.72rem; font-weight:800; padding:1px 9px; border-radius:6px; color:var(--dark); vertical-align:2px}
+.tag.t1{background:#cd7f32} .tag.t2{background:#c8d1da} .tag.t3{background:#ffd23f}
+.achgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px}
+.guide details{background:var(--bg2); border:1px solid var(--line); border-radius:14px; padding:4px 16px; margin-bottom:10px}
+.guide summary{cursor:pointer; font-weight:800; padding:12px 0}
+.guide ul{margin:.3em 0 .6em 1.2em; padding:0}
+.chip2{display:inline-flex; align-items:center; gap:4px; background:var(--bg2); border:1px solid var(--line); border-radius:999px; padding:4px 6px 4px 14px; font-weight:700}
+.chip2 button{appearance:none; border:0; background:none; color:var(--ink); font:inherit; cursor:pointer}
+.chip2 .x{color:var(--mute); padding:0 6px; font-size:1.1rem}
+.daily{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:18px}
+.daily .grow{flex:1 1 240px}
+.stage .fsbtn{position:absolute; top:12px; right:12px; z-index:3; width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:rgba(10,26,32,.72); color:var(--ink); cursor:pointer; display:grid; place-items:center; backdrop-filter:blur(6px); padding:0}
+.stage .fsbtn svg{width:22px; height:22px}
+.stage .tmini{position:absolute; top:64px; right:12px; z-index:2; min-width:96px; text-align:center; padding:8px 12px; border-radius:14px; color:var(--dark); font-weight:800; background:var(--yellow)}
+.stage .tmini[hidden]{display:none}
+.tmini .tl{display:block; font-size:.78rem; line-height:1.3; max-width:150px; margin:0 auto}
+.tmini .tn{display:block; font:800 2.6rem/1.05 var(--num)}
+.tmini.rest{background:var(--teal)} .tmini.prepare{background:#2b4750; color:var(--ink)} .tmini.danger{background:var(--coral); color:#fff}
+.stage .fsgo{position:absolute; right:14px; bottom:26px; z-index:3; box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.stage .fsgo[hidden]{display:none}
+.stage.full{position:fixed; inset:0; z-index:60; width:100vw; height:100vh; height:100dvh; aspect-ratio:auto; border-radius:0; border:0; background:#000}
+.stage.full .v,.stage.full .c{object-fit:contain}
+.stage.full .score{left:calc(18px + env(safe-area-inset-left)); top:calc(10px + env(safe-area-inset-top))}
+.stage.full .n{font-size:clamp(90px,16vw,170px)}
+.stage.full .fsbtn{top:calc(12px + env(safe-area-inset-top)); right:calc(12px + env(safe-area-inset-right))}
+.stage.full .tmini{top:calc(64px + env(safe-area-inset-top)); right:calc(12px + env(safe-area-inset-right))}
+.stage.full .tmini .tn{font-size:3.6rem}
+.stage.full .chip{bottom:calc(30px + env(safe-area-inset-bottom)); left:calc(16px + env(safe-area-inset-left)); font-size:1.05rem}
+.stage.full .fsgo{bottom:calc(30px + env(safe-area-inset-bottom)); right:calc(16px + env(safe-area-inset-right))}
+.stage .hint{position:absolute; left:50%; bottom:58px; transform:translateX(-50%); z-index:2; max-width:94%; padding:5px 12px; font-size:.82rem; line-height:1.4; border-radius:10px; background:rgba(255,107,87,.94); color:#fff; font-weight:800; text-align:center; pointer-events:none}
+.stage .hint[hidden]{display:none}
+.stage.rear .v,.stage.rear .c{transform:none}
+.stage.full .hint{bottom:calc(76px + env(safe-area-inset-bottom)); font-size:1rem; padding:8px 16px}
+.stage .recbtn{position:absolute; top:12px; right:62px; z-index:3; height:42px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:rgba(10,26,32,.72); color:var(--ink); cursor:pointer; display:flex; align-items:center; gap:8px; font:700 .85rem "Noto Sans TC",sans-serif; backdrop-filter:blur(6px)}
+.stage .recbtn i{width:12px; height:12px; border-radius:50%; background:var(--coral)}
+.stage .recbtn.on{background:var(--coral); color:#fff; border-color:var(--coral)}
+.stage .recbtn.on i{background:#fff; animation:blink 1s steps(2,start) infinite}
+@keyframes blink{50%{opacity:.2}}
+@media(prefers-reduced-motion:reduce){.stage .recbtn.on i{animation:none}}
+.stage.full .recbtn{top:calc(12px + env(safe-area-inset-top)); right:calc(62px + env(safe-area-inset-right))}
+dialog.recdlg{border:0; border-radius:20px; padding:18px; background:var(--card); color:var(--ink); width:min(92vw,560px)}
+dialog.recdlg::backdrop{background:rgba(0,0,0,.72)}
+#installBar{max-width:1068px; margin:0 auto 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+#installBar[hidden]{display:none}
+#installBar span{flex:1 1 240px}
+.fab{position:fixed; right:16px; bottom:16px; z-index:45; width:54px; height:54px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; display:grid; place-items:center; box-shadow:0 8px 26px rgba(0,0,0,.45); padding:0}
+.fab svg{width:26px; height:26px}
+.fab.on{background:var(--yellow); color:var(--dark); border-color:var(--yellow)}
+.mpanel{position:fixed; right:16px; bottom:82px; z-index:46; width:min(92vw,350px); max-height:calc(100dvh - 110px); overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:16px; box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.mpanel[hidden]{display:none}
+.mpanel h3{margin:0 0 10px; font-size:1.05rem}
+.mpanel .stack>*+*{margin-top:12px}
+.mpanel ol{margin:6px 0 0; padding-left:1.3em; font-size:.88rem}
+.mpanel ol li.cur{color:var(--yellow); font-weight:700}
+.mpanel a{color:var(--teal)}
+.sc{display:grid; grid-template-columns:3.2em 1fr auto; gap:10px; align-items:center; padding:6px 0; border-bottom:1px solid var(--line); font-size:.92rem}
+.sc.today{background:rgba(255,210,63,.08); border-radius:10px; padding:6px 8px}
+.sc input{padding:7px 10px}
+.xbtn{appearance:none; border:0; background:none; color:var(--mute); cursor:pointer; font-size:1.15rem; padding:0 6px}
+.xbtn:hover{color:var(--coral)}
+.stage .dbg{position:absolute; left:16px; top:132px; z-index:2; font:700 .74rem ui-monospace,Consolas,monospace; padding:3px 9px; border-radius:8px; background:rgba(10,26,32,.72); color:var(--teal); pointer-events:none}
+.stage .dbg[hidden]{display:none}
+.foot{max-width:1100px; margin:0 auto; padding:10px 16px 90px; color:var(--mute); font-size:.78rem; text-align:center}
+.fr{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background:var(--bg2); margin-bottom:8px}
+.fr.me{border-color:var(--yellow); background:rgba(255,210,63,.07)}
+.fr .grow{flex:1; min-width:0}
+.fr b{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.fr .small{display:block; font-size:.76rem}
+.fr .fv{font:800 1.7rem/1 var(--num); color:var(--yellow); text-align:right; min-width:3.2em}
+.fr .fv small{font:600 .72rem "Noto Sans TC",sans-serif; color:var(--mute); margin-left:2px}
+.rk{flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font:800 1.1rem var(--num); background:var(--card); border:1px solid var(--line); color:var(--ink)}
+.rk.r1{background:#ffd23f; color:var(--dark); border-color:#ffd23f}
+.rk.r2{background:#c8d1da; color:var(--dark); border-color:#c8d1da}
+.rk.r3{background:#cd7f32; color:var(--dark); border-color:#cd7f32}
+.codebox{font:800 2.2rem/1 var(--num); letter-spacing:.2em; color:var(--yellow); background:var(--bg2); border:1px dashed var(--line); border-radius:14px; padding:12px 18px; text-align:center}
+</style>
+
+<style id="polish">
+/* ===== 視覺強化層：只改外觀，不改功能 ===== */
+:root{--r-md:16px; --r-lg:24px; --sh:0 12px 32px rgba(0,0,0,.30); --glass:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015));}
+html{scroll-behavior:smooth}
+body{
+  background-image:
+    radial-gradient(900px 520px at 88% -8%,rgba(61,214,208,.15),transparent 62%),
+    radial-gradient(760px 520px at -6% 6%,rgba(255,210,63,.09),transparent 58%),
+    repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.028) 119px 120px);
+}
+::selection{background:rgba(255,210,63,.35)}
+
+/* 頂部 */
+.top{padding:20px 20px 12px}
+.brand{display:flex; align-items:center; gap:12px; font-size:2.15rem; letter-spacing:.01em}
+.brand::before{content:""; width:12px; height:30px; border-radius:4px; transform:skewX(-14deg); background:linear-gradient(180deg,var(--yellow),var(--teal)); box-shadow:0 0 18px rgba(255,210,63,.35)}
+.brand small{margin-left:2px}
+.stats{gap:0; padding:8px 6px; border:1px solid var(--line); border-radius:18px; background:var(--glass); box-shadow:var(--sh)}
+.stat{padding:2px 16px; text-align:center}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat b{font-size:1.65rem; line-height:1.1}
+#voiceBtn{box-shadow:none}
+
+/* 分頁：膠囊 + 圖示 */
+.tabs{padding:10px 12px; gap:4px; border-bottom:1px solid var(--line); scroll-snap-type:x proximity; background:rgba(10,26,32,.88)}
+.tab{display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:1px solid transparent; border-radius:999px; font-size:.92rem; white-space:nowrap; transition:background .18s,color .18s,transform .12s; scroll-snap-align:center}
+.tab svg{width:17px; height:17px; flex:none; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.tab:hover{background:rgba(255,255,255,.07); color:var(--ink)}
+.tab:active{transform:scale(.97)}
+.tab[aria-selected=true]{background:var(--yellow); color:var(--dark); border-color:var(--yellow); box-shadow:0 6px 20px rgba(255,210,63,.25)}
+.tab:first-child{margin-left:auto}.tab:last-child{margin-right:auto}
+
+/* 版面節奏 */
+main{padding-top:26px}
+.panel.active{animation:panelIn .32s cubic-bezier(.2,.7,.2,1) both}
+@keyframes panelIn{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
+h2{font-size:1.7rem; letter-spacing:.01em}
+.panel h2::after{content:""; display:block; width:44px; height:4px; margin-top:8px; border-radius:4px; background:linear-gradient(90deg,var(--yellow),var(--teal))}
+h3{letter-spacing:.01em}
+.stack>*+*{margin-top:16px}
+
+/* 卡片 */
+.card,.fact,.glass,.boss,.badge,.ach,.fr{background-image:var(--glass); background-color:var(--card)}
+.card{border-radius:var(--r-lg); padding:20px 22px; box-shadow:var(--sh)}
+.fact{position:relative; overflow:hidden; border-radius:14px; padding:14px 16px 14px 20px}
+.fact::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg,var(--yellow),var(--teal))}
+.fact b{font-size:2rem}
+.ach,.fr,.badge{transition:transform .16s,border-color .16s,box-shadow .16s}
+.ach:hover,.fr:hover{transform:translateY(-2px); border-color:rgba(255,210,63,.35); box-shadow:0 10px 26px rgba(0,0,0,.3)}
+.notice{border-radius:0 14px 14px 0}
+
+/* 按鈕與輸入 */
+.btn{font-weight:800; letter-spacing:.02em; box-shadow:0 8px 22px rgba(255,210,63,.20); transition:transform .12s,filter .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px); box-shadow:0 10px 26px rgba(255,210,63,.28)}
+.btn:active{transform:scale(.98)}
+.btn.teal{box-shadow:0 8px 22px rgba(61,214,208,.20)}
+.btn.teal:hover{box-shadow:0 10px 26px rgba(61,214,208,.28)}
+.btn.ghost{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22); background:rgba(255,255,255,.03)}
+.btn.ghost:hover{background:rgba(255,255,255,.08); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
+.btn:disabled{box-shadow:none}
+.btn.block{padding:15px 24px; font-size:1.05rem}
+.seg button{transition:background .15s,color .15s}
+.seg button:hover:not(.on){background:rgba(255,255,255,.1)}
+select,input[type=number],input[type=password],input[type=text],textarea{border-radius:12px; transition:border-color .15s,box-shadow .15s}
+select:focus,input:focus,textarea:focus{outline:0; border-color:var(--yellow); box-shadow:0 0 0 3px rgba(255,210,63,.18)}
+details>summary{list-style:none; display:flex; align-items:center; gap:8px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:""; width:8px; height:8px; border-right:2px solid var(--yellow); border-bottom:2px solid var(--yellow); transform:rotate(-45deg); transition:transform .2s; flex:none}
+details[open]>summary::before{transform:rotate(45deg)}
+details#camAdv{background:var(--glass); border:1px solid var(--line); border-radius:14px; padding:12px 16px}
+
+/* 鏡頭畫面：取景框、空狀態 */
+.stage{border-radius:28px; box-shadow:0 20px 56px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.07); background:radial-gradient(120% 90% at 50% 0%,#0d2630,#04101a 70%)}
+.stage::after{content:""; position:absolute; inset:14px; pointer-events:none; z-index:1; opacity:.5;
+  background:
+   linear-gradient(var(--teal),var(--teal)) 0 0/26px 2px, linear-gradient(var(--teal),var(--teal)) 0 0/2px 26px,
+   linear-gradient(var(--teal),var(--teal)) 100% 0/26px 2px, linear-gradient(var(--teal),var(--teal)) 100% 0/2px 26px,
+   linear-gradient(var(--teal),var(--teal)) 0 100%/26px 2px, linear-gradient(var(--teal),var(--teal)) 0 100%/2px 26px,
+   linear-gradient(var(--teal),var(--teal)) 100% 100%/26px 2px, linear-gradient(var(--teal),var(--teal)) 100% 100%/2px 26px;
+  background-repeat:no-repeat}
+.stage.full::after{display:none}
+.stage .msg{flex-direction:column; gap:14px; background:transparent; font-size:1.02rem; line-height:1.6; color:var(--ink); max-width:100%}
+.stage .msg::before{content:""; width:76px; height:76px; border-radius:50%; background:rgba(61,214,208,.10) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%233dd6d0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='13' r='6'/%3E%3Cpath d='M32 21v17M32 27l-12 8M32 27l12 8M32 38l-9 17M32 38l9 17'/%3E%3C/svg%3E") center/46px no-repeat; box-shadow:0 0 0 1px rgba(61,214,208,.35),0 0 40px rgba(61,214,208,.18)}
+.stage .msg[hidden]{display:none}
+.stage .chip{border-radius:999px; padding:6px 16px; backdrop-filter:blur(6px)}
+.stage .fsbtn,.stage .recbtn{border-radius:14px}
+.stage .score{text-shadow:0 2px 18px rgba(0,0,0,.7)}
+
+/* 計時器卡片 */
+.tcard{border-radius:32px; box-shadow:0 20px 50px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.18)}
+.tcard.idle{gap:14px; border:2px dashed rgba(255,255,255,.14); box-shadow:none}
+.tcard.idle::before{content:""; width:64px; height:64px; margin:0 auto; border-radius:50%; background:rgba(255,210,63,.10) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffd23f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='13' r='8'/%3E%3Cpath d='M12 9v4l3 2M9 3h6'/%3E%3C/svg%3E") center/34px no-repeat; box-shadow:0 0 0 1px rgba(255,210,63,.3)}
+.tbar{height:12px}
+
+/* 每日挑戰、好友、成就 */
+.daily{background:linear-gradient(135deg,rgba(255,210,63,.14),rgba(61,214,208,.08)),var(--card); border-color:rgba(255,210,63,.28)}
+.daily .bar i{background:linear-gradient(90deg,var(--yellow),var(--teal))}
+.bar{height:12px}
+.bar i{border-radius:99px; transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.fr{border-radius:16px; padding:12px 14px}
+.rk{width:38px; height:38px; box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.codebox{background:linear-gradient(135deg,rgba(255,210,63,.10),rgba(61,214,208,.06)); border:1px dashed rgba(255,210,63,.45); border-radius:16px}
+.ach{border-radius:18px}
+.msgb.me{box-shadow:0 6px 18px rgba(255,210,63,.18)}
+.msgb.ai{box-shadow:var(--sh)}
+
+/* 其他 */
+.fab{box-shadow:0 10px 30px rgba(0,0,0,.5); transition:transform .15s}
+.fab:hover{transform:scale(1.06)}
+.mpanel,.wbar,.toast{box-shadow:0 20px 56px rgba(0,0,0,.55)}
+.foot{opacity:.7}
+
+/* 手機 */
+@media(max-width:640px){
+  .top{padding:14px 14px 8px}
+  .top-right{width:100%; justify-content:space-between}
+  .stage{min-height:300px}
+  .brand{font-size:1.75rem}
+  .brand::before{height:24px}
+  .stats{padding:6px 2px}.stat{padding:2px 12px}.stat b{font-size:1.4rem}
+  .tabs{padding:8px 10px}
+  .tab{padding:8px 13px; font-size:.9rem}
+  main{padding:18px 14px 80px}
+  .card{padding:16px 16px; border-radius:20px}
+  .stage{border-radius:22px}
+  h2{font-size:1.5rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .panel.active{animation:none}
+  html{scroll-behavior:auto}
+  .btn,.tab,.ach,.fr,.bar i{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">Lin AI<small>健身教練</small></div>
+  <div class="top-right">
+    <button class="btn ghost small" id="voiceBtn" type="button"></button>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+<div class="wbar" id="planBar" role="alert" hidden>
+  <span id="plText"></span>
+  <button class="btn small" id="plGo" type="button">去訓練</button>
+  <button class="btn ghost small" id="plLater" type="button">30 分鐘後再提醒</button>
+  <button class="x" id="plClose" type="button" aria-label="關閉提醒">×</button>
+</div>
+<div class="notice" id="updateBar" hidden style="max-width:1068px;margin:0 auto 12px"><span>網站有新版本了，重新整理就會更新。</span> <button class="btn small" type="button" id="updateGo">重新整理</button></div>
+<div class="notice" id="installBar" hidden><span id="installTxt"></span><button class="btn small" type="button" id="installGo">安裝</button><button class="btn ghost small" type="button" id="installNo">不用了</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="wbar" id="waterBar" role="alert" hidden>
+  <span id="wText"></span>
+  <button class="btn small" id="wDrink" type="button">我喝了 250 ml</button>
+  <button class="btn ghost small" id="wLater" type="button">10 分鐘後再提醒</button>
+  <button class="x" id="wClose" type="button" aria-label="關閉提醒">×</button>
+</div>
+
+<nav class="tabs" role="tablist" id="tabs">
+  <button class="tab" role="tab" data-tab="cam" aria-selected="true">鏡頭計數</button>
+  <button class="tab" role="tab" data-tab="timer" aria-selected="false">訓練計時器</button>
+  <button class="tab" role="tab" data-tab="game" aria-selected="false">挑戰與遊戲</button>
+  <button class="tab" role="tab" data-tab="stats" aria-selected="false">統計紀錄</button>
+  <button class="tab" role="tab" data-tab="ach" aria-selected="false">成就徽章</button>
+  <button class="tab" role="tab" data-tab="friends" aria-selected="false">好友排行</button>
+  <button class="tab" role="tab" data-tab="body" aria-selected="false">身體數據與菜單</button>
+  <button class="tab" role="tab" data-tab="food" aria-selected="false">飲食紀錄</button>
+  <button class="tab" role="tab" data-tab="guide" aria-selected="false">動作教學</button>
+  <button class="tab" role="tab" data-tab="coach" aria-selected="false">AI 教練</button>
+</nav>
+
+<main>
+<!-- ============ 鏡頭計數 ============ -->
+<section class="panel active" id="tab-cam">
+  <div class="card daily" id="dailyCard">
+    <div class="grow">
+      <div id="dailyTxt" style="font-weight:700"></div>
+      <div class="bar" style="margin:8px 0"><i id="dailyBar"></i></div>
+      <div class="small mute" id="dailySub"></div>
+      <div class="small" id="dailyPlan" style="margin-top:4px; color:var(--yellow)"></div>
+    </div>
+    <button class="btn teal" type="button" id="dailyGo">用這個動作開始</button>
+  </div>
+  <div class="grid2">
+    <div data-stage="cam"></div>
+    <div class="stack">
+      <div>
+        <label class="f" for="camEx">訓練動作</label>
+        <select id="camEx"></select>
+      </div>
+      <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+      <div class="row">
+        <button class="btn grow" id="camStart">開啟鏡頭</button>
+        <button class="btn ghost" id="camStop" disabled>關閉</button>
+      </div>
+      <div class="slider">
+        <label class="f" for="camRelax" style="margin:0">偵測寬鬆度</label><output id="camRelaxO">10%</output>
+        <input type="range" id="camRelax" min="0" max="30" value="10">
+      </div>
+      <p class="small mute">數不到就調高，數太多就調低。畫面下緣的細條是動作幅度，拉滿代表動作到位。</p>
+      <details id="camAdv">
+        <summary style="cursor:pointer; font-weight:700">進階偵測設定</summary>
+        <div class="stack" style="margin-top:10px">
+          <div><label class="f">角度計算</label><div class="seg" id="cfg3d"><button type="button" data-v="1">3D（世界座標）</button><button type="button" data-v="0">2D（畫面座標）</button></div>
+            <p class="small mute" style="margin:6px 0 0">3D 比較不受拍攝角度影響；從側面拍深蹲這類動作，2D 有時也很穩，可以兩種都試試。</p></div>
+          <div class="slider"><label class="f" style="margin:0" for="cfgVis">關節可信度門檻</label><output id="cfgVisO"></output><input type="range" id="cfgVis" min="40" max="90" step="5"></div>
+          <div class="slider"><label class="f" style="margin:0" for="cfgWin">平滑視窗（取最近幾幀的中位數）</label><output id="cfgWinO"></output><input type="range" id="cfgWin" min="1" max="9" step="2"></div>
+          <div class="slider"><label class="f" style="margin:0" for="cfgConf">偵測／追蹤信心</label><output id="cfgConfO"></output><input type="range" id="cfgConf" min="40" max="90" step="5"></div>
+          <div><label class="f" for="cfgModel">姿勢模型</label>
+            <select id="cfgModel"><option value="lite">輕量（約 6 MB，手機建議）</option><option value="full">標準（約 9 MB）</option><option value="heavy">高精準（約 30 MB，電腦建議）</option></select>
+            <p class="small mute" style="margin:6px 0 0">越精準的模型越吃效能。換模型後第一次要下載，需要網路。</p></div>
+          <div><label class="f" for="camDev">鏡頭裝置（DroidCam、外接網路攝影機都選這裡）</label><select id="camDev"></select></div>
+          <label><input type="checkbox" id="cfgMirror"> 畫面鏡像（像照鏡子）</label>
+          <label><input type="checkbox" id="cfgShow"> 顯示各關節角度和 FPS（調整門檻時很好用）</label>
+          <button class="btn ghost small" type="button" id="cfgReset" style="align-self:flex-start">還原預設值</button>
+        </div>
+      </details>
+      <div class="facts"><div class="fact"><b id="camFormV">—</b><span>姿勢達標率</span></div><div class="fact"><b id="camTempoV">—</b><span>平均每下（秒）</span></div></div>
+      <p class="small mute">姿勢提醒依關節角度估算，只是參考。連續兩下不標準時，可以用語音提醒你（右上角可開關語音）。</p>
+      <div class="row">
+        <button class="btn teal grow" id="camSave" disabled>儲存這組並歸零</button>
+      </div>
+      <div class="notice small">全身入鏡、光線充足、距離鏡頭約 2–3 公尺。伏地挺身、捲腹、臀橋請從側面拍。影像只在你的裝置上處理，不會上傳。</div>
+      <div>
+        <h4>已儲存的紀錄</h4>
+        <ul class="log" id="histList"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 計時器 ============ -->
+<section class="panel" id="tab-timer">
+  <div class="grid2">
+    <div>
+      <div class="tcard idle" id="tCard"><div class="tlabel">選好模式，按「開始訓練」</div></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn grow" id="tStart">開始訓練</button>
+        <button class="btn ghost" id="tStop" disabled>停止</button>
+      </div>
+      <div id="tWarn" class="notice warn small" hidden style="margin-top:12px"></div>
+      <div class="card stack" id="tCamCard" style="margin-top:14px">
+        <label><input type="checkbox" id="tCamOn"> 用鏡頭自動計算每組次數</label>
+        <div id="tCamBox" class="stack" hidden>
+          <div id="tExWrap"><label class="f" for="tEx">計數的動作</label><select id="tEx"></select></div>
+          <p class="small mute" id="tExNote" hidden>循環訓練會依每個階段的動作自動切換計數。</p>
+          <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+          <div class="row">
+            <button class="btn teal grow" id="tCamBtn">開啟鏡頭</button>
+            <button class="btn ghost" id="tCamOff" disabled>關閉</button>
+          </div>
+          <div data-stage="timer"></div>
+          <p class="small mute">只在「訓練」階段計數，休息時不計。伏地挺身、捲腹、仰臥起坐請從側面拍。</p>
+        </div>
+      </div>
+      <div id="tResult" class="card" hidden style="margin-top:14px"></div>
+    </div>
+    <div class="stack">
+      <div>
+        <label class="f">訓練模式</label>
+        <div class="seg" id="tModes"></div>
+        <p class="small mute" id="tDesc"></p>
+      </div>
+      <div id="tParams" class="stack"></div>
+      <div id="tPicks" hidden>
+        <label class="f">循環動作（依序進行）</label>
+        <div id="tPickList" class="row" style="gap:6px 14px"></div>
+      </div>
+      <hr class="rule" style="margin:4px 0">
+      <div class="slider"><label class="f" style="margin:0">開始前準備（秒）</label><output id="tPrepO">5</output><input type="range" id="tPrep" min="3" max="15" value="5"></div>
+      <label><input type="checkbox" id="tSound" checked> 倒數音效（最後 10 秒每秒嗶一聲）</label>
+      <div class="facts">
+        <div class="fact"><b id="tTotal">0:00</b><span>總時間</span></div>
+        <div class="fact"><b id="tCount">0</b><span>階段數</span></div>
+      </div>
+      <div class="card stack">
+        <h4 style="margin:0">我的菜單</h4>
+        <p class="small mute">把目前選的模式和秒數存起來，下次一鍵載入。</p>
+        <div class="row"><input type="text" id="mpName" maxlength="12" placeholder="取個名字，例如：晨間 HIIT" style="flex:1 1 160px;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit"><button class="btn teal" type="button" id="mpSave">儲存</button></div>
+        <div class="row" id="mpList" style="gap:8px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 挑戰與遊戲 ============ -->
+<section class="panel" id="tab-game">
+  <div class="seg" id="gSub" style="margin-bottom:18px">
+    <button class="on" data-sub="ch">一分鐘挑戰</button>
+    <button data-sub="hold">撐住挑戰</button>
+    <button data-sub="boss">打怪模式</button>
+  </div>
+
+  <div id="sub-ch">
+    <div class="grid2">
+      <div class="stack">
+        <div data-stage="ch"></div>
+        <div class="tcard idle" id="chTimer" style="min-height:240px"><div class="tlabel">60 秒內你能做幾下？</div></div>
+        <div id="chResult" hidden class="card stack">
+          <div id="chResultMsg" class="notice"></div>
+          <div class="row">
+            <div class="grow"><label class="f" for="chReps">完成次數（鏡頭數不準可以改）</label><input type="number" id="chReps" min="0" max="300"></div>
+            <button class="btn" id="chSubmit">提交成績</button>
+          </div>
+        </div>
+        <div id="chDone" hidden class="notice"></div>
+      </div>
+      <div class="stack">
+        <div><label class="f" for="chEx">項目</label><select id="chEx"></select></div>
+        <div><label class="f">難度</label><div class="seg" id="chDiff"></div></div>
+        <div class="facts">
+          <div class="fact"><b id="chTarget">0</b><span>目標（下）</span></div>
+          <div class="fact"><b id="chBest">—</b><span>個人最佳</span></div>
+        </div>
+        <p class="small mute" id="chRange"></p>
+        <p class="small mute">星數：做到目標的 70% 得 1 顆、100% 得 2 顆、120% 得 3 顆。</p>
+        <label><input type="checkbox" id="chCam" checked> 用鏡頭自動計算次數</label>
+        <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+        <div class="row">
+          <button class="btn teal grow" id="chCamBtn">開啟鏡頭</button>
+          <button class="btn ghost" id="chCamOff" disabled>關閉</button>
+        </div>
+        <label><input type="checkbox" id="chSound" checked> 倒數音效</label>
+        <button class="btn block" id="chStart">開始 60 秒挑戰</button>
+        <div id="chWarn" class="notice warn small" hidden></div>
+        <div><h4>最近的成績</h4><table id="chLog"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-hold" hidden>
+    <div class="grid2">
+      <div class="stack">
+        <div data-stage="hold"></div>
+        <div id="hResult" class="notice" hidden></div>
+      </div>
+      <div class="stack">
+        <div><label class="f" for="hEx">項目</label><select id="hEx"><option>平板支撐</option><option>側棒式</option><option>靠牆深蹲</option><option>臀橋停留</option></select></div>
+        <div><label class="f">目標秒數</label><div class="seg" id="hTarget"><button type="button" data-v="30" class="on">30</button><button type="button" data-v="45">45</button><button type="button" data-v="60">60</button><button type="button" data-v="90">90</button><button type="button" data-v="120">120</button></div></div>
+        <div class="facts"><div class="fact"><b id="hBest">—</b><span>個人最佳（秒）</span></div></div>
+        <p class="small mute" id="hTip"></p>
+        <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+        <div class="row"><button class="btn teal grow" id="hCamBtn" type="button">開啟鏡頭</button><button class="btn ghost" id="hCamOff" type="button" disabled>關閉</button></div>
+        <button class="btn block" id="hStart" type="button">開始（3 秒後計時）</button>
+        <div id="hWarn" class="notice warn small" hidden></div>
+        <p class="small mute">只有「姿勢正確」的時間才會計入秒數；姿勢跑掉會暫停計時，並提醒你怎麼修正。</p>
+        <div><h4>最近的成績</h4><table id="hLog"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-boss" hidden>
+    <div class="grid2">
+      <div class="stack">
+        <div class="boss"><div class="e" id="bEmoji"></div><div class="nm" id="bName"></div><div class="small mute" id="bSub"></div></div>
+        <div><div class="row" style="justify-content:space-between"><span class="small mute">魔王血量</span><span class="small" id="bHpTxt"></span></div><div class="bar hp"><i id="bHp"></i></div></div>
+        <div class="row">
+          <div class="grow"><label class="f" for="bMove">攻擊動作</label><select id="bMove"></select></div>
+          <div style="width:110px"><label class="f" for="bReps">做了幾下</label><input type="number" id="bReps" min="1" max="100" value="10"></div>
+        </div>
+        <div class="row">
+          <button class="btn grow" id="bAtk">攻擊</button>
+          <button class="btn teal grow" id="bAtkCam">用鏡頭計數攻擊</button>
+        </div>
+        <p class="small mute">鏡頭計數來自「鏡頭計數」分頁目前還沒儲存的次數。連續換不同動作會累積連擊，還有 20% 機率爆擊。</p>
+      </div>
+      <div class="stack">
+        <div class="facts">
+          <div class="fact"><b id="bLv">1</b><span>等級</span></div>
+          <div class="fact"><b id="bCombo">x1.0</b><span>連擊</span></div>
+          <div class="fact"><b id="bDef">0</b><span>擊敗魔王</span></div>
+        </div>
+        <div><div class="row" style="justify-content:space-between"><span class="small mute">經驗值</span><span class="small" id="bXpTxt"></span></div><div class="bar"><i id="bXp"></i></div></div>
+        <div><h4>戰鬥紀錄</h4><ul class="log" id="bLog"></ul></div>
+        <button class="btn ghost" id="bReset">重新開始遊戲</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 統計與成就 ============ -->
+<section class="panel" id="tab-stats">
+  <div class="stack">
+    <div class="facts" id="stFacts"></div>
+    <div class="card stack">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">近期次數</h3>
+        <div class="seg" id="stRange"><button class="on" data-n="7">7 天</button><button data-n="30">30 天</button></div>
+      </div>
+      <div id="stChart"></div>
+    </div>
+    <div class="card stack">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">今日目標</h3>
+        <div style="width:130px"><input type="number" id="stGoal" min="10" max="1000" step="10" aria-label="每日目標次數"></div>
+      </div>
+      <div class="bar"><i id="stGoalBar"></i></div>
+      <p class="small mute" id="stGoalTxt"></p>
+    </div>
+    <div class="card stack" id="schedCard">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">我的課表與提醒</h3>
+        <label><input type="checkbox" id="scOn"> 開啟訓練提醒</label>
+      </div>
+      <p class="small mute" style="margin:0">每天填一個訓練內容，例如「下肢」「伏地挺身 + 有氧」；空白或寫「休息」就是休息日。</p>
+      <div id="scGrid"></div>
+      <div class="row"><div class="grow"><label class="f" for="scTime">提醒時間</label><select id="scTime"></select></div></div>
+      <p class="small mute" id="scNote"></p>
+    </div>
+    <div class="card stack" id="waterCard">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">喝水提醒</h3>
+        <label><input type="checkbox" id="wOn"> 開啟提醒</label>
+      </div>
+      <div class="row">
+        <div class="grow"><label class="f" for="wMin">每隔</label>
+          <select id="wMin"><option value="30">30 分鐘</option><option value="45">45 分鐘</option><option value="60">60 分鐘</option><option value="90">90 分鐘</option><option value="120">2 小時</option></select></div>
+        <div class="grow"><label class="f" for="wFrom">提醒時段，從</label><select id="wFrom"></select></div>
+        <div class="grow"><label class="f" for="wTo">到</label><select id="wTo"></select></div>
+      </div>
+      <div class="bar"><i id="wBar"></i></div>
+      <p class="small" id="wTxt"></p>
+      <div class="row">
+        <button class="btn teal" type="button" data-ml="250">喝了 250 ml</button>
+        <button class="btn teal" type="button" data-ml="500">喝了 500 ml</button>
+        <button class="btn ghost" type="button" id="wUndo">撤銷上一筆</button>
+      </div>
+      <div class="row" style="align-items:flex-end">
+        <div style="width:150px"><label class="f" for="wGoal">每日目標（ml）</label><input type="number" id="wGoal" min="500" max="6000" step="50"></div>
+        <button class="btn ghost" type="button" id="wNotif">允許瀏覽器通知</button>
+      </div>
+      <p class="small mute" id="wNote"></p>
+    </div>
+    <div class="card stack"><h3 style="margin:0">運動日曆</h3><div id="stHeat" style="overflow-x:auto"></div></div>
+    <div class="card stack"><h3 style="margin:0">個人紀錄（單組最多）</h3><div id="stPR"></div></div>
+    <div class="card stack">
+      <h3 style="margin:0">備份與還原</h3>
+      <p class="small mute">紀錄只存在這個瀏覽器。換手機或電腦前，先匯出備份檔，再到新的裝置匯入。備份檔不含 API Key。</p>
+      <div class="row">
+        <button class="btn teal" type="button" id="stExport">匯出備份</button>
+        <label class="btn ghost" style="cursor:pointer">匯入備份<input type="file" id="stImport" accept="application/json,.json" hidden></label>
+        <button class="btn ghost" type="button" id="stReset">清除所有紀錄</button>
+      </div>
+    </div>
+    <div class="card stack">
+      <h3 style="margin:0">診斷資訊</h3>
+      <p class="small mute">網站有問題時，按「複製診斷資訊」貼給我，我就能看出是哪裡出錯。裡面只有版本、瀏覽器和設定，沒有你的訓練紀錄。</p>
+      <div class="row"><button class="btn ghost" type="button" id="diagCopy">複製診斷資訊</button><span class="small mute" id="diagVer"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 好友排行 ============ -->
+<section class="panel" id="tab-friends">
+  <div style="max-width:760px; margin:0 auto" class="stack">
+    <h2>好友排行</h2>
+    <div id="frNoCfg" class="notice warn" hidden>好友功能暫時還不能使用，請稍後再試。</div>
+    <div id="frMain" class="stack" hidden>
+      <div class="notice" id="frNote" hidden></div>
+      <div class="card stack">
+        <h3 style="margin:0">我的資料</h3>
+        <div class="row" style="align-items:flex-end">
+          <div class="grow"><label class="f" for="frName">暱稱（最多 12 個字）</label><input type="text" id="frName" maxlength="12" placeholder="例如：小林"></div>
+          <button class="btn" type="button" id="frSaveMe">建立我的資料</button>
+        </div>
+        <div id="frMeBox" class="stack" hidden>
+          <div><label class="f">我的好友代碼（給朋友，讓他加你）</label><div class="codebox" id="frMyCode">—</div></div>
+          <div class="row"><button class="btn teal grow" type="button" id="frInvite">分享邀請連結</button><button class="btn ghost" type="button" id="frCopy">複製代碼</button></div>
+        </div>
+        <p class="small mute">好友只看得到你的暱稱、累計次數、本週次數、連續天數和等級，看不到影像和訓練細節。</p>
+      </div>
+      <div class="card stack" id="frAddBox">
+        <h3 style="margin:0">加好友</h3>
+        <div class="row" style="align-items:flex-end">
+          <div class="grow"><label class="f" for="frCode">對方的 6 碼好友代碼</label><input type="text" id="frCode" maxlength="8" placeholder="例如：K7M2QX" autocapitalize="characters" autocomplete="off"></div>
+          <button class="btn" type="button" id="frAdd">加入</button>
+        </div>
+        <p class="small mute">加了之後，雙方都會出現在對方的排行榜裡。</p>
+      </div>
+      <div class="card stack">
+        <div class="row" style="justify-content:space-between">
+          <h3 style="margin:0">排行榜</h3>
+          <button class="btn ghost small" type="button" id="frRefresh">重新整理</button>
+        </div>
+        <div class="seg" id="frSort"><button type="button" data-v="week" class="on">本週次數</button><button type="button" data-v="total">累計次數</button><button type="button" data-v="streak">連續天數</button><button type="button" data-v="level">等級</button></div>
+        <div id="frBoard"></div>
+        <p class="small mute" id="frAt"></p>
+      </div>
+      <details>
+        <summary style="cursor:pointer; font-weight:700">隱私與刪除資料</summary>
+        <p class="small mute" style="margin:8px 0">你的暱稱和統計數字會存在好友伺服器，只有你的好友看得到。你可以隨時刪除，刪除後排行榜上就不會再有你。</p>
+        <button class="btn ghost small" type="button" id="frDelete">刪除我在伺服器上的資料</button>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 身體數據與菜單 ============ -->
+<section class="panel" id="tab-body">
+  <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+    <div class="stack">
+      <h2>身體數據</h2>
+      <div class="seg" id="bSex"><button class="on" data-v="男">男</button><button data-v="女">女</button></div>
+      <div class="row">
+        <div class="grow"><label class="f" for="bAge">年齡</label><input type="number" id="bAge" value="25" min="14" max="90"></div>
+        <div class="grow"><label class="f" for="bH">身高 cm</label><input type="number" id="bH" value="170" min="120" max="220" step="0.5"></div>
+        <div class="grow"><label class="f" for="bW">體重 kg</label><input type="number" id="bW" value="65" min="30" max="200" step="0.5"></div>
+      </div>
+      <div><label class="f" for="bAct">日常活動量</label>
+        <select id="bAct"><option value="1.2">久坐（幾乎不運動）</option><option value="1.375">輕度（每週 1–3 天）</option><option value="1.55">中度（每週 3–5 天）</option><option value="1.725">高度（每週 6–7 天）</option></select></div>
+      <div><label class="f">目標</label><div class="seg" id="bGoal"><button data-v="減脂">減脂</button><button class="on" data-v="維持">維持</button><button data-v="增肌">增肌</button></div></div>
+      <div class="facts" id="bOut"></div>
+      <p class="small mute">以 Mifflin-St Jeor 公式估算，BMI 分級採台灣衛福部標準。僅供參考，不能取代醫師或營養師的建議。</p>
+    </div>
+    <div class="stack">
+      <h2>每週訓練菜單</h2>
+      <div class="row">
+        <div class="grow"><label class="f" for="pGoal">目標</label><select id="pGoal"><option>減脂</option><option>增肌</option><option>提升體能</option></select></div>
+        <div class="grow"><label class="f" for="pLevel">程度</label><select id="pLevel"><option>新手</option><option>中階</option><option>進階</option></select></div>
+      </div>
+      <div class="slider"><label class="f" style="margin:0">每週訓練天數</label><output id="pDaysO">3</output><input type="range" id="pDays" min="2" max="5" value="3"></div>
+      <div class="plan" id="planOut"></div>
+      <p class="small mute">訓練日之間安排休息日，睡眠和飲食跟訓練一樣重要。</p>
+    </div>
+    <div class="stack">
+      <h2>體重紀錄</h2>
+      <div class="row" style="align-items:flex-end">
+        <div class="grow"><label class="f" for="wtIn">今天的體重（kg）</label><input type="number" id="wtIn" min="30" max="200" step="0.1" placeholder="例如 65.4"></div>
+        <button class="btn" type="button" id="wtAdd">記錄</button>
+      </div>
+      <div id="wtChart"></div>
+      <p class="small" id="wtTxt"></p>
+      <div id="wtList" class="row" style="gap:8px"></div>
+      <p class="small mute">體重一天內會上下波動，固定在同一個時間量（例如早上起床後）趨勢比較準。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 成就徽章 ============ -->
+<section class="panel" id="tab-ach">
+  <div class="stack">
+    <div class="row" style="justify-content:space-between">
+      <div><h2 style="margin:0">成就徽章</h2><p class="small mute" style="margin:2px 0 0">已獲得 <b id="achCount" style="color:var(--yellow)"></b>。每個成就有銅、銀、金三個等級。</p></div>
+      <button class="btn" type="button" id="achShare">產生分享圖</button>
+    </div>
+    <div id="shareBox" class="card stack" hidden>
+      <img id="shareImg" alt="成就分享圖" style="max-width:360px;width:100%;border-radius:14px;align-self:center">
+      <div class="row" style="justify-content:center">
+        <a class="btn teal" id="shareDl" download="lin-ai-achievements.png">下載圖片</a>
+        <button class="btn ghost" type="button" id="shareNative" hidden>分享給朋友</button>
+      </div>
+    </div>
+    <div class="achgrid" id="achGrid"></div>
+  </div>
+</section>
+
+<!-- ============ 飲食紀錄 ============ -->
+<section class="panel" id="tab-food">
+  <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+    <div class="stack">
+      <h2>飲食紀錄</h2>
+      <div class="card stack">
+        <div class="row" style="justify-content:space-between"><b id="fdTotal"></b><span class="small mute" id="fdTarget"></span></div>
+        <div class="bar"><i id="fdBar"></i></div>
+        <p class="small" id="fdLeft" style="margin:0"></p>
+        <div class="facts" id="fdMacro"></div>
+      </div>
+      <h4>今天吃了什麼</h4>
+      <ul class="log" id="fdList"></ul>
+      <p class="small mute" id="fdAvg"></p>
+    </div>
+    <div class="stack">
+      <h3>快速新增</h3>
+      <div class="row" style="gap:8px" id="fdQuick"></div>
+      <hr class="rule" style="margin:6px 0">
+      <h3>自己輸入</h3>
+      <div class="row">
+        <div class="grow" style="flex:2 1 160px"><label class="f" for="fdName">食物名稱</label><input type="text" id="fdName" maxlength="20" placeholder="例如：滷雞腿便當"></div>
+        <div class="grow"><label class="f" for="fdKcal">大卡</label><input type="number" id="fdKcal" min="0" max="5000" step="10"></div>
+        <div class="grow"><label class="f" for="fdP">蛋白質 g（選填）</label><input type="number" id="fdP" min="0" max="300"></div>
+      </div>
+      <button class="btn" type="button" id="fdAdd">加入今天</button>
+      <p class="small mute">上面的熱量都是約略值，份量和做法不同差很多，只當參考。目標熱量來自「身體數據」分頁的估算。請不要因為數字而過度節食；如果記錄讓你有壓力，可以先暫停，需要時諮詢醫師或營養師。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 動作教學 ============ -->
+<section class="panel" id="tab-guide">
+  <div style="max-width:760px; margin:0 auto" class="guide">
+    <h2>動作教學</h2>
+    <p class="mute">每個動作的要點和常見錯誤。做動作時如果感到疼痛，請立刻停止；有傷病、慢性病或懷孕，請先諮詢醫師或物理治療師。</p>
+    <div id="guideList"></div>
+  </div>
+</section>
+
+<!-- ============ AI 教練 ============ -->
+<section class="panel" id="tab-coach">
+  <div style="max-width:760px; margin:0 auto" class="stack">
+    <h2>AI 教練</h2>
+    <p class="mute">跟教練說你的目標、每週能練幾天、有沒有器材，它會幫你排菜單，也能回答動作和飲食問題。</p>
+    <details id="keyBox">
+      <summary style="cursor:pointer; font-weight:700">設定 API Key</summary>
+      <div class="stack" style="margin-top:10px">
+        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+        <label><input type="checkbox" id="keyRemember"> 記住在這台裝置</label>
+        <p class="small mute">到 console.anthropic.com 申請。金鑰只存在你的瀏覽器，對話直接從你的裝置送到 Anthropic，用量會從你的帳號扣款。不要在公用電腦勾選「記住」。</p>
+      </div>
+    </details>
+    <label><input type="checkbox" id="useCtx" checked> 讓教練參考「身體數據」分頁填的資料</label>
+    <label><input type="checkbox" id="useLog" checked> 讓教練參考我最近 7 天的訓練與飲食紀錄（會一起送給 Anthropic）</label>
+    <div class="row" id="quick"></div>
+    <div class="chat" id="chat"></div>
+    <div class="row" style="align-items:flex-end">
+      <textarea id="chatIn" rows="2" class="grow" placeholder="例如：我想 8 週減 3 公斤，每週練 4 天，只有徒手" style="flex:1 1 240px"></textarea>
+      <button class="btn" id="chatSend">送出</button>
+    </div>
+    <button class="btn ghost" id="chatClear" hidden>清除對話</button>
+  </div>
+</section>
+</main>
+<footer class="foot" id="foot"></footer>
+
+<button class="fab" id="musicFab" type="button" aria-label="訓練音樂" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
+<div class="mpanel" id="musicPanel" role="dialog" aria-label="訓練音樂" hidden>
+  <h3>訓練音樂</h3>
+  <div class="stack">
+    <div class="seg" id="mSrc"><button type="button" data-v="built">內建節拍</button><button type="button" data-v="mine">我的音樂</button></div>
+    <div id="mBuilt" class="stack">
+      <div><label class="f" for="mStyle">風格</label><select id="mStyle"></select></div>
+      <div class="slider"><label class="f" style="margin:0" for="mBpm">速度（BPM）</label><output id="mBpmO">135</output><input type="range" id="mBpm" min="60" max="180" step="1" value="135"></div>
+      <p class="small mute">內建音樂是程式即時合成的原創節拍，沒有版權問題。用「節拍器」可以練深蹲、伏地挺身的節奏。</p>
+    </div>
+    <div id="mMine" class="stack" hidden>
+      <label class="btn ghost small" style="cursor:pointer; align-self:flex-start">選擇音樂檔案<input type="file" id="mFiles" accept="audio/*" multiple hidden></label>
+      <ol id="mList"></ol>
+      <div class="row"><button class="btn ghost small" type="button" id="mPrev">上一首</button><button class="btn ghost small" type="button" id="mNext">下一首</button></div>
+      <p class="small mute">播放的是你自己裝置裡的檔案，不會上傳。請確認你有使用權。</p>
+    </div>
+    <div class="slider"><label class="f" style="margin:0" for="mVol">音量</label><output id="mVolO">35%</output><input type="range" id="mVol" min="0" max="100" step="1" value="35"></div>
+    <button class="btn block" type="button" id="mPlay">播放</button>
+    <label><input type="checkbox" id="mAuto"> 計時器或挑戰開始時自動播放，結束自動停止</label>
+    <details>
+      <summary style="cursor:pointer; font-weight:700">去哪裡找免費音樂</summary>
+      <ul class="small" style="padding-left:1.2em; margin:8px 0">
+        <li><a href="https://pixabay.com/music/" target="_blank" rel="noopener">Pixabay 音樂</a>：有自己的內容授權，通常不用標示</li>
+        <li><a href="https://freemusicarchive.org/" target="_blank" rel="noopener">Free Music Archive</a>：可篩選 CC0（公眾領域）</li>
+        <li><a href="https://incompetech.com/music/" target="_blank" rel="noopener">Incompetech</a>：CC BY，要標示作者</li>
+        <li>YouTube Studio 的「音訊庫」</li>
+      </ul>
+      <p class="small mute">下載後用上面的「我的音樂」播放。授權條款可能會改變，使用前請自己看清楚。</p>
+    </details>
+  </div>
+</div>
+<dialog class="recdlg" id="recDlg" aria-label="錄影完成">
+  <h3 style="margin-top:0">錄影完成</h3>
+  <video id="recVideo" controls playsinline style="width:100%; border-radius:12px; background:#000; max-height:60vh"></video>
+  <p class="small mute" id="recInfo"></p>
+  <div class="row" style="margin-top:10px">
+    <a class="btn teal" id="recDl" download>下載影片</a>
+    <button class="btn ghost" type="button" id="recShare" hidden>分享</button>
+    <button class="btn ghost" type="button" id="recClose">關閉並刪除</button>
+  </div>
+  <p class="small mute">按「關閉並刪除」後，影片就不能再找回，要保留請先下載。</p>
+</dialog>
+<script type="module">
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const APP_VERSION='2026.10.14-v8';
+const ERRS=[];
+const logErr=m=>{ERRS.push(new Date().toLocaleTimeString()+'  '+String(m).slice(0,220));if(ERRS.length>8)ERRS.shift()};
+addEventListener('error',e=>logErr(`${e.message} @${(e.filename||'').split('/').pop()}:${e.lineno}`));
+addEventListener('unhandledrejection',e=>logErr('promise: '+((e.reason&&e.reason.message)||e.reason)));
+const mmss=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+
+/* ================= 資料儲存（只存在使用者自己的瀏覽器） ================= */
+const KEY='fitai_web_v1';
+const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0},sb:{url:'',key:''}};
+let S;
+try{S={...DEF,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){S={...DEF}}
+/* 讀進來的資料型別不對（舊版備份、手動改壞）時，把那一欄還原成預設值，避免整個網站壞掉 */
+function normalizeState(o){
+  for(const [k,d] of Object.entries(DEF)){
+    if(d===null)continue;
+    const v=o[k],t=Array.isArray(d)?'array':typeof d;
+    const ok=t==='array'?Array.isArray(v):t==='object'?(v&&typeof v==='object'&&!Array.isArray(v)):t==='number'?Number.isFinite(v):typeof v===t;
+    if(!ok)o[k]=Array.isArray(d)?[]:(typeof d==='object'?{...d}:d);
+  }
+  o.cam={...DEF.cam,...o.cam};o.me={...DEF.me,...o.me};o.sb={...DEF.sb,...o.sb};
+  return o;
+}
+S=normalizeState(S);
+/* 連續多次修改只寫一次（250 毫秒內合併），離開頁面前一定會寫入 */
+let noSave=false,saveT=0;
+const saveNow=()=>{clearTimeout(saveT);saveT=0;if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const save=()=>{if(!saveT)saveT=setTimeout(saveNow,250)};
+addEventListener('pagehide',saveNow);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveNow()});
+const level=()=>Math.floor(S.xp/100)+1;
+const dkey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dayN=k=>{const [y,m,d]=k.split('-').map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)};
+function addReps(n,ex){
+  if(!(n>0))return;S.reps+=n;const k=dkey(new Date());S.days[k]=(S.days[k]||0)+n;
+  if(ex){S.exs[ex]=(S.exs[ex]||0)+n;const de=S.dayEx[k]||(S.dayEx[k]={});de[ex]=(de[ex]||0)+n}
+}
+function streaks(){
+  const nums=Object.keys(S.days).filter(k=>S.days[k]>0).map(dayN).sort((x,y)=>x-y);
+  let longest=0,run=0,prev=null;
+  for(const n of nums){run=(prev!==null&&n===prev+1)?run+1:1;longest=Math.max(longest,run);prev=n}
+  const set=new Set(nums),today=dayN(dkey(new Date()));
+  let cur=0,n=set.has(today)?today:today-1;while(set.has(n)){cur++;n--}
+  return {cur,longest};
+}
+const maxDay=()=>Math.max(0,...Object.values(S.days));
+const ACH=[
+ {id:'reps',g:'次',n:'累計次數',d:'累計完成的次數',t:[100,500,2000],u:'下',v:()=>S.reps},
+ {id:'day',g:'日',n:'單日爆發',d:'一天內做的次數',t:[50,100,200],u:'下',v:()=>maxDay()},
+ {id:'streak',g:'連',n:'連續打卡',d:'連續有運動的天數',t:[3,7,30],u:'天',v:()=>streaks().longest},
+ {id:'timer',g:'時',n:'計時達人',d:'計時器訓練的分鐘數',t:[10,60,300],u:'分鐘',v:()=>Math.floor(S.workSecs/60)},
+ {id:'stars',g:'星',n:'三星挑戰',d:'一分鐘挑戰拿到三顆星的次數',t:[1,5,20],u:'次',v:()=>S.stars3||0},
+ {id:'boss',g:'斬',n:'魔王殺手',d:'擊敗的魔王數',t:[1,5,15],u:'隻',v:()=>S.defeated},
+ {id:'lv',g:'升',n:'遊戲等級',d:'遊戲等級',t:[5,10,20],u:'級',v:()=>level()},
+ {id:'var',g:'全',n:'全能運動員',d:'做過的不同動作數',t:[5,12,20],u:'種',v:()=>Object.keys(S.exs).length},
+ {id:'water',g:'水',n:'補水達人',d:'喝水達標的天數',t:[1,7,30],u:'天',v:()=>Object.keys(S.waterHit).length},
+ {id:'daily',g:'令',n:'每日挑戰',d:'完成每日挑戰的天數',t:[1,7,30],u:'天',v:()=>Object.keys(S.dailyDone).length},
+ {id:'form',g:'正',n:'姿勢標兵',d:'姿勢被判定「標準」的下數',t:[50,300,1000],u:'下',v:()=>S.formOk||0},
+ {id:'pr',g:'破',n:'破紀錄',d:'刷新個人單組紀錄的次數',t:[1,10,30],u:'次',v:()=>S.prCount||0},
+ {id:'hold',g:'撐',n:'撐住達人',d:'撐住類動作累計的秒數',t:[60,300,1200],u:'秒',v:()=>S.holdSecs||0},
+ {id:'food',g:'食',n:'飲食紀錄',d:'有記錄飲食的天數',t:[3,14,60],u:'天',v:()=>Object.keys(S.food).filter(k=>S.food[k].length).length},
+ {id:'friends',g:'友',n:'社交達人',d:'好友人數',t:[1,5,10],u:'位',v:()=>S.me.friends||0},
+ {id:'weigh',g:'秤',n:'體重追蹤',d:'記錄體重的天數',t:[1,7,30],u:'天',v:()=>Object.keys(S.weights).length},
+];
+const TIERN=['','銅','銀','金'],TIERC=['#93aeb3','#cd7f32','#c8d1da','#ffd23f'];
+const achState=a=>{const v=a.v(),tier=a.t.filter(x=>v>=x).length;return {v,tier,next:a.t[tier]}};
+/* 一般提示：馬上顯示，新的蓋掉舊的（才不會看到過期的訊息）。成就、每日挑戰這類「不能漏掉」的提示用 toast(文字, true)，會排隊一則一則顯示。 */
+const toastQ=[];let toastShowing=false,toastT=0;
+function showToast(t,ms){const el=$('#toast');clearTimeout(toastT);el.textContent=t;el.hidden=false;toastShowing=true;toastT=setTimeout(nextToast,ms)}
+function nextToast(){const t=toastQ.shift();if(!t){toastShowing=false;$('#toast').hidden=true;return}showToast(t,3200)}
+function toast(t,queued){
+  if(queued){toastQ.push(t);if(!toastShowing)nextToast();return}   // 排隊的提示：等目前顯示的那則結束再出現
+  showToast(t,3200);                                              // 一般提示：馬上顯示；排隊中的提示不會被丟掉，會接在後面
+}
+function checkBadges(silent){
+  let changed=false;
+  for(const a of ACH){
+    const {tier}=achState(a),old=S.ach[a.id]||0;
+    if(tier>old){S.ach[a.id]=tier;changed=true;if(!silent)toast(`${old?'成就升級':'成就解鎖'}：${a.n}（${TIERN[tier]}）`,true)}
+  }
+  if(changed)save();
+}
+/* 語音（瀏覽器內建，不需要網路） */
+function say(text,o={}){
+  if(!S.voice||!('speechSynthesis' in window))return;
+  try{if(o.cancel)speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text));u.lang='zh-TW';u.rate=o.rate||1.1;speechSynthesis.speak(u)}catch(e){}
+}
+function renderVoice(){const b=$('#voiceBtn');b.textContent='語音報數：'+(S.voice?'開':'關');b.setAttribute('aria-pressed',S.voice)}
+$('#voiceBtn').onclick=()=>{S.voice=!S.voice;save();renderVoice();if(S.voice)say('語音報數已開啟',{cancel:true})};
+function renderStats(silent){
+  const st=streaks();
+  $('#stats').innerHTML=
+    `<div class="stat"><b>${S.reps}</b><span>累計次數</span></div>`+
+    `<div class="stat opt"><b>${Math.round(S.reps*0.5)}</b><span>大卡</span></div>`+
+    `<div class="stat opt"><b>${st.cur}</b><span>連續天數</span></div>`+
+    `<div class="stat"><b>Lv.${level()}</b><span>遊戲等級</span></div>`;
+  checkDaily();renderDaily();friendSyncSoon();
+  checkBadges(silent);
+  if($('#tab-ach').classList.contains('active'))renderAch();
+  if($('#tab-stats').classList.contains('active'))renderStatsTab();
+}
+
+/* ================= 動作偵測設定 ================= */
+// lo＝低點門檻、hi＝高點門檻。數值先降到 lo 以下，再回到 hi 以上，算 1 下。
+const IDX={nose:0,l_sh:11,r_sh:12,l_el:13,r_el:14,l_wr:15,r_wr:16,l_hip:23,r_hip:24,l_kn:25,r_kn:26,l_an:27,r_an:28};
+/* ===== 偵測設定（參考你的 cam.py：USE_3D、VISIBILITY_THRESHOLD、SMOOTHING_WINDOW、MODEL_COMPLEXITY、信心門檻）===== */
+const isMirror=()=>S.cam.mirror&&(!!S.cam.dev||S.facing==='user');
+const median=a=>{const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const angN=(a,b,c)=>{const u=a.map((v,i)=>v-b[i]),w=c.map((v,i)=>v-b[i]),nu=Math.hypot(...u),nw=Math.hypot(...w);if(nu<1e-6||nw<1e-6)return null;
+  return Math.acos(Math.max(-1,Math.min(1,u.reduce((s,v,i)=>s+v*w[i],0)/(nu*nw))))*180/Math.PI};
+const P=(lm,n,thr=S.cam.vis)=>{const p=lm[IDX[n]];return p&&p[2]>=thr?[p[0],p[1]]:null};
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+const ang=(a,b,c)=>{const v1=[a[0]-b[0],a[1]-b[1]],v2=[c[0]-b[0],c[1]-b[1]];
+  const cos=(v1[0]*v2[0]+v1[1]*v2[1])/(Math.hypot(...v1)*Math.hypot(...v2)+1e-6);
+  return Math.acos(Math.max(-1,Math.min(1,cos)))*180/Math.PI};
+/* 三個點的可信度都夠才算角度；有 3D 世界座標就用 3D（不受拍攝角度影響），否則用畫面 2D 座標 */
+const angles=(lm,a,b,c)=>['l','r'].map(s=>{
+  const ix=[a,b,c].map(n=>IDX[`${s}_${n}`]);
+  if(!ix.every(i=>lm[i]&&lm[i][2]>=S.cam.vis))return null;
+  if(S.cam.use3d&&lm.w&&ix.every(i=>lm.w[i]))return angN(...ix.map(i=>lm.w[i].slice(0,3)));
+  return ang(...ix.map(i=>[lm[i][0],lm[i][1]]));
+}).filter(v=>v!==null);
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const torso=lm=>mean(['l','r'].map(s=>{const a=P(lm,s+'_sh'),b=P(lm,s+'_hip');return a&&b?dist(a,b):null}).filter(v=>v!==null));
+const armsUp=lm=>{const t=torso(lm);if(!t)return null;
+  const sh=['l','r'].map(s=>P(lm,s+'_sh')).filter(Boolean),wr=['l','r'].map(s=>P(lm,s+'_wr')).filter(Boolean);
+  if(!sh.length||!wr.length)return null;return (mean(sh.map(p=>p[1]))-mean(wr.map(p=>p[1])))/t};
+const kneeShoulder=(lm,s)=>{const t=torso(lm),k=P(lm,s+'_kn'),h=P(lm,s+'_sh');return t&&k&&h?dist(k,h)/t:null};
+const kneeHeight=(lm,s)=>{const t=torso(lm),k=P(lm,s+'_kn'),h=P(lm,s+'_hip');return t&&k&&h?(h[1]-k[1])/t:null};
+const EX={
+ "深蹲":{en:"Squats",lo:105,hi:160,fn:lm=>mean(angles(lm,'hip','kn','an'))},
+ "伏地挺身":{en:"Push-ups",lo:95,hi:150,fn:lm=>mean(angles(lm,'sh','el','wr'))},
+ "捲腹":{en:"Crunches",lo:80,hi:105,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
+ "仰臥起坐":{en:"Sit-ups",lo:70,hi:110,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
+ "側平舉":{en:"Lateral Raises",lo:35,hi:75,fn:lm=>mean(angles(lm,'hip','sh','el'))},
+ "二頭彎舉":{en:"Bicep Curls",lo:55,hi:140,fn:lm=>mean(angles(lm,'sh','el','wr'))},
+ "開合跳":{en:"Jumping Jacks",lo:-.3,hi:.3,fn:armsUp},
+ "弓箭步":{en:"Lunges",lo:105,hi:155,fn:lm=>{const a=angles(lm,'hip','kn','an');return a.length?Math.min(...a):null}},
+ "登山者":{en:"Mountain Climbers",lo:1.0,hi:1.35,side:true,fn:kneeShoulder},
+ "臀橋":{en:"Glute Bridges",lo:135,hi:160,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
+ "高抬腿":{en:"High Knees",lo:-.6,hi:-.25,side:true,fn:kneeHeight},
+};
+/* ===== 新增動作的偵測方式 ===== */
+const vertRatio=lm=>mean(['l','r'].map(s=>{const a=P(lm,s+'_sh'),b=P(lm,s+'_hip');return a&&b?Math.abs(b[1]-a[1])/(dist(a,b)+1e-6):null}).filter(v=>v!==null));
+const tiltRatio=lm=>{const t=torso(lm),sh=['l','r'].map(s=>P(lm,s+'_sh')).filter(Boolean),hp=['l','r'].map(s=>P(lm,s+'_hip')).filter(Boolean);
+  if(!t||!sh.length||!hp.length)return null;return Math.abs(mean(sh.map(p=>p[0]))-mean(hp.map(p=>p[0])))/t};
+const kneeElbow=(lm,s)=>{const t=torso(lm),k=P(lm,s+'_kn'),e=P(lm,s+'_el');return t&&k&&e?dist(k,e)/t:null};
+const legSpread=(lm,s)=>{const t=torso(lm),a=P(lm,s+'_an'),h=P(lm,s+'_hip');return t&&a&&h?Math.abs(a[0]-h[0])/t:null};
+const jumpSig=(lm,sd,st)=>{ // 腳踝離「地面」多高（地面＝最近腳踝最低的位置，會慢慢跟著調整）
+  const t=torso(lm),ys=['l','r'].map(s=>P(lm,s+'_an')).filter(Boolean).map(p=>p[1]);if(!t||!ys.length)return null;
+  const y=mean(ys);if(st.base===undefined||y>st.base)st.base=y;else st.base+=(y-st.base)*.01;return (st.base-y)/t};
+const elbowAng=lm=>mean(angles(lm,'sh','el','wr')),hipAng=lm=>mean(angles(lm,'sh','hip','kn'));
+Object.assign(EX,{
+ "深蹲跳":{en:"Jump Squats",lo:105,hi:160,fn:EX["深蹲"].fn},
+ "肩推":{en:"Shoulder Press",lo:95,hi:155,fn:elbowAng},
+ "椅子臂屈伸":{en:"Chair Dips",lo:100,hi:150,fn:elbowAng},
+ "仰臥抬腿":{en:"Leg Raises",lo:100,hi:150,fn:hipAng},
+ "前平舉":{en:"Front Raises",lo:35,hi:75,fn:lm=>mean(angles(lm,'hip','sh','wr'))},
+ "引體向上":{en:"Pull-ups",lo:75,hi:150,fn:elbowAng},
+ "髖鉸鏈":{en:"Hip Hinge",lo:115,hi:160,fn:hipAng},
+ "側抬腿":{en:"Side Leg Raises",lo:.12,hi:.35,side:true,fn:legSpread},
+ "側彎":{en:"Side Bends",lo:.08,hi:.30,fn:tiltRatio},
+ "站姿抬膝碰肘":{en:"Standing Knee-to-Elbow",lo:.55,hi:.9,side:true,fn:kneeElbow},
+ "原地踏步":{en:"March in Place",lo:-.6,hi:-.4,side:true,fn:kneeHeight},
+ "原地跳繩":{en:"Jump Rope",lo:.03,hi:.07,fn:jumpSig},
+ "波比跳":{en:"Burpees",lo:.45,hi:.8,fn:vertRatio},
+ "啞鈴臥推":{en:"Dumbbell Bench Press",lo:95,hi:155,fn:elbowAng,
+   cue2:{fn:lm=>mean(angles(lm,'el','sh','hip')),ok:80,msg:'手肘張太開，收近身體一點（上臂和身體約 45–75 度）'}},
+});
+const CATMAP={"深蹲":"下肢","弓箭步":"下肢","臀橋":"下肢","髖鉸鏈":"下肢","側抬腿":"下肢",
+ "伏地挺身":"上肢","啞鈴臥推":"上肢","肩推":"上肢","側平舉":"上肢","前平舉":"上肢","二頭彎舉":"上肢","椅子臂屈伸":"上肢","引體向上":"上肢",
+ "捲腹":"核心","仰臥起坐":"核心","仰臥抬腿":"核心","側彎":"核心","站姿抬膝碰肘":"核心",
+ "開合跳":"全身有氧","深蹲跳":"全身有氧","登山者":"全身有氧","高抬腿":"全身有氧","原地踏步":"全身有氧","原地跳繩":"全身有氧","波比跳":"全身有氧"};
+for(const [k,c] of Object.entries(CATMAP))EX[k].cat=c;
+const CATS=['下肢','上肢','核心','全身有氧'];
+const ORDER=Object.keys(CATMAP);
+const optsByCat=(names,label=n=>n)=>CATS.map(c=>{const g=names.filter(n=>EX[n]&&EX[n].cat===c);return g.length?`<optgroup label="${c}">${g.map(n=>`<option value="${n}">${label(n)}</option>`).join('')}</optgroup>`:''}).join('');
+
+/* 姿勢提醒：type 'min'＝這一下動作的最低點要小於等於 ok；'max'＝最高點要大於等於 ok */
+const CUES={
+ "深蹲":{type:'min',ok:100,msg:'再蹲低一點，大腿接近水平'},
+ "伏地挺身":{type:'min',ok:90,msg:'胸口再壓低一點，手肘彎到 90 度'},
+ "捲腹":{type:'min',ok:75,msg:'上半身再捲起來一點'},
+ "仰臥起坐":{type:'min',ok:65,msg:'起身再高一點，胸口靠近膝蓋'},
+ "側平舉":{type:'max',ok:80,msg:'手臂舉到與肩同高'},
+ "二頭彎舉":{type:'min',ok:50,msg:'彎舉到頂，手肘再彎緊一點'},
+ "開合跳":{type:'max',ok:.5,msg:'手臂舉高過頭'},
+ "弓箭步":{type:'min',ok:100,msg:'再往下沉，前腿膝蓋接近 90 度'},
+ "登山者":{type:'min',ok:.9,msg:'膝蓋再往胸口帶近一點'},
+ "臀橋":{type:'max',ok:165,msg:'臀部頂高，肩、髖、膝成一直線'},
+ "高抬腿":{type:'max',ok:-.15,msg:'膝蓋抬到髖部高度'},
+};
+Object.assign(CUES,{
+ "深蹲跳":{type:'min',ok:105,msg:'下蹲再深一點，再用力跳起來'},
+ "肩推":{type:'max',ok:160,msg:'手臂推到伸直'},
+ "啞鈴臥推":{type:'max',ok:160,msg:'手臂推到伸直，但不要鎖死手肘'},
+ "椅子臂屈伸":{type:'min',ok:95,msg:'身體往下沉，手肘彎到 90 度'},
+ "仰臥抬腿":{type:'min',ok:100,msg:'腿抬高一點，接近與地面垂直'},
+ "前平舉":{type:'max',ok:80,msg:'手臂舉到與肩同高'},
+ "引體向上":{type:'min',ok:70,msg:'再拉高一點，下巴過槓'},
+ "髖鉸鏈":{type:'min',ok:110,msg:'髖部再往後推，上身前傾更多，背保持平直'},
+ "側抬腿":{type:'max',ok:.4,msg:'腿再往外抬高一點，身體不要歪'},
+ "側彎":{type:'max',ok:.3,msg:'身體再往側邊彎一點'},
+ "站姿抬膝碰肘":{type:'min',ok:.6,msg:'膝蓋抬高，靠近手肘'},
+});
+for(const [k,q] of Object.entries(CUES))EX[k].cue=q;
+/* 節奏提醒：兩下之間的最短時間（秒）。開合跳、登山者、高抬腿是有氧，不檢查。 */
+const TEMPO={"深蹲":1.8,"伏地挺身":1.6,"二頭彎舉":1.6,"弓箭步":1.8,"側平舉":1.6,"臀橋":1.6,"捲腹":1.4,"仰臥起坐":1.6};
+Object.assign(TEMPO,{"啞鈴臥推":1.6,"肩推":1.6,"椅子臂屈伸":1.6,"仰臥抬腿":1.8,"前平舉":1.6,"引體向上":2.0,"髖鉸鏈":1.8});
+for(const [k,v] of Object.entries(TEMPO))EX[k].tempo=v;
+
+class RepCounter{
+  constructor(key){this.key=key;this.cfg=EX[key];this.relax=.1;this.reset()}
+  reset(){this.count=0;this.cueTotal=0;this.cueBad=0;this.hist=[];this.cycles=[];this.tempoFast=0;this.store={};this.trk={};
+    (this.cfg.side?['l','r']:['_']).forEach(s=>this.trk[s]={armed:false,pend:false,last:0,lastCount:0,v:null,buf:[],cmin:0,cmax:0,c2:-Infinity})}
+  lost(){Object.values(this.trk).forEach(t=>{t.v=null;t.buf=[]})}
+  _eval(ext){const q=this.cfg.cue;if(!q)return null;const bad=q.type==='min'?ext>q.ok:ext<q.ok;
+    this.cueTotal++;if(bad)this.cueBad++;this.hist=[...this.hist,bad?1:0].slice(-3);return {bad,msg:q.msg}}
+  _eval2(ext){const q=this.cfg.cue2,bad=ext>q.ok;this.cueTotal++;if(bad)this.cueBad++;this.hist=[...this.hist,bad?1:0].slice(-3);return {bad,msg:q.msg}}
+  update(lm,now){
+    const c=this.cfg,gap=(c.hi-c.lo)*this.relax,lo=c.lo+gap,hi=c.hi-gap,mid=(lo+hi)/2,vals=[],ev=[];
+    for(const [s,t] of Object.entries(this.trk)){
+      const raw=c.fn(lm,s,this.store);
+      if(raw===null){t.v=null;t.buf=[];continue}
+      (t.buf=t.buf||[]).push(raw);while(t.buf.length>S.cam.win)t.buf.shift();   // 最近幾幀取中位數，比平均更不怕突然跳點
+      t.v=median(t.buf);const v=t.v;vals.push(v);
+      const v2=c.cue2?c.cue2.fn(lm,s,this.store):null;
+      if(t.pend&&v<=mid){t.pend=false;const e=this._eval(t.cmax);e&&ev.push(e)}
+      if(v<=lo&&!t.armed){t.armed=true;t.pend=false;t.cmin=t.cmax=v;t.c2=-Infinity}
+      if(t.armed||t.pend){t.cmin=Math.min(t.cmin,v);t.cmax=Math.max(t.cmax,v);if(v2!==null)t.c2=Math.max(t.c2,v2)}
+      if(v>=hi&&t.armed&&now-t.last>250){
+        this.count++;t.armed=false;t.last=now;
+        const cyc=t.lastCount?(now-t.lastCount)/1000:null;t.lastCount=now;
+        if(c.tempo&&cyc!==null){this.cycles=[...this.cycles,cyc].slice(-6);if(cyc<c.tempo){this.tempoFast++;ev.push({kind:'tempo',bad:true,msg:'節奏太快，放慢一點：下放約 2 秒、用力約 1 秒'})}else this.tempoFast=0}
+        if(c.cue2&&isFinite(t.c2))ev.push(this._eval2(t.c2));
+        if(c.cue){if(c.cue.type==='min'){const e=this._eval(t.cmin);e&&ev.push(e)}else t.pend=true}
+      }
+    }
+    const value=mean(vals);
+    return {value,lo,hi,ev,status:value===null?'nobody':(Object.values(this.trk).some(t=>t.armed)?'low':'ready')};
+  }
+}
+
+/* ================= 姿勢模型與鏡頭（MediaPipe，在使用者自己的裝置上執行） ================= */
+const VER='0.10.14';
+let poseLM=null,posePromise=null;
+function resetPose(){if(poseLM&&poseLM.close){try{poseLM.close()}catch(e){}}poseLM=null;posePromise=null}
+function loadPose(){
+  if(window.__fakePose){poseLM=window.__fakePose;return Promise.resolve(poseLM)}
+  if(poseLM)return Promise.resolve(poseLM);
+  if(posePromise)return posePromise;
+  posePromise=(async()=>{
+    const mod=await import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VER}`);
+    const V=mod.PoseLandmarker?mod:(mod.default||mod);
+    const fileset=await V.FilesetResolver.forVisionTasks(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VER}/wasm`);
+    const mk=S.cam.model,models=[`pose_landmarker_${mk}.task`,`https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${mk}/float16/1/pose_landmarker_${mk}.task`];
+    let lastErr;
+    for(const m of models)for(const d of ['GPU','CPU']){
+      try{
+        poseLM=await V.PoseLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath:m,delegate:d},runningMode:'VIDEO',numPoses:1,minPoseDetectionConfidence:S.cam.conf,minPosePresenceConfidence:.5,minTrackingConfidence:S.cam.conf});
+        return poseLM;
+      }catch(e){lastErr=e;console.warn('model load failed',m,d,e)}
+    }
+    throw lastErr||new Error('模型載入失敗');
+  })().catch(e=>{posePromise=null;throw e});
+  return posePromise;
+}
+
+const STAGE_HTML=`<div class="stage"><video class="v" playsinline muted></video><canvas class="c"></canvas>
+<div class="score"><span class="n">0</span><span class="u">下</span><span class="nm"></span></div>
+<div class="cue" hidden></div><div class="hint" hidden></div><div class="dbg" hidden></div><div class="chip">鏡頭未開啟</div><div class="gauge"><i></i></div>
+<button class="fsbtn" type="button" aria-label="全螢幕"></button>
+<button class="recbtn" type="button" aria-label="開始錄影"><i></i><span>錄影</span></button>
+<div class="tmini" hidden><span class="tl"></span><span class="tn"></span></div>
+<button class="btn fsgo" type="button" hidden></button>
+<div class="msg">按「開啟鏡頭」開始。第一次需要下載姿勢模型，約幾秒到十幾秒。</div></div>`;
+const rec={on:false,mr:null,chunks:[],canvas:null,ctx:null,view:null,t0:0,timer:0,scale:1};
+const rrect=(c,...a)=>c.roundRect?c.roundRect(...a):c.rect(...a.slice(0,4));
+const ICON_EXP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+const ICON_CMP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+/* ---- 全螢幕：支援的瀏覽器用原生全螢幕，iPhone Safari 等不支援時用「鋪滿整個視窗」代替 ---- */
+let fullStage=null;
+function setFull(stage,on){
+  stage.classList.toggle('full',on);
+  const b=$('.fsbtn',stage);b.setAttribute('aria-label',on?'結束全螢幕':'全螢幕');b.innerHTML=on?ICON_CMP:ICON_EXP;
+  const g=$('.fsgo',stage);if(g)g.hidden=!(on&&stage._go);
+  document.body.style.overflow=on?'hidden':'';
+  fullStage=on?stage:null;
+}
+async function toggleFull(stage){
+  if(stage.classList.contains('full')){setFull(stage,false);if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){}}return}
+  setFull(stage,true);
+  try{if(stage.requestFullscreen)await stage.requestFullscreen({navigationUI:'hide'});else if(stage.webkitRequestFullscreen)stage.webkitRequestFullscreen()}catch(e){}
+}
+function exitFull(){if(fullStage){const st=fullStage;setFull(st,false);if(document.fullscreenElement){try{document.exitFullscreen()}catch(e){}}}}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&fullStage)setFull(fullStage,false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&fullStage)exitFull()});
+function makeView(host,getCounter,go){
+  host.innerHTML=STAGE_HTML;
+  const q=s=>$(s,host),stage=q('.stage');stage._go=go||null;
+  stage.classList.toggle('rear',!isMirror());
+  q('.fsbtn').innerHTML=ICON_EXP;q('.fsbtn').onclick=()=>toggleFull(stage);stage.ondblclick=e=>{if(!e.target.closest('button'))toggleFull(stage)};
+  if(go)q('.fsgo').onclick=go.click;
+  const view={stage,go,recBtn:q('.recbtn'),miniState:null,cueInfo:null,fsgo:q('.fsgo'),tmini:q('.tmini'),tl:q('.tmini .tl'),tn:q('.tmini .tn'),video:q('.v'),canvas:q('.c'),n:q('.n'),nm:q('.nm'),chip:q('.chip'),gaugeEl:q('.gauge i'),msg:q('.msg'),cueEl:q('.cue'),hintEl:q('.hint'),dbgEl:q('.dbg'),hasWorld:false,badFrames:0,spoken:0,cueT:0,getCounter,
+    setMsg(t){this.msg.textContent=t;this.msg.hidden=!t},
+    reset(){this.n.textContent='0';this.chip.className='chip';this.chip.textContent='鏡頭未開啟';this.gaugeEl.style.width='0'}};
+  q('.recbtn').onclick=()=>(rec.on&&rec.view===view)?recStop():recStart(view);
+  return view;
+}
+const CHIP={ready:['就緒','ready'],low:['低點','low'],nobody:['請讓全身入鏡','warn'],rest:['休息中','']};
+let lastCueSay=0;
+function handleCue(v,counter,e,now){
+  if(e.kind==='tempo'){
+    clearTimeout(v.cueT);v.cueEl.hidden=false;v.cueEl.className='cue bad';v.cueEl.textContent=e.msg;
+    v.cueT=setTimeout(()=>{v.cueEl.hidden=true},2400);v.cueInfo={text:e.msg,bad:true,until:now+2400};
+    if(counter.tempoFast>=2&&now-lastCueSay>6000){lastCueSay=now;say('放慢一點')}
+    return;
+  }
+  const dk=dkey(new Date()),df=S.dayForm[dk]||(S.dayForm[dk]={ok:0,bad:0});
+  if(e.bad){S.formBad=(S.formBad||0)+1;df.bad++}else df.ok++;
+  if(!e.bad)S.formOk=(S.formOk||0)+1;
+  clearTimeout(v.cueT);v.cueEl.hidden=false;v.cueEl.className='cue '+(e.bad?'bad':'ok');v.cueEl.textContent=e.bad?e.msg:'標準';
+  v.cueT=setTimeout(()=>{v.cueEl.hidden=true},e.bad?2400:900);
+  v.cueInfo={text:e.bad?e.msg:'標準',bad:e.bad,until:now+(e.bad?2400:900)};
+  if(e.bad&&counter.hist.slice(-2).join()==='1,1'&&now-lastCueSay>6000){lastCueSay=now;say(e.msg)}
+}
+const cam={running:false,view:null,stream:null,raf:0,lastT:-1,onStop:null};
+const CONN=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+function drawSkeleton(ctx,lm,k=1){
+  ctx.lineWidth=5*k;ctx.lineCap='round';ctx.strokeStyle='#3dd6d0';
+  for(const [a,b] of CONN){if(lm[a][2]>.5&&lm[b][2]>.5){ctx.beginPath();ctx.moveTo(lm[a][0],lm[a][1]);ctx.lineTo(lm[b][0],lm[b][1]);ctx.stroke()}}
+  for(const i of [0,11,12,13,14,15,16,23,24,25,26,27,28]){if(lm[i][2]>.5){ctx.beginPath();ctx.arc(lm[i][0],lm[i][1],7*k,0,7);ctx.fillStyle='#0a1a20';ctx.fill();ctx.beginPath();ctx.arc(lm[i][0],lm[i][1],5*k,0,7);ctx.fillStyle='#ffd23f';ctx.fill()}}
+}
+const JOINTS=[[11,13,15],[12,14,16],[13,11,23],[14,12,24],[11,23,25],[12,24,26],[23,25,27],[24,26,28]];   // 手肘、肩、髖、膝（跟 cam.py 的 JOINT_CONFIG 一樣，左右都顯示）
+function angleAt(lm,i1,i2,i3){
+  if([i1,i2,i3].some(i=>!lm[i]||lm[i][2]<S.cam.vis))return null;
+  if(S.cam.use3d&&lm.w&&[i1,i2,i3].every(i=>lm.w[i]))return angN(lm.w[i1].slice(0,3),lm.w[i2].slice(0,3),lm.w[i3].slice(0,3));
+  return angN([lm[i1][0],lm[i1][1]],[lm[i2][0],lm[i2][1]],[lm[i3][0],lm[i3][1]]);
+}
+function drawAngles(ctx,lm,k){
+  const flip=isMirror();ctx.font=`700 ${15*k}px sans-serif`;ctx.textBaseline='middle';
+  for(const [i1,i2,i3] of JOINTS){
+    const a=angleAt(lm,i1,i2,i3);if(a===null)continue;
+    ctx.save();ctx.translate(lm[i2][0],lm[i2][1]);if(flip)ctx.scale(-1,1);   // 畫面是鏡像的，文字要反向翻回來才看得懂
+    ctx.beginPath();ctx.arc(0,0,6*k,0,7);ctx.fillStyle='#3dd6d0';ctx.fill();
+    const txt=a.toFixed(0)+'°';ctx.lineWidth=4*k;ctx.strokeStyle='rgba(10,26,32,.9)';ctx.strokeText(txt,10*k,-12*k);ctx.fillStyle='#ffffff';ctx.fillText(txt,10*k,-12*k);
+    ctx.restore();
+  }
+}
+const LM=Array.from({length:33},()=>[0,0,0]),WLM=Array.from({length:33},()=>[0,0,0,0]);   // 每幀重複使用，不再每幀配置新陣列
+const setT=(el,t)=>{if(el.textContent!==t)el.textContent=t};
+const setC=(el,c)=>{if(el.className!==c)el.className=c};
+function scheduleTick(){
+  const vid=cam.view&&cam.view.video;
+  if(vid&&vid.requestVideoFrameCallback)cam.vf=vid.requestVideoFrameCallback(tick);   // 有新的影像才處理，省電又準時
+  else cam.raf=requestAnimationFrame(tick);
+}
+function tick(){
+  if(!cam.running)return;
+  const v=cam.view,vid=v.video,counter=v.getCounter();
+  if(vid.readyState>=2&&vid.currentTime!==cam.lastT){
+    cam.lastT=vid.currentTime;
+    const W=vid.videoWidth,H=vid.videoHeight;
+    if(v.canvas.width!==W){v.canvas.width=W;v.canvas.height=H}
+    const ctx=v.canvas.getContext('2d');ctx.clearRect(0,0,W,H);
+    let res=null;try{res=poseLM.detectForVideo(vid,performance.now())}catch(e){console.warn(e)}
+    const raw=res&&res.landmarks&&res.landmarks[0];
+    let info={status:'nobody',value:null},msg='';
+    if(raw){
+      const lm=LM,nL=Math.min(raw.length,33);
+      for(let i=0;i<nL;i++){const p=raw[i],a=lm[i];a[0]=p.x*W;a[1]=p.y*H;a[2]=p.visibility===undefined?1:p.visibility}
+      const wr=res.worldLandmarks&&res.worldLandmarks[0];
+      if(wr){for(let i=0;i<Math.min(wr.length,33);i++){const p=wr[i],a=WLM[i];a[0]=p.x;a[1]=p.y;a[2]=p.z;a[3]=p.visibility}lm.w=WLM}else lm.w=null;
+      v.hasWorld=!!lm.w;
+      drawSkeleton(ctx,lm,Math.max(1,W/640));if(S.cam.show)drawAngles(ctx,lm,Math.max(1,W/640));if(counter)info=counter.update(lm,performance.now());
+      if(v.onLm)v.onLm(lm,performance.now());
+      let nv=0,x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+      for(let i=0;i<nL;i++){const p=lm[i];if(p[2]>.5){nv++;if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1]}}
+      if(nv){
+        const size=Math.max((x1-x0)/W,(y1-y0)/H);
+        if(counter&&info.status==='nobody')msg=size>.92?'離太近，請退後一點':'有些關節沒入鏡，請調整位置或角度，讓全身入鏡';
+        else if(size<.4)msg='離太遠，請靠近一點，讓人佔畫面一半以上';
+      }
+    }else{if(counter)counter.lost();msg='沒偵測到人：請站到鏡頭前，並確認光線充足';if(v.onLm)v.onLm(null,performance.now())}
+    if(!counter)info={status:'rest',value:null};
+    v.badFrames=msg&&counter?v.badFrames+1:0;
+    if(!v.manualHint){const showHint=v.badFrames>20;if(v.hintEl.hidden===showHint)v.hintEl.hidden=!showHint;if(showHint&&v.hintEl.textContent!==msg)v.hintEl.textContent=msg}
+    if(counter){
+      setT(v.n,String(counter.count));
+      if(counter.count!==v.spoken){if(counter.count>v.spoken)say(counter.count,{cancel:true});v.spoken=counter.count}
+      if(info.ev)for(const e of info.ev)handleCue(v,counter,e,performance.now());
+    }else v.spoken=0;
+    let [txt,cls]=CHIP[info.status];
+    let gw=(!counter||info.value===null)?'0':Math.round(Math.max(0,Math.min(1,(info.value-counter.cfg.lo)/(counter.cfg.hi-counter.cfg.lo)))*100)+'%';
+    if(v.chipFn){const r=v.chipFn();txt=r[0];cls=r[1]}
+    if(v.gaugeFn)gw=v.gaugeFn();
+    setT(v.chip,txt);setC(v.chip,'chip '+cls);
+    if(v._g!==gw){v._g=gw;v.gaugeEl.style.width=gw}
+    {const nf=performance.now();if(cam.lastF){const f=1000/Math.max(1,nf-cam.lastF);cam.fps=cam.fps?cam.fps*.9+f*.1:f}cam.lastF=nf}
+    if(S.cam.show){v.dbgEl.hidden=false;setT(v.dbgEl,`FPS ${Math.round(cam.fps||0)}　${S.cam.use3d&&v.hasWorld?'3D':'2D'}　模型：${S.cam.model}　門檻 ${S.cam.vis}`)}else if(!v.dbgEl.hidden)v.dbgEl.hidden=true;
+    if(rec.on&&rec.view===v)drawRec(v,counter);
+    if(v.go&&!v.fsgo.hidden){const t=v.go.label();if(v.fsgo.textContent!==t)v.fsgo.textContent=t}
+    if(v.onFrame)v.onFrame(info);
+  }
+  scheduleTick();
+}
+async function camStart(view){
+  camStop();
+  view.setMsg('載入姿勢模型中，請稍候…');
+  try{await loadPose()}catch(e){view.setMsg('姿勢模型載入失敗，請檢查網路後重新整理頁面。');console.error(e);return false}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){view.setMsg('這個網址不能使用鏡頭。請用 https 開頭的網址，或在自己的電腦用 localhost 開啟。');return false}
+  const dim={width:{ideal:1280},height:{ideal:720}},denied='無法開啟鏡頭：請在瀏覽器允許使用攝影機，並關閉其他正在用鏡頭的程式或分頁。';
+  try{cam.stream=await navigator.mediaDevices.getUserMedia({video:S.cam.dev?{...dim,deviceId:{exact:S.cam.dev}}:{...dim,facingMode:{ideal:S.facing}},audio:false})}
+  catch(e){
+    if(!S.cam.dev){view.setMsg(denied);return false}
+    try{cam.stream=await navigator.mediaDevices.getUserMedia({video:{...dim,facingMode:{ideal:S.facing}},audio:false});S.cam.dev='';save();toast('找不到你選的鏡頭，已改用預設鏡頭')}
+    catch(e2){view.setMsg(denied);return false}
+  }
+  view.video.srcObject=cam.stream;
+  try{await view.video.play()}catch(e){}
+  listCams();
+  if(view.video.videoWidth)view.stage.style.aspectRatio=`${view.video.videoWidth} / ${view.video.videoHeight}`;   // 手機直拿時畫面比例跟著變，不會被裁掉
+  view.setMsg('');cam.view=view;cam.running=true;cam.lastT=-1;scheduleTick();
+  try{cam.wake=await navigator.wakeLock?.request('screen')}catch(e){}
+  return true;
+}
+function camStop(){
+  if(rec.on)recStop();
+  const was=cam.running;cam.running=false;cancelAnimationFrame(cam.raf);
+  if(cam.vf&&cam.view&&cam.view.video.cancelVideoFrameCallback){try{cam.view.video.cancelVideoFrameCallback(cam.vf)}catch(e){}}cam.vf=0;
+  if(cam.wake){cam.wake.release().catch(()=>{});cam.wake=null}
+  if(cam.stream){cam.stream.getTracks().forEach(t=>t.stop());cam.stream=null}
+  if(cam.view){cam.view.video.srcObject=null;const c=cam.view.canvas;c.getContext('2d').clearRect(0,0,c.width,c.height);
+    cam.view.chip.className='chip';cam.view.chip.textContent='鏡頭未開啟';cam.view.gaugeEl.style.width='0';cam.view.hintEl.hidden=true;cam.view.setMsg('鏡頭已關閉。')}
+  if(was&&cam.onStop)cam.onStop();
+}
+
+/* ================= 分頁切換 ================= */
+$$('.tab').forEach(b=>b.onclick=()=>{
+  $$('.tab').forEach(t=>t.setAttribute('aria-selected',t===b));
+  $$('.panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+b.dataset.tab));
+  b.scrollIntoView({inline:'center',block:'nearest'});
+  exitFull();
+  if(b.dataset.tab==='stats')renderStatsTab();
+  if(b.dataset.tab==='ach')renderAch();
+  if(b.dataset.tab==='food')renderFood();
+  if(b.dataset.tab==='friends'){renderFriends();friendBoard()}
+  if(cam.running)camStop();
+});
+const seg=(el,onPick)=>$$('button',el).forEach(b=>b.onclick=()=>{$$('button',el).forEach(x=>x.classList.toggle('on',x===b));onPick(b)});
+
+/* ================= 鏡頭計數分頁 ================= */
+$('#camEx').innerHTML=optsByCat(ORDER,n=>`${n}（${EX[n].en}）`);
+let camCounter=new RepCounter(ORDER[0]);
+const camView=makeView($('[data-stage=cam]'),()=>camCounter);
+camView.nm.textContent=ORDER[0];
+const setCamBtns=on=>{$('#camStart').disabled=on;$('#camStop').disabled=!on;$('#camSave').disabled=!on&&camCounter.count===0};
+$('#camEx').onchange=e=>{camCounter=new RepCounter(e.target.value);camCounter.relax=$('#camRelax').value/100;camView.nm.textContent=e.target.value;camView.n.textContent='0'};
+$('#camRelax').oninput=e=>{$('#camRelaxO').textContent=e.target.value+'%';camCounter.relax=e.target.value/100};
+$('#camStart').onclick=async()=>{
+  $('#camStart').disabled=true;
+  const ok=await camStart(camView);
+  if(ok){camView.onFrame=()=>{$('#camSave').disabled=camCounter.count===0;$('#camFormV').textContent=camCounter.cueTotal?Math.round((1-camCounter.cueBad/camCounter.cueTotal)*100)+'%':'—';$('#camTempoV').textContent=camCounter.cycles.length?(camCounter.cycles.reduce((a,b)=>a+b,0)/camCounter.cycles.length).toFixed(1):'—'};setCamBtns(true)}else $('#camStart').disabled=false;
+};
+$('#camStop').onclick=()=>camStop();
+cam.onStop=()=>{if(typeof hold!=='undefined'&&hold.on)holdFinish(false);$('#hCamBtn').disabled=false;$('#hCamOff').disabled=true;$('#camStart').disabled=false;$('#camStop').disabled=true;$('#chCamBtn').disabled=false;$('#chCamOff').disabled=true;$('#tCamBtn').disabled=false;$('#tCamOff').disabled=true;$('#camSave').disabled=camCounter.count===0};
+$('#camSave').onclick=()=>{
+  if(camCounter.count<=0)return;
+  S.history.unshift({ex:camCounter.key,n:camCounter.count,t:Date.now()});S.history=S.history.slice(0,30);
+  notePR(camCounter.key,camCounter.count);addReps(camCounter.count,camCounter.key);camCounter.reset();camView.n.textContent='0';
+  $('#camSave').disabled=true;save();renderStats();renderHist();
+};
+function renderHist(){
+  $('#histList').innerHTML=S.history.length?S.history.slice(0,8).map(h=>{const d=new Date(h.t);
+    return `<li>${esc(h.ex)}　<b style="color:var(--yellow)">${h.n} 下</b>　<span class="small">${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span></li>`}).join(''):'<li>還沒有紀錄。做完一組後按「儲存這組並歸零」。</li>';
+}
+
+/* ================= 計時器 ================= */
+let ac=null;
+function audioInit(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume&&ac.resume()}catch(e){}}
+function beep(freq=880,ms=150){if(!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=freq;g.gain.value=.25;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
+const sleepUntil=t=>new Promise(r=>setTimeout(r,Math.max(0,t-performance.now())));
+function cardHTML(o){
+  return `<div class="tlabel">${o.label}</div><div class="tbig">${o.big}</div><div class="thint">${o.hint||'&nbsp;'}</div>
+  <div class="tbar"><i style="width:${o.pct}%"></i></div><div class="tmeta"><span>下一個：${o.next}</span><span>總剩餘 ${mmss(o.remain)}</span></div>`;
+}
+/* 依序執行階段 [{label,secs,kind}]；每個階段最後 10 秒放大倒數並嗶聲。回傳 true＝完整跑完、false＝被中斷 */
+async function runPhases(phases,card,opt={}){
+  const total=phases.reduce((a,p)=>a+p.secs,0);let done=0;
+  let wake=null;try{wake=await navigator.wakeLock?.request('screen')}catch(e){}
+  const musicHere=S.musicAuto&&!music.on;if(musicHere)musicStart();
+  try{
+    for(let i=0;i<phases.length;i++){
+      const ph=phases[i],next=phases[i+1]?phases[i+1].label:'完成',start=performance.now();
+      opt.onPhase&&opt.onPhase(ph);
+      musicDuck(ph.kind!=='work');
+      for(let r=ph.secs;r>0;r--){
+        if(opt.ctl.aborted)return false;
+        const danger=r<=10&&ph.secs>10;
+        let hint=danger?(ph.kind==='work'?'最後 10 秒，衝刺！':'準備好，下一組快開始了'):'';
+        if(opt.live&&ph.kind==='work')hint=`已偵測 ${opt.live()} 下`+(danger?'，最後 10 秒！':'');
+        if(opt.mini){const m=opt.mini;m.tmini.hidden=false;m.tmini.className='tmini '+(danger?'danger':ph.kind);m.tl.textContent=ph.label;m.tn.textContent=r;m.miniState={label:ph.label,r,kind:danger?'danger':ph.kind}}
+        card.className='tcard '+(danger?'danger':ph.kind);
+        card.innerHTML=cardHTML({label:ph.label,big:r,hint,pct:(ph.secs-r)/ph.secs*100,next,remain:total-(done+ph.secs-r)});
+        if(opt.sound&&((r<=10&&ph.secs>10)||r<=3))beep(r===1?1320:880,r===1?450:150);
+        await sleepUntil(start+(ph.secs-r+1)*1000);
+      }
+      opt.onPhaseEnd&&opt.onPhaseEnd(ph);
+      done+=ph.secs;
+    }
+    card.className='tcard done';
+    card.innerHTML=`<div class="tlabel">完成</div><div class="tbig">✓</div><div class="thint">做得好，記得補水和伸展。</div>`;
+    if(opt.sound)beep(1320,500);
+    S.workSecs+=phases.filter(p=>p.kind==='work').reduce((a,p)=>a+p.secs,0);save();renderStats();
+    return true;
+  }finally{if(musicHere)musicStop();musicDuck(false);wake&&wake.release&&wake.release().catch(()=>{});if(opt.mini){opt.mini.tmini.hidden=true;opt.mini.miniState=null}}
+}
+
+const ph=(label,secs,kind,ex)=>({label,secs,kind,ex});
+const seq=(arr,gap)=>{const a=[];arr.forEach(([n,sec],i)=>{a.push(ph(n,sec,'work'));if(i<arr.length-1)a.push(ph('換下一個',gap,'rest'))});return a};
+const MODES={
+ hiit:{name:'經典 HIIT',desc:'固定時間訓練加固定休息，重複多組。',
+  params:[['work','訓練（秒）',10,120,5,30],['rest','休息（秒）',5,60,5,15],['rounds','組數',2,20,1,6]],
+  build:p=>{const a=[];for(let n=1;n<=p.rounds;n++){a.push(ph(`第 ${n}/${p.rounds} 組`,p.work,'work'));if(n<p.rounds)a.push(ph('休息',p.rest,'rest'))}return a}},
+ tabata:{name:'Tabata',desc:'訓練 20 秒、休息 10 秒，標準是 8 組（約 4 分鐘）。',
+  params:[['rounds','組數',4,12,1,8]],
+  build:p=>{const a=[];for(let n=1;n<=p.rounds;n++){a.push(ph(`第 ${n}/${p.rounds} 組，全力衝刺`,20,'work'));if(n<p.rounds)a.push(ph('休息',10,'rest'))}return a}},
+ emom:{name:'EMOM 每分鐘',desc:'每分鐘一開始就做動作，做完剩下的時間就是休息。',
+  params:[['work','每分鐘訓練（秒）',15,50,5,40],['mins','總分鐘數',3,20,1,8]],
+  build:p=>{const a=[];for(let n=1;n<=p.mins;n++){a.push(ph(`第 ${n}/${p.mins} 分鐘`,p.work,'work'));a.push(ph('剩餘時間休息',60-p.work,'rest'))}return a}},
+ circuit:{name:'循環訓練',desc:'選幾個動作依序做完一輪，休息後進入下一輪。',picks:true,
+  params:[['work','每個動作（秒）',15,90,5,40],['rest','動作間休息（秒）',5,60,5,15],['rounds','輪數',1,6,1,3],['rr','輪間休息（秒）',10,120,5,45]],
+  build:(p,picks)=>{const a=[];if(!picks.length)return a;for(let r=1;r<=p.rounds;r++){picks.forEach((n,j)=>{a.push(ph(`第 ${r} 輪：${n}`,p.work,'work',n));if(j<picks.length-1)a.push(ph('休息',p.rest,'rest'))});if(r<p.rounds)a.push(ph('輪間休息',p.rr,'rest'))}return a}},
+ warmup:{name:'暖身',desc:'約 5 分鐘全身暖身，運動前先做。',params:[],nocam:true,
+  build:()=>seq([['原地踏步',40],['手臂繞環',30],['開合跳',30],['徒手深蹲',30],['弓步轉體',30],['高抬腿',30],['手腕與腳踝繞環',30]],5)},
+ cooldown:{name:'收操伸展',desc:'約 5 分鐘放鬆伸展，運動後做。每個部位 30 秒。',params:[],nocam:true,
+  build:()=>seq([['小腿伸展',30],['大腿前側伸展',30],['大腿後側伸展',30],['臀部伸展',30],['胸口伸展',30],['肩膀伸展',30],['深呼吸放鬆',30]],5)},
+ pyramid:{name:'金字塔',desc:'訓練時間逐步增加再逐步減少，例如 20、30、40、30、20 秒。',
+  params:[['base','起始訓練（秒）',10,40,5,20],['step','每階增加（秒）',5,20,5,10],['peak','往上幾階',1,4,1,2],['rest','休息（秒）',5,60,5,20]],
+  build:p=>{const seq=[];for(let k=0;k<=p.peak;k++)seq.push(p.base+p.step*k);for(let k=p.peak-1;k>=0;k--)seq.push(p.base+p.step*k);
+    const a=[];seq.forEach((w,i)=>{a.push(ph(`第 ${i+1}/${seq.length} 階，${w} 秒`,w,'work'));if(i<seq.length-1)a.push(ph('休息',p.rest,'rest'))});return a}},
+};
+let tMode='hiit';const tCtl={aborted:false};let tRunning=false;
+$('#tModes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button data-k="${k}" class="${k===tMode?'on':''}">${m.name}</button>`).join('');
+$('#tPickList').innerHTML=ORDER.map(n=>`<label><input type="checkbox" value="${n}" ${['開合跳','深蹲','伏地挺身','登山者'].includes(n)?'checked':''}> ${n}</label>`).join('');
+function tParams(){const p={};$$('#tParams input').forEach(i=>p[i.dataset.k]=+i.value);return p}
+function tBuild(){
+  const m=MODES[tMode],picks=$$('#tPickList input:checked').map(i=>i.value);
+  const phases=[ph('準備開始',+$('#tPrep').value,'prepare'),...m.build(tParams(),picks)];
+  const has=phases.some(p=>p.kind==='work');
+  $('#tTotal').textContent=mmss(phases.reduce((a,p)=>a+p.secs,0));$('#tCount').textContent=phases.length-1;
+  $('#tStart').disabled=tRunning||!has;return phases;
+}
+function tRender(){
+  const m=MODES[tMode];$('#tDesc').textContent=m.desc;$('#tPicks').hidden=!m.picks;
+  $('#tParams').innerHTML=m.params.map(([k,l,mn,mx,st,v])=>`<div class="slider"><label class="f" style="margin:0">${l}</label><output>${v}</output><input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${v}"></div>`).join('');
+  $$('#tParams input').forEach(i=>i.oninput=()=>{i.previousElementSibling.textContent=i.value;tBuild()});tBuild();
+}
+seg($('#tModes'),b=>{tMode=b.dataset.k;tRender();tCamUi()});
+$('#tPrep').oninput=e=>{$('#tPrepO').textContent=e.target.value;tBuild()};
+$('#tPickList').onchange=tBuild;
+/* ----- 計時器的鏡頭計數 ----- */
+const formTxt=c=>c.cueTotal?`${c.cueTotal-c.cueBad}/${c.cueTotal}`:'—';
+let timerCounter=null;
+$('#tEx').innerHTML=optsByCat(Object.keys(EX),n=>`${n}（${EX[n].en}）`);
+const timerView=makeView($('[data-stage=timer]'),()=>timerCounter,{label:()=>tRunning?'停止':'開始訓練',click:()=>tRunning?$('#tStop').click():$('#tStart').click()});
+const tCurEx=()=>{if(tMode==='circuit'){const f=$$('#tPickList input:checked').map(i=>i.value).find(n=>EX[n]);return f||'深蹲'}return $('#tEx').value};
+function tPreviewCounter(){const k=tCurEx();timerCounter=new RepCounter(k);timerCounter.relax=.1;timerView.nm.textContent=k;timerView.n.textContent='0'}
+function tCamUi(){const nc=!!MODES[tMode].nocam;$('#tCamCard').hidden=nc;if(nc&&$('#tCamOn').checked){$('#tCamOn').checked=false;if(cam.running&&cam.view===timerView)camStop()}$('#tCamBox').hidden=!$('#tCamOn').checked;$('#tExWrap').hidden=tMode==='circuit';$('#tExNote').hidden=tMode!=='circuit'}
+$('#tCamOn').onchange=()=>{tCamUi();if(!$('#tCamOn').checked&&cam.running&&cam.view===timerView)camStop()};
+$('#tEx').onchange=()=>{if(cam.running&&cam.view===timerView&&!tRunning)tPreviewCounter()};
+$('#tCamBtn').onclick=async()=>{
+  $('#tCamBtn').disabled=true;tPreviewCounter();
+  const ok=await camStart(timerView);
+  if(ok)$('#tCamOff').disabled=false;else $('#tCamBtn').disabled=false;
+};
+$('#tCamOff').onclick=()=>camStop();
+function showTimerResult(sets){
+  const box=$('#tResult');if(!sets.length){box.hidden=true;return}
+  const total=sets.reduce((a,x)=>a+x.n,0);
+  box.hidden=false;
+  box.innerHTML=`<h4>這次訓練的次數</h4><table><tr><th>階段</th><th>動作</th><th>次數</th><th>姿勢達標</th></tr>${sets.map(x=>`<tr><td>${esc(x.label)}</td><td>${esc(x.ex)}</td><td>${x.n}</td><td>${x.f||'—'}</td></tr>`).join('')}</table><p><b style="color:var(--yellow)">共 ${total} 下</b>，已加入累計次數和「鏡頭計數」的紀錄。</p>`;
+  if(total>0){
+    const exs=[...new Set(sets.map(x=>x.ex))];
+    S.history.unshift({ex:exs.length<=2?exs.join('、'):'計時訓練',n:total,t:Date.now()});S.history=S.history.slice(0,30);
+    sets.forEach(x=>{notePR(x.ex,x.n);addReps(x.n,x.ex)});save();renderStats();renderHist();
+  }
+}
+$('#tStart').onclick=async()=>{
+  const useCam=$('#tCamOn').checked&&!MODES[tMode].nocam,warn=$('#tWarn');warn.hidden=true;
+  if(useCam&&!(cam.running&&cam.view===timerView)){warn.hidden=false;warn.textContent='你勾選了鏡頭計數，請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
+  audioInit();tRunning=true;tCtl.aborted=false;$('#tStart').disabled=true;$('#tStop').disabled=false;$('#tResult').hidden=true;
+  const sets=[];let cur=null;
+  const ok=await runPhases(tBuild(),$('#tCard'),{ctl:tCtl,sound:$('#tSound').checked,
+    onPhase:p=>{cur=p;if(!useCam)return;
+      if(p.kind==='work'){const k=p.ex&&EX[p.ex]?p.ex:tCurEx();timerCounter=new RepCounter(k);timerCounter.relax=.1;timerView.nm.textContent=k;timerView.n.textContent='0'}
+      else timerCounter=null},
+    onPhaseEnd:p=>{if(useCam&&p.kind==='work'&&timerCounter)sets.push({label:p.label,ex:timerCounter.key,n:timerCounter.count,f:formTxt(timerCounter)})},
+    live:useCam?()=>timerCounter?timerCounter.count:0:null,mini:useCam?timerView:null});
+  tRunning=false;$('#tStop').disabled=true;tBuild();
+  if(fullStage===timerView.stage)exitFull();   // 結束後離開全螢幕，才看得到結果表
+  if(ok)waterNudge('訓練完成，喝點水補充一下吧。');
+  if(useCam){
+    if(!ok&&cur&&cur.kind==='work'&&timerCounter)sets.push({label:cur.label+'（中斷）',ex:timerCounter.key,n:timerCounter.count,f:formTxt(timerCounter)});
+    showTimerResult(sets);
+    if(cam.running&&cam.view===timerView)tPreviewCounter();else timerCounter=null;
+  }
+  if(!ok){$('#tCard').className='tcard idle';$('#tCard').innerHTML='<div class="tlabel">已停止。可以重新開始。</div>'}
+};
+$('#tStop').onclick=()=>{tCtl.aborted=true};
+tRender();
+
+/* ================= 一分鐘挑戰 ================= */
+const CH={"開合跳":[30,50,70],"仰臥起坐":[15,25,35],"深蹲":[20,35,50],"伏地挺身":[8,15,25],"高抬腿":[40,70,100],"登山者":[30,50,70],"波比跳":[6,10,15],
+ "深蹲跳":[15,25,35],"啞鈴臥推":[10,18,26],"肩推":[15,25,35],"椅子臂屈伸":[10,20,30],"仰臥抬腿":[10,20,30],"前平舉":[15,25,35],"引體向上":[3,6,10],"髖鉸鏈":[15,25,35],"側抬腿":[20,30,40],"側彎":[25,40,55],"站姿抬膝碰肘":[30,50,70],"原地踏步":[60,90,120],"原地跳繩":[60,100,140]};
+const CAMOK=new Set(Object.keys(EX));
+const DN=['低','中','高'],MULT=[1,1.5,2];
+let chDiff=0,chCounter=null,chPending=null;const chCtl={aborted:false};let chRunning=false;
+$('#chEx').innerHTML=optsByCat(Object.keys(CH));
+$('#chDiff').innerHTML=DN.map((d,i)=>`<button class="${i===0?'on':''}" data-i="${i}">${d}</button>`).join('');
+const chView=makeView($('[data-stage=ch]'),()=>chCounter,{label:()=>$('#chStart').textContent,click:()=>$('#chStart').click()});
+function chRefresh(){
+  const ex=$('#chEx').value,t=CH[ex][chDiff],best=S.best[ex+'|'+chDiff];
+  $('#chTarget').textContent=t;$('#chBest').textContent=best?best:'—';
+  $('#chRange').textContent=`低、中、高難度的目標是 ${CH[ex].join('、')} 下。`;
+  const okCam=CAMOK.has(ex);$('#chCam').disabled=!okCam;if(!okCam)$('#chCam').checked=false;
+  chCounter=okCam?new RepCounter(ex):null;if(chCounter)chCounter.relax=.1;
+  chView.nm.textContent=ex;chView.n.textContent='0';
+  $('#chLog').innerHTML=S.log.length?'<tr><th>項目</th><th>難度</th><th>目標</th><th>成績</th><th>星</th></tr>'+S.log.slice(0,6).map(l=>`<tr><td>${esc(l.ex)}</td><td>${DN[l.d]}</td><td>${l.t}</td><td>${l.n}</td><td>${'★'.repeat(l.s)||'—'}</td></tr>`).join(''):'<tr><td class="mute">還沒有成績。</td></tr>';
+}
+$('#chEx').onchange=chRefresh;seg($('#chDiff'),b=>{chDiff=+b.dataset.i;chRefresh()});
+$('#chCamBtn').onclick=async()=>{
+  const ex=$('#chEx').value;if(!CAMOK.has(ex)){$('#chWarn').hidden=false;$('#chWarn').textContent='這個項目還不支援鏡頭偵測，做完請自己輸入次數。';return}
+  $('#chCamBtn').disabled=true;const ok=await camStart(chView);
+  if(ok){$('#chCamOff').disabled=false}else $('#chCamBtn').disabled=false;
+};
+$('#chCamOff').onclick=()=>camStop();
+$('#chStart').onclick=async()=>{
+  if(chRunning){chCtl.aborted=true;return}
+  const ex=$('#chEx').value,useCam=$('#chCam').checked&&CAMOK.has(ex);
+  const warn=$('#chWarn');warn.hidden=true;
+  if(useCam&&!(cam.running&&cam.view===chView)){warn.hidden=false;warn.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
+  audioInit();chRunning=true;chCtl.aborted=false;$('#chStart').textContent='停止挑戰';$('#chResult').hidden=true;$('#chDone').hidden=true;
+  const t=CH[ex][chDiff];
+  const ok=await runPhases([ph('準備開始',5,'prepare'),ph(`${ex}（${DN[chDiff]}）`,60,'work')],$('#chTimer'),
+    {ctl:chCtl,sound:$('#chSound').checked,onPhase:()=>{if(useCam){chCounter.reset();chView.n.textContent='0'}},live:useCam?()=>chCounter.count:null,mini:useCam?chView:null});
+  chRunning=false;$('#chStart').textContent='開始 60 秒挑戰';
+  if(fullStage===chView.stage)exitFull();
+  if(!ok){$('#chTimer').className='tcard idle';$('#chTimer').innerHTML='<div class="tlabel">已停止。</div>';return}
+  const auto=useCam?chCounter.count:null;
+  chPending={ex,d:chDiff,t,auto};
+  $('#chResult').hidden=false;$('#chReps').value=auto===null?t:auto;
+  $('#chResultMsg').textContent=auto===null?`時間到。請輸入你剛剛 ${ex} 做了幾下。`:`時間到，鏡頭偵測到 ${auto} 下${chCounter.cueTotal?`（姿勢達標 ${formTxt(chCounter)}）`:''}。如果不準，可以修正後再提交。`;
+};
+$('#chSubmit').onclick=()=>{
+  if(!chPending)return;const p=chPending,n=Math.max(0,Math.round(+$('#chReps').value||0));
+  const stars=n>=p.t*1.2?3:n>=p.t?2:n>=p.t*.7?1:0,xp=Math.round(n*2*MULT[p.d])+stars*10,key=p.ex+'|'+p.d,isBest=n>(S.best[key]||0);
+  if(isBest)S.best[key]=n;if(stars===3)S.stars3=(S.stars3||0)+1;S.xp+=xp;addReps(n,p.ex);S.log.unshift({ex:p.ex,d:p.d,t:p.t,n,s:stars});S.log=S.log.slice(0,20);
+  save();renderStats();chPending=null;$('#chResult').hidden=true;waterNudge('挑戰完成，喝點水休息一下吧。');
+  $('#chDone').hidden=false;$('#chDone').textContent=`${stars?'★'.repeat(stars):'再接再厲'}　${p.ex} ${n} 下（目標 ${p.t}），獲得 ${xp} 經驗值${isBest?'，新的個人紀錄！':''}`;
+  chRefresh();renderBoss();
+};
+
+/* ================= 打怪模式 ================= */
+const MOVES={"深蹲":3,"伏地挺身":4,"捲腹":3,"側平舉":2,"二頭彎舉":2,"開合跳":2,"弓箭步":3,"登山者":3,"臀橋":2,"高抬腿":2,
+ "仰臥起坐":3,"深蹲跳":4,"啞鈴臥推":4,"肩推":3,"椅子臂屈伸":3,"仰臥抬腿":3,"前平舉":2,"引體向上":5,"髖鉸鏈":3,"側抬腿":2,"側彎":1,"站姿抬膝碰肘":2,"原地踏步":1,"原地跳繩":1,"波比跳":5};
+const BOSSES=[["懶惰史萊姆","🟢",60],["泡麵哥布林","👺",120],["沙發石巨人","🗿",200],["熬夜暗影騎士","🥷",300],["暴食火焰龍","🐉",450]];
+const maxHp=(i,l)=>Math.round(BOSSES[i][2]*(1+.5*l));
+$('#bMove').innerHTML=optsByCat(Object.keys(MOVES));
+function renderBoss(){
+  if(S.bossHp===null)S.bossHp=maxHp(S.bossIdx,S.bossLoop);
+  const [name,emo]=BOSSES[S.bossIdx],mh=maxHp(S.bossIdx,S.bossLoop);
+  $('#bEmoji').textContent=emo;$('#bName').textContent=name;$('#bSub').textContent=`第 ${S.bossLoop+1} 輪，第 ${S.bossIdx+1}/${BOSSES.length} 隻`;
+  $('#bHp').style.width=S.bossHp/mh*100+'%';$('#bHpTxt').textContent=`${S.bossHp} / ${mh}`;
+  $('#bLv').textContent=level();$('#bCombo').textContent='x'+(1+.2*S.combo).toFixed(1);$('#bDef').textContent=S.defeated;
+  $('#bXp').style.width=(S.xp%100)+'%';$('#bXpTxt').textContent=`${S.xp%100} / 100`;
+  $('#bLog').innerHTML=S.blog.length?S.blog.map(l=>`<li>${esc(l)}</li>`).join(''):'<li>還沒開打，先做幾下運動吧。</li>';
+}
+function attack(move,reps){
+  if(reps<=0)return;
+  S.combo=move!==S.lastMove?Math.min(S.combo+1,5):0;S.lastMove=move;
+  const mult=1+.2*S.combo,crit=Math.random()<.2,dmg=Math.round(reps*MOVES[move]*mult*(crit?2:1));
+  S.bossHp=Math.max(0,S.bossHp-dmg);addReps(reps,move);S.xp+=reps*2;
+  S.blog.unshift(`${crit?'爆擊！':''}${move} × ${reps} 下，造成 ${dmg} 傷害（連擊 x${mult.toFixed(1)}）`);
+  if(S.bossHp<=0){S.xp+=50;S.defeated++;S.blog.unshift(`擊敗了 ${BOSSES[S.bossIdx][0]}，獲得 50 經驗值`);
+    S.bossIdx++;if(S.bossIdx>=BOSSES.length){S.bossIdx=0;S.bossLoop++}S.bossHp=maxHp(S.bossIdx,S.bossLoop)}
+  S.blog=S.blog.slice(0,6);save();renderStats();renderBoss();
+}
+$('#bAtk').onclick=()=>attack($('#bMove').value,Math.max(1,Math.round(+$('#bReps').value||0)));
+$('#bAtkCam').onclick=()=>{const n=camCounter.count;if(n<=0){alert('「鏡頭計數」分頁目前沒有未儲存的次數。先去那邊用鏡頭做幾下。');return}attack($('#bMove').value,n);camCounter.reset();camView.n.textContent='0'};
+$('#bReset').onclick=()=>{if(!confirm('要重新開始遊戲嗎？等級和魔王進度會歸零。'))return;
+  Object.assign(S,{xp:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,blog:[]});save();renderStats();renderBoss()};
+seg($('#gSub'),b=>{['ch','boss','hold'].forEach(k=>{$('#sub-'+k).hidden=b.dataset.sub!==k});if(cam.running)camStop();exitFull()});
+
+/* ================= 身體數據與菜單 ================= */
+let sex='男',goalType='維持';
+seg($('#bSex'),b=>{sex=b.dataset.v;calc()});seg($('#bGoal'),b=>{goalType=b.dataset.v;calc()});
+['#bAge','#bH','#bW','#bAct'].forEach(s=>$(s).oninput=calc);
+function bodyInfo(){
+  const age=+$('#bAge').value||25,h=+$('#bH').value||170,w=+$('#bW').value||65,act=+$('#bAct').value;
+  const bmi=w/((h/100)**2),bmr=10*w+6.25*h-5*age+(sex==='男'?5:-161),tdee=bmr*act;
+  const target={減脂:Math.max(tdee-400,bmr),維持:tdee,增肌:tdee+300}[goalType];
+  return {age,h,w,bmi,bmr,tdee,target,cat:bmi<18.5?'過輕':bmi<24?'正常':bmi<27?'過重':'肥胖'};
+}
+function calc(){
+  const b=bodyInfo(),f=(v,l)=>`<div class="fact"><b>${v}</b><span>${l}</span></div>`;
+  $('#bOut').innerHTML=f(b.bmi.toFixed(1)+'（'+b.cat+'）','BMI')+f(Math.round(b.bmr),'基礎代謝（大卡）')+f(Math.round(b.tdee),'每日總消耗（大卡）')+
+    f(Math.round(b.target),`建議攝取（${goalType}，大卡）`)+f(Math.round(b.w*1.6)+'–'+Math.round(b.w*2),'蛋白質（克）')+f((b.w*35/1000).toFixed(1),'每日喝水（公升）');
+}
+const GROUPS={"下肢":["深蹲","弓箭步","臀橋","髖鉸鏈","側抬腿","深蹲跳"],"上肢核心":["伏地挺身","肩推（可用水瓶）","二頭彎舉（可用水瓶）","側平舉（可用水瓶）","椅子臂屈伸","捲腹","仰臥抬腿"],"有氧燃脂":["開合跳","登山者","高抬腿","原地跳繩","波比跳"],"全身":["深蹲","伏地挺身","登山者","捲腹","波比跳","髖鉸鏈"]};
+const CNT={新手:4,中階:5,進階:6};
+const TIMED=new Set(["開合跳","登山者","高抬腿","原地跳繩","原地踏步"]);
+const SPLITS={2:["全身","有氧燃脂"],3:["下肢","上肢核心","有氧燃脂"],4:["下肢","上肢核心","有氧燃脂","全身"],5:["下肢","上肢核心","有氧燃脂","全身","有氧燃脂"]};
+const LEVELS={新手:[3,10,60,30],中階:[4,12,45,40],進階:[5,15,30,45]};
+const EXTRA={減脂:'收操：做一輪 4 分鐘 Tabata（到「訓練計時器」選 Tabata）。',增肌:'動作放慢，下放 3 秒；每組做到接近力竭前 1–2 下。',提升體能:'組間心率稍微恢復再開始下一組，逐週增加 1–2 下。'};
+function plan(){
+  const g=$('#pGoal').value,[sets,reps,rest,timed]=LEVELS[$('#pLevel').value],days=+$('#pDays').value;
+  $('#pDaysO').textContent=days;
+  $('#planOut').innerHTML=SPLITS[days].map((grp,i)=>`<details ${i===0?'open':''}><summary>第 ${i+1} 天，${grp}</summary><ul>${GROUPS[grp].slice(0,CNT[$('#pLevel').value]).map(e=>{
+    const base=e.replace(/（.*）/,'');return `<li><b>${e}</b>：${sets} 組 × ${TIMED.has(base)?timed+' 秒':reps+' 下'}，組間休息 ${rest} 秒</li>`}).join('')}</ul><p class="small mute">${EXTRA[g]}</p></details>`).join('');
+}
+['#pGoal','#pLevel','#pDays'].forEach(s=>$(s).oninput=plan);
+
+/* ================= AI 教練 ================= */
+const SYSTEM=`你是「Lin AI」的專業健身教練，使用繁體中文（台灣用語）回答。
+任務：根據使用者的目標、程度、時間與器材，規劃具體可執行的訓練菜單，並回答訓練、動作姿勢與飲食問題。
+規則：
+- 資訊不足以排菜單時，先簡短詢問最多 3 個關鍵問題（目標、每週可練天數、程度/器材/傷病）；資訊夠了就直接給完整菜單。
+- 菜單請用表格或條列：每天重點、動作、組數×次數（或秒數）、組間休息，並提醒暖身與收操，以及如何逐週進步。
+- 動作優先使用本系統支援的：深蹲、深蹲跳、弓箭步、臀橋、髖鉸鏈、側抬腿、伏地挺身、肩推、側平舉、前平舉、二頭彎舉、椅子臂屈伸、引體向上、捲腹、仰臥起坐、仰臥抬腿、側彎、站姿抬膝碰肘、開合跳、登山者、高抬腿、原地踏步、原地跳繩、波比跳，以及撐住類的平板支撐、側棒式、靠牆深蹲、臀橋停留，也可加入其他徒手或啞鈴動作。
+- 安全第一：不推薦極端節食或過低熱量；有疼痛、傷病、慢性病、懷孕等情況，請建議先諮詢醫師或物理治療師。你不是醫師。
+- 回答簡潔、鼓勵但誠實。`;
+const QUICK=['根據我的紀錄排下週菜單','幫我排一週訓練菜單','居家 30 分鐘減脂菜單','訓練前後該怎麼吃？','深蹲姿勢要注意什麼？'];
+$('#quick').innerHTML=QUICK.map(q=>`<button class="btn ghost small">${q}</button>`).join('');
+$$('#quick button').forEach(b=>b.onclick=()=>ask(b.textContent));
+try{const k=localStorage.getItem('fitai_key');if(k){$('#apiKey').value=k;$('#keyRemember').checked=true}}catch(e){}
+$('#keyBox').open=!$('#apiKey').value;
+function md(src){
+  const blocks=[];let t=esc(src).replace(/```(?:\w*\n)?([\s\S]*?)```/g,(m,c)=>{blocks.push(c);return `\u0000${blocks.length-1}\u0000`});
+  const inl=s=>s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
+  const out=[];let list=null,table=null;
+  const flush=()=>{if(list){out.push(`<${list.t}>${list.i.join('')}</${list.t}>`);list=null}if(table){const rows=table.filter(r=>!/^\|?\s*:?-{2,}/.test(r));
+    out.push('<table>'+rows.map((r,i)=>{const c=r.replace(/^\||\|$/g,'').split('|').map(x=>inl(x.trim()));return '<tr>'+c.map(x=>i?`<td>${x}</td>`:`<th>${x}</th>`).join('')+'</tr>'}).join('')+'</table>');table=null}};
+  for(const line of t.split('\n')){
+    let m;
+    if(/^\s*\|/.test(line)){if(!table){flush();table=[]}table.push(line.trim());continue}
+    if((m=line.match(/^\s*[-*]\s+(.*)/))){if(!list||list.t!=='ul'){flush();list={t:'ul',i:[]}}list.i.push(`<li>${inl(m[1])}</li>`);continue}
+    if((m=line.match(/^\s*\d+[.)]\s+(.*)/))){if(!list||list.t!=='ol'){flush();list={t:'ol',i:[]}}list.i.push(`<li>${inl(m[1])}</li>`);continue}
+    flush();
+    if((m=line.match(/^#{1,4}\s+(.*)/)))out.push(`<h4>${inl(m[1])}</h4>`);
+    else if(line.trim())out.push(`<p>${inl(line)}</p>`);
+  }
+  flush();return out.join('').replace(/\u0000(\d+)\u0000/g,(m,i)=>`<pre>${blocks[i]}</pre>`);
+}
+const chatHist=[];let asking=false;
+function addMsg(role,html){const d=document.createElement('div');d.className='msgb '+(role==='user'?'me':'ai');d.innerHTML=html;$('#chat').appendChild(d);$('#chat').scrollTop=1e9;return d}
+async function ask(text){
+  text=(text||'').trim();if(!text||asking)return;
+  const key=$('#apiKey').value.trim();
+  try{if($('#keyRemember').checked)localStorage.setItem('fitai_key',key);else localStorage.removeItem('fitai_key')}catch(e){}
+  addMsg('user',esc(text));$('#chatIn').value='';$('#chatClear').hidden=false;
+  if(!key){addMsg('ai','還沒設定 API Key，所以教練暫時無法回覆。請展開上方「設定 API Key」貼上金鑰。在那之前，可以先用「身體數據與菜單」分頁的菜單產生器。');$('#keyBox').open=true;return}
+  chatHist.push({role:'user',content:text});asking=true;$('#chatSend').disabled=true;
+  const wait=addMsg('ai','<span class="mute">教練思考中…</span>');
+  let system=SYSTEM;
+  if($('#useLog').checked)system+='\n\n'+trainSummary();
+  if($('#useCtx').checked){const b=bodyInfo();system+=`\n\n使用者資料：${sex}性、${b.age} 歲、身高 ${b.h} cm、體重 ${b.w} kg、目標 ${goalType}、BMI ${b.bmi.toFixed(1)}、建議熱量約 ${Math.round(b.target)} 大卡；累計運動 ${S.reps} 下。`}
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:1800,system,messages:chatHist.slice(-20)})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data&&data.error&&data.error.message||('HTTP '+r.status));
+    const reply=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');
+    chatHist.push({role:'assistant',content:reply});wait.innerHTML=md(reply);
+  }catch(e){chatHist.pop();wait.innerHTML='連線失敗：'+esc(e.message)+'<br><span class="small mute">請檢查 API Key 是否正確、帳戶是否有額度、網路是否正常。</span>'}
+  asking=false;$('#chatSend').disabled=false;$('#chat').scrollTop=1e9;
+}
+$('#chatSend').onclick=()=>ask($('#chatIn').value);
+$('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();ask($('#chatIn').value)}});
+$('#chatClear').onclick=()=>{chatHist.length=0;$('#chat').innerHTML='';$('#chatClear').hidden=true};
+
+/* ================= 喝水提醒（網頁開著時有效） ================= */
+const wToday=()=>S.water[dkey(new Date())]||0;
+function nextActive(t){
+  const d=new Date(t),h=d.getHours()+d.getMinutes()/60;
+  if(h>=S.waterFrom&&h<S.waterTo)return t;
+  const n=new Date(t);n.setHours(S.waterFrom,0,0,0);if(h>=S.waterTo)n.setDate(n.getDate()+1);return n.getTime();
+}
+function waterSchedule(){S.waterNext=nextActive(Date.now()+S.waterMin*60000);save()}
+function addWater(ml){
+  const k=dkey(new Date());S.water[k]=(S.water[k]||0)+ml;S.waterLog=[...S.waterLog,{k,ml}].slice(-30);
+  if(S.water[k]>=S.waterGoal)S.waterHit[k]=true;
+  save();renderStats();
+}
+function showWater(text){
+  $('#wText').textContent=text;$('#waterBar').hidden=false;
+  clearTimeout(showWater.t);showWater.t=setTimeout(()=>{$('#waterBar').hidden=true},90000);
+  beep(660,120);setTimeout(()=>beep(880,160),170);say('該喝水了');
+  if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){try{new Notification('Lin AI 喝水提醒',{body:text})}catch(e){}}
+}
+function waterNudge(text){if(S.waterOn)showWater(text)}
+function waterTick(){
+  if(!S.waterOn)return;
+  const now=Date.now();if(!S.waterNext){waterSchedule();return}
+  if(now<S.waterNext)return;
+  if(cam.running||tRunning||chRunning){S.waterNext=now+2*60000;return}   // 訓練中先不打擾
+  const d=new Date(),h=d.getHours()+d.getMinutes()/60;
+  if(h<S.waterFrom||h>=S.waterTo){S.waterNext=nextActive(now);save();return}
+  showWater(`該喝水了，喝一杯 250 ml 吧。今天已喝 ${wToday()} / ${S.waterGoal} ml`);
+  S.waterNext=nextActive(now+S.waterMin*60000);save();renderWater();
+}
+setInterval(waterTick,20000);
+const hhmm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+function renderWater(){
+  if(!$('#wOn'))return;
+  const ml=wToday(),goal=S.waterGoal;
+  $('#wOn').checked=S.waterOn;$('#wMin').value=S.waterMin;$('#wFrom').value=S.waterFrom;$('#wTo').value=S.waterTo;$('#wGoal').value=goal;
+  $('#wBar').style.width=Math.min(100,ml/goal*100)+'%';
+  $('#wTxt').textContent=`今天已喝 ${ml} / ${goal} ml`+(ml>=goal?'，達標了！':'')+(S.waterOn&&S.waterNext?`。下次提醒：${hhmm(S.waterNext)}`:(S.waterOn?'':'。提醒已關閉'));
+  const perm=!('Notification' in window)?'此瀏覽器不支援通知':Notification.permission==='granted'?'瀏覽器通知已開啟':Notification.permission==='denied'?'瀏覽器通知被封鎖':'尚未允許瀏覽器通知';
+  $('#wNote').textContent=`依你在「身體數據」填的體重，建議每天約 ${Math.round(bodyInfo().w*35/50)*50} ml。提醒只在這個網頁開著時有效，分頁縮到背景也可以；${perm}。`;
+  $('#wNotif').disabled=!('Notification' in window)||Notification.permission==='granted';
+}
+$('#wFrom').innerHTML=Array.from({length:24},(_,i)=>`<option value="${i}">${String(i).padStart(2,'0')}:00</option>`).join('');
+$('#wTo').innerHTML=Array.from({length:24},(_,i)=>`<option value="${i+1}">${String(i+1).padStart(2,'0')}:00</option>`).join('');
+$('#wOn').onchange=e=>{S.waterOn=e.target.checked;if(S.waterOn)waterSchedule();save();renderWater()};
+$('#wMin').onchange=e=>{S.waterMin=+e.target.value;waterSchedule();renderWater()};
+$('#wFrom').onchange=e=>{S.waterFrom=+e.target.value;if(S.waterFrom>=S.waterTo){S.waterTo=Math.min(24,S.waterFrom+1)}waterSchedule();renderWater()};
+$('#wTo').onchange=e=>{S.waterTo=+e.target.value;if(S.waterTo<=S.waterFrom){S.waterFrom=Math.max(0,S.waterTo-1)}waterSchedule();renderWater()};
+$('#wGoal').onchange=e=>{S.waterGoal=Math.max(500,Math.min(6000,Math.round(+e.target.value)||2000));const k=dkey(new Date());if(wToday()>=S.waterGoal)S.waterHit[k]=true;save();renderStats()};
+$$('#waterCard [data-ml]').forEach(b=>b.onclick=()=>{addWater(+b.dataset.ml);if(S.waterOn)waterSchedule()});
+$('#wUndo').onclick=()=>{const l=S.waterLog.pop();if(!l){toast('沒有可以撤銷的紀錄');return}S.water[l.k]=Math.max(0,(S.water[l.k]||0)-l.ml);if(S.water[l.k]<S.waterGoal)delete S.waterHit[l.k];save();renderWater()};
+$('#wNotif').onclick=async()=>{
+  try{const r=await Notification.requestPermission();toast(r==='granted'?'已開啟瀏覽器通知':'通知被封鎖，可以點網址列左邊的圖示重新開啟')}catch(e){}
+  renderWater();
+};
+$('#wDrink').onclick=()=>{addWater(250);if(S.waterOn)waterSchedule();$('#waterBar').hidden=true};
+$('#wLater').onclick=()=>{S.waterNext=Date.now()+10*60000;save();$('#waterBar').hidden=true;renderWater()};
+$('#wClose').onclick=()=>{$('#waterBar').hidden=true};
+
+/* ================= 統計與成就 ================= */
+let chartN=7;
+const WD=['日','一','二','三','四','五','六'];
+function lastDays(n){const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);a.push({k:dkey(d),d})}return a}
+function renderStatsTab(){
+  const days=lastDays(chartN),vals=days.map(x=>S.days[x.k]||0);
+  const sum7=lastDays(7).reduce((a,x)=>a+(S.days[x.k]||0),0),st=streaks();
+  $('#stFacts').innerHTML=[[sum7,'近 7 天總次數'],[Math.round(sum7/7),'近 7 天日均'],[maxDay(),'最佳單日'],[st.cur+' 天','目前連續'],[st.longest+' 天','最長連續']]
+    .map(([b,l])=>`<div class="fact"><b>${b}</b><span>${l}</span></div>`).join('');
+  const mx=Math.max(10,...vals),top=mx<=20?20:mx<=50?50:Math.ceil(mx/50)*50;
+  const W=700,H=250,L=34,R=6,T=16,B=34,bw=(W-L-R)/days.length,ch=H-T-B;let g='';
+  for(const f of [0,.5,1]){const y=T+ch*(1-f);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.1)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#93aeb3">${Math.round(top*f)}</text>`}
+  days.forEach((x,i)=>{
+    const v=vals[i],h=ch*v/top,bx=L+i*bw+bw*.18,bww=bw*.64,isToday=i===days.length-1;
+    g+=`<rect x="${bx}" y="${T+ch-Math.max(h,v?2:0)}" width="${bww}" height="${Math.max(h,v?2:0)}" rx="${Math.min(6,bww/2)}" fill="${isToday?'#3dd6d0':'#ffd23f'}"/>`;
+    if(chartN===7&&v)g+=`<text x="${bx+bww/2}" y="${T+ch-h-5}" text-anchor="middle" font-size="12" font-weight="700" fill="#eaf4f1">${v}</text>`;
+    if(chartN===7||i%5===0||i===days.length-1)g+=`<text x="${bx+bww/2}" y="${H-12}" text-anchor="middle" font-size="12" fill="#93aeb3">${chartN===7?'週'+WD[x.d.getDay()]:(x.d.getMonth()+1)+'/'+x.d.getDate()}</text>`;
+  });
+  $('#stChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="近 ${chartN} 天每日次數長條圖，青色是今天">${g}</svg>`;
+  const today=S.days[dkey(new Date())]||0;
+  $('#stGoal').value=S.goal;$('#stGoalBar').style.width=Math.min(100,today/S.goal*100)+'%';
+  $('#stGoalTxt').textContent=today>=S.goal?`今天已達標，做了 ${today} 下。`:`今天已完成 ${today} / ${S.goal} 下，還差 ${S.goal-today} 下。`;
+  renderWater();
+  renderHeat();renderPR();
+}
+seg($('#stRange'),b=>{chartN=+b.dataset.n;renderStatsTab()});
+$('#stGoal').onchange=e=>{S.goal=Math.max(10,Math.min(1000,Math.round(+e.target.value)||50));save();renderStatsTab()};
+$('#stReset').onclick=()=>{if(confirm('要清除所有紀錄嗎？次數、等級、成就和統計都會歸零。\n（好友排行榜上的資料不會被清掉，要刪除請到「好友排行」分頁。）')){noSave=true;try{localStorage.removeItem(KEY)}catch(e){}location.reload()}};
+
+/* ================= 每日挑戰 ================= */
+const DAILY_T={"深蹲":40,"伏地挺身":20,"捲腹":30,"側平舉":30,"二頭彎舉":30,"開合跳":60,"弓箭步":30,"登山者":50,"臀橋":30,"高抬腿":60,
+ "仰臥起坐":25,"深蹲跳":20,"啞鈴臥推":20,"肩推":25,"椅子臂屈伸":20,"仰臥抬腿":20,"前平舉":25,"引體向上":8,"髖鉸鏈":25,"側抬腿":30,"側彎":40,"站姿抬膝碰肘":40,"原地踏步":100,"原地跳繩":150,"波比跳":15};
+function dailyTask(){const k=dkey(new Date()),ex=ORDER[dayN(k)%ORDER.length];return {ex,target:DAILY_T[ex],key:k}}
+const dailyProg=t=>(S.dayEx[t.key]||{})[t.ex]||0;
+function checkDaily(){
+  const t=dailyTask();
+  if(!S.dailyDone[t.key]&&dailyProg(t)>=t.target){S.dailyDone[t.key]=true;S.xp+=30;save();toast(`每日挑戰完成：${t.ex} ${t.target} 下，獲得 30 經驗值`,true)}
+}
+function renderDaily(){
+  const t=dailyTask(),p=dailyProg(t),done=!!S.dailyDone[t.key];
+  $('#dailyTxt').innerHTML=`今日挑戰：<span style="color:var(--yellow)">${t.ex} ${t.target} 下</span>`;
+  $('#dailyBar').style.width=Math.min(100,p/t.target*100)+'%';
+  const plan=(S.sched[new Date().getDay()]||'').trim();$('#dailyPlan').textContent=isRest(plan)?'':`今日課表：${plan}${(S.days[dkey(new Date())]||0)>0?'（今天已運動）':''}`;
+  $('#dailySub').textContent=done?'已完成，30 經驗值已入帳。':`進度 ${p} / ${t.target} 下，完成可得 30 經驗值。（鏡頭、計時器、挑戰、打怪的次數都算）`;
+}
+$('#dailyGo').onclick=()=>{const t=dailyTask();$('#camEx').value=t.ex;$('#camEx').dispatchEvent(new Event('change'))};
+
+/* ================= 個人紀錄 ================= */
+function notePR(ex,n){
+  if(n<5)return;const old=S.pr[ex];
+  if(!old||n>old.n){S.pr[ex]={n,t:Date.now()};if(old){S.prCount=(S.prCount||0)+1;toast(`新紀錄：${ex} 單組 ${n} 下`,true)}}
+}
+function renderPR(){
+  const rows=Object.entries(S.pr).sort((x,y)=>y[1].n-x[1].n);
+  $('#stPR').innerHTML=rows.length?'<table><tr><th>動作</th><th>單組最多</th><th>日期</th></tr>'+rows.map(([ex,r])=>{const d=new Date(r.t);return `<tr><td>${esc(ex)}</td><td><b style="color:var(--yellow)">${r.n} 下</b></td><td>${d.getMonth()+1}/${d.getDate()}</td></tr>`}).join('')+'</table>':'<p class="small mute">還沒有紀錄。用鏡頭做完一組並儲存，或跑計時器，就會記下每個動作單組最多的次數。</p>';
+}
+
+/* ================= 運動日曆 ================= */
+function renderHeat(){
+  const weeks=16,cell=15,gap=3,today=new Date();today.setHours(0,0,0,0);
+  const start=new Date(today);start.setDate(today.getDate()-today.getDay()-(weeks-1)*7);
+  let g='',lastM=-1;
+  for(let w=0;w<weeks;w++){
+    for(let d=0;d<7;d++){
+      const dt=new Date(start);dt.setDate(start.getDate()+w*7+d);if(dt>today)continue;
+      const v=S.days[dkey(dt)]||0,col=v===0?'rgba(255,255,255,.07)':v<20?'rgba(61,214,208,.4)':v<50?'rgba(61,214,208,.7)':v<100?'#3dd6d0':'#ffd23f';
+      g+=`<rect x="${26+w*(cell+gap)}" y="${18+d*(cell+gap)}" width="${cell}" height="${cell}" rx="3" fill="${col}"><title>${dkey(dt)}：${v} 下</title></rect>`;
+      if(d===0&&dt.getMonth()!==lastM){lastM=dt.getMonth();g+=`<text x="${26+w*(cell+gap)}" y="11" font-size="11" fill="#93aeb3">${dt.getMonth()+1} 月</text>`}
+    }
+  }
+  [['一',1],['三',3],['五',5]].forEach(([t,r])=>{g+=`<text x="0" y="${18+r*(cell+gap)+12}" font-size="11" fill="#93aeb3">${t}</text>`});
+  const W=26+weeks*(cell+gap),H=18+7*(cell+gap);
+  $('#stHeat').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="最近 16 週的運動日曆，顏色越亮代表當天次數越多">${g}</svg><div class="small mute" style="margin-top:6px">顏色越亮，當天次數越多（青色 1–99 下，黃色 100 下以上）。</div>`;
+}
+
+/* ================= 成就頁與分享圖 ================= */
+function medal(g,tier,size=56){
+  const c=TIERC[tier],on=tier>0;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="24" fill="${on?c:'none'}" stroke="${c}" stroke-width="2.5" ${on?'':'stroke-dasharray="5 5"'}/><circle cx="28" cy="28" r="19" fill="none" stroke="${on?'rgba(10,26,32,.3)':'none'}" stroke-width="1.5"/><text x="28" y="36" text-anchor="middle" font-size="24" font-weight="800" fill="${on?'#0a1a20':'#93aeb3'}">${g}</text></svg>`;
+}
+function renderAch(){
+  let got=0;const total=ACH.length*3;
+  $('#achGrid').innerHTML=ACH.map(a=>{
+    const {v,tier,next}=achState(a);got+=tier;const pct=next?Math.min(100,v/next*100):100;
+    return `<div class="ach ${tier?'':'locked'}">${medal(a.g,tier)}<div class="grow"><b>${a.n}${tier?`　<span class="tag t${tier}">${TIERN[tier]}</span>`:''}</b><span class="d">${a.d}</span><div class="bar"><i style="width:${pct}%"></i></div><span class="d">${next?`${v} / ${next} ${a.u}，下一級：${TIERN[tier+1]}`:`已達最高等級（${v} ${a.u}）`}</span></div></div>`;
+  }).join('');
+  $('#achCount').textContent=`${got} / ${total} 個等級`;
+}
+let shareBlob=null;
+async function makeShare(){
+  try{await document.fonts.ready}catch(e){}
+  const W=900,H=1200,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const F='"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif';
+  const gr=x.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#0f2c35');gr.addColorStop(1,'#0a1a20');x.fillStyle=gr;x.fillRect(0,0,W,H);
+  x.strokeStyle='rgba(255,255,255,.045)';x.lineWidth=2;for(let i=0;i<W;i+=120){x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke()}
+  x.fillStyle='#eaf4f1';x.font=`800 80px ${F}`;x.fillText('Lin AI',60,140);
+  x.fillStyle='#93aeb3';x.font=`500 32px ${F}`;const d=new Date();x.fillText(`健身成就卡　${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`,60,196);
+  const st=streaks(),stats=[[S.reps,'累計次數'],[st.cur,'連續天數'],[level(),'遊戲等級'],[Math.round(S.reps*.5),'消耗大卡']];
+  stats.forEach(([v,l],i)=>{const bx=60+i*210;x.fillStyle='rgba(255,255,255,.06)';x.beginPath();rrect(x,bx,250,195,150,20);x.fill();
+    x.fillStyle='#ffd23f';x.font=`800 60px ${F}`;x.textAlign='center';x.fillText(String(v),bx+97,332);x.fillStyle='#93aeb3';x.font=`500 26px ${F}`;x.fillText(l,bx+97,378);x.textAlign='left'});
+  x.fillStyle='#eaf4f1';x.font=`800 40px ${F}`;x.fillText('我的徽章',60,490);
+  const list=ACH.map(a=>({a,...achState(a)})).sort((p,q)=>q.tier-p.tier);
+  list.slice(0,12).forEach((o,i)=>{
+    const col=i%4,row=Math.floor(i/4),cx=60+col*210+97,cy=590+row*215;
+    x.beginPath();x.arc(cx,cy,64,0,7);x.fillStyle=o.tier?TIERC[o.tier]:'rgba(255,255,255,.05)';x.fill();
+    if(!o.tier){x.setLineDash([8,8]);x.strokeStyle='#93aeb3';x.lineWidth=3;x.stroke();x.setLineDash([])}
+    x.fillStyle=o.tier?'#0a1a20':'#93aeb3';x.font=`800 58px ${F}`;x.textAlign='center';x.fillText(o.a.g,cx,cy+20);
+    x.fillStyle='#eaf4f1';x.font=`700 26px ${F}`;x.fillText(o.a.n,cx,cy+104);
+    x.fillStyle=o.tier?TIERC[o.tier]:'#93aeb3';x.font=`600 22px ${F}`;x.fillText(o.tier?TIERN[o.tier]+'級':'未解鎖',cx,cy+134);x.textAlign='left';
+  });
+  x.fillStyle='#93aeb3';x.font=`500 28px ${F}`;x.textAlign='center';x.fillText('每天進步一點點',W/2,H-50);x.textAlign='left';
+  return new Promise(r=>c.toBlob(r,'image/png'));
+}
+$('#achShare').onclick=async()=>{
+  const btn=$('#achShare');btn.disabled=true;
+  try{
+    shareBlob=await makeShare();
+    if(!shareBlob)throw new Error('產生圖片失敗');
+    const url=URL.createObjectURL(shareBlob);$('#shareImg').src=url;$('#shareDl').href=url;$('#shareBox').hidden=false;
+    const f=new File([shareBlob],'lin-ai-achievements.png',{type:'image/png'});
+    $('#shareNative').hidden=!(navigator.canShare&&navigator.canShare({files:[f]}));
+    $('#shareNative').onclick=()=>navigator.share({files:[f],title:'Lin AI 成就卡'}).catch(()=>{});
+  }catch(e){toast('產生分享圖失敗：'+e.message)}
+  btn.disabled=false;
+};
+
+/* ================= 體重紀錄 ================= */
+function renderWeights(){
+  const ents=Object.entries(S.weights).sort((a,b)=>a[0]<b[0]?-1:1).slice(-30);
+  if(!ents.length){$('#wtChart').innerHTML='';$('#wtTxt').textContent='還沒有紀錄。輸入今天的體重，按「記錄」。';$('#wtList').innerHTML='';return}
+  const vals=ents.map(e=>e[1]),mn=Math.min(...vals)-1,mx=Math.max(...vals)+1;
+  const W=700,H=220,L=40,R=14,T=16,B=30,sx=i=>L+(ents.length===1?(W-L-R)/2:i*(W-L-R)/(ents.length-1)),sy=v=>T+(H-T-B)*(1-(v-mn)/(mx-mn));
+  let g='';
+  for(const f of [0,.5,1]){const v=mn+(mx-mn)*f,y=sy(v);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.1)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#93aeb3">${v.toFixed(1)}</text>`}
+  g+=`<polyline fill="none" stroke="#3dd6d0" stroke-width="3" stroke-linejoin="round" points="${ents.map((e,i)=>sx(i)+','+sy(e[1])).join(' ')}"/>`;
+  ents.forEach((e,i)=>{g+=`<circle cx="${sx(i)}" cy="${sy(e[1])}" r="4.5" fill="#ffd23f"><title>${e[0]}：${e[1]} kg</title></circle>`;
+    if(i===0||i===ents.length-1||ents.length<=8)g+=`<text x="${sx(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="#93aeb3">${e[0].slice(5).replace('-','/')}</text>`});
+  $('#wtChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="最近的體重變化折線圖">${g}</svg>`;
+  const first=vals[0],last=vals[vals.length-1],diff=last-first;
+  $('#wtTxt').textContent=`最新 ${last} kg`+(ents.length>1?`，比第一筆${diff>0?'增加':'減少'} ${Math.abs(diff).toFixed(1)} kg，期間最低 ${Math.min(...vals)} kg`:'');
+  $('#wtList').innerHTML=ents.slice(-5).reverse().map(e=>`<span class="chip2">${e[0].slice(5).replace('-','/')}　${e[1]} kg<button class="x" type="button" data-k="${e[0]}" aria-label="刪除 ${e[0]} 的紀錄">×</button></span>`).join('');
+  $$('#wtList .x').forEach(b=>b.onclick=()=>{delete S.weights[b.dataset.k];save();renderWeights()});
+}
+$('#wtAdd').onclick=()=>{
+  const v=Math.round(+$('#wtIn').value*10)/10;
+  if(!(v>=30&&v<=200)){toast('請輸入 30 到 200 之間的體重');return}
+  S.weights[dkey(new Date())]=v;$('#bW').value=v;calc();$('#wtIn').value='';save();renderWeights();renderStats();toast(`已記錄體重 ${v} kg`);
+};
+
+/* ================= 我的菜單（計時器預設） ================= */
+function renderPresets(){
+  $('#mpList').innerHTML=S.presets.length?S.presets.map((m,i)=>`<span class="chip2"><button type="button" data-i="${i}" class="ld">${esc(m.name)}</button><button class="x" type="button" data-i="${i}" aria-label="刪除 ${esc(m.name)}">×</button></span>`).join(''):'<span class="small mute">還沒有存過菜單。</span>';
+  $$('#mpList .ld').forEach(b=>b.onclick=()=>loadPreset(S.presets[+b.dataset.i]));
+  $$('#mpList .x').forEach(b=>b.onclick=()=>{S.presets.splice(+b.dataset.i,1);save();renderPresets()});
+}
+function loadPreset(m){
+  if(!m||!MODES[m.mode])return;
+  tMode=m.mode;$$('#tModes button').forEach(b=>b.classList.toggle('on',b.dataset.k===tMode));tRender();
+  $$('#tParams input').forEach(i=>{const v=m.params&&m.params[i.dataset.k];if(v!==undefined){i.value=v;i.previousElementSibling.textContent=i.value}});
+  if(m.picks)$$('#tPickList input').forEach(i=>i.checked=m.picks.includes(i.value));
+  $('#tPrep').value=m.prep;$('#tPrepO').textContent=m.prep;tBuild();tCamUi();toast(`已載入菜單：${m.name}`);
+}
+$('#mpSave').onclick=()=>{
+  const name=$('#mpName').value.trim();if(!name){toast('先幫這個菜單取個名字');return}
+  const m={name,mode:tMode,params:tParams(),picks:$$('#tPickList input:checked').map(i=>i.value),prep:+$('#tPrep').value};
+  const i=S.presets.findIndex(x=>x.name===name);
+  if(i>=0)S.presets[i]=m;else{if(S.presets.length>=8){toast('最多存 8 個菜單，請先刪掉一個');return}S.presets.push(m)}
+  $('#mpName').value='';save();renderPresets();toast(`已儲存菜單：${name}`);
+};
+
+/* ================= 動作教學 ================= */
+const GUIDE=[
+ {n:'深蹲',m:'股四頭肌、臀大肌、核心',tips:['雙腳與肩同寬，腳尖微微朝外','臀部往後坐，膝蓋和腳尖同方向','蹲到大腿接近水平，起身時腳跟踩穩地面'],bad:['膝蓋往內夾','腳跟離地、上半身過度前傾'],cam:'正面或斜 45 度，全身入鏡'},
+ {n:'伏地挺身',m:'胸大肌、肱三頭肌、核心',tips:['從頭到腳維持一直線，核心收緊','手肘約 45 度向後，不要完全往外開','胸口接近地面再推起；力量不夠可先做跪姿'],bad:['塌腰或臀部翹太高','只做半程，沒壓到底'],cam:'從側面拍'},
+ {n:'捲腹',m:'腹直肌',tips:['下背貼地，下巴微收','用腹部把肩胛捲離地面，不是用手拉','吐氣上捲、吸氣慢慢放下'],bad:['雙手拉脖子','用甩的借力'],cam:'從側面拍'},
+ {n:'仰臥起坐',m:'腹肌、髖屈肌',tips:['躺下膝蓋彎曲、腳底踩地','雙手交叉放胸前，不要拉脖子','起身到胸口靠近膝蓋，再慢慢放下'],bad:['用慣性彈起來','頸部往前拉'],cam:'從側面拍，膝蓋彎曲躺下'},
+ {n:'側平舉',m:'三角肌中束',tips:['手肘微彎，手臂舉到與肩同高','肩膀放鬆，不要聳肩','用輕重量（裝水的水瓶就可以）'],bad:['甩動借力','舉過肩膀太高'],cam:'正面'},
+ {n:'二頭彎舉',m:'肱二頭肌',tips:['手肘貼近身體固定','彎舉到頂端稍微停一下','慢慢放下，不要直接掉下去'],bad:['身體後仰借力','手肘前後晃動'],cam:'正面或側面'},
+ {n:'開合跳',m:'全身有氧、小腿、肩膀',tips:['跳起時雙腳打開，雙手舉過頭','落地時膝蓋微彎緩衝','保持穩定的節奏'],bad:['手沒有舉到頭上','落地太重'],cam:'正面'},
+ {n:'弓箭步',m:'股四頭肌、臀大肌、腿後側',tips:['跨一大步，上半身挺直','前腿膝蓋約 90 度，後膝接近地面','用前腳跟推地回到起始位置'],bad:['步伐太小','重心前傾、膝蓋壓力過大'],cam:'側面或正面'},
+ {n:'登山者',m:'核心、肩膀、髖屈肌',tips:['雙手在肩膀正下方撐地，身體成一直線','膝蓋輪流往胸口帶','臀部不要翹太高'],bad:['臀部翹起','手臂撐不住時姿勢變形'],cam:'從側面拍'},
+ {n:'臀橋',m:'臀大肌、腿後側',tips:['仰躺、膝蓋彎曲、腳跟踩地','用臀部把髖推高到肩、髖、膝成一直線','頂端夾緊臀部停 1 秒'],bad:['用下背過度拱起代償','腳離臀部太遠或太近'],cam:'從側面拍'},
+ {n:'高抬腿',m:'髖屈肌、核心、有氧',tips:['原地快速交替抬膝到髖部高度','上半身挺直','用前腳掌輕快落地'],bad:['身體往後仰','膝蓋抬得太低'],cam:'正面'},
+ {n:'波比跳',m:'全身',tips:['蹲下雙手撐地，腳向後伸成伏地挺身姿勢','收腿回來再向上跳起','體能不足時，可以拿掉伏地挺身或跳躍'],bad:['塌腰','落地太重'],cam:'從側面拍。從趴下（撐地）站起來算一下；沒有真的趴低就不會算'},
+ {n:'深蹲跳',m:'股四頭肌、臀大肌、小腿、心肺',tips:['先蹲到大腿接近水平，再用力往上跳','落地時膝蓋微彎緩衝，膝蓋和腳尖同方向','每下之間穩定呼吸'],bad:['落地時膝蓋往內夾','落地太僵硬、太大聲'],cam:'正面或側面。衝擊較大，膝蓋不舒服時請改做一般深蹲'},
+ {n:'側抬腿',m:'臀中肌、髖外展肌',tips:['站穩，上半身挺直','單腳往側邊抬到約 30–45 度，不要靠身體歪斜','慢慢放下，可以扶牆'],bad:['身體往另一邊歪','甩腿借力'],cam:'正面'},
+ {n:'髖鉸鏈',m:'臀大肌、腿後側、下背（硬舉動作）',tips:['雙腳與髖同寬，膝蓋微彎','把屁股往後推，上身前傾，背保持平直','感到大腿後側拉伸後，用臀部發力站直'],bad:['圓背','膝蓋彎太多，變成蹲而不是鉸鏈'],cam:'從側面拍'},
+ {n:'啞鈴臥推',m:'胸大肌、肱三頭肌、三角肌前束',tips:['躺在穩固的長椅，雙腳踩地，肩胛收緊貼住椅面','手肘不要張太開，上臂和身體大約 45–75 度','下放到手肘約 90 度，再推到手臂伸直但不要鎖死'],bad:['手肘張到 90 度（肩膀壓力大）','用彈的借力、屁股離開椅面'],cam:'從側面或頭頂方向拍；3D 角度模式下比較準。沒有啞鈴可以用裝水的水瓶'},
+ {n:'肩推',m:'三角肌、肱三頭肌',tips:['雙手拿水瓶或啞鈴在肩膀高度，手肘約 90 度','核心收緊，往正上方推到手臂伸直','慢慢放下'],bad:['下背過度反弓','手腕往後折'],cam:'正面'},
+ {n:'前平舉',m:'三角肌前束',tips:['手臂微彎，往前舉到與肩同高','身體不要後仰','用輕重量（裝水的水瓶就可以）'],bad:['甩動借力','聳肩'],cam:'從側面拍'},
+ {n:'椅子臂屈伸',m:'肱三頭肌、胸、前三角肌',tips:['雙手撐在穩固的椅子或床邊，臀部離開椅面','手肘往後彎到約 90 度，再撐起來','肩膀遠離耳朵'],bad:['手肘往外開','身體離椅子太遠，肩膀壓力大'],cam:'從側面拍。肩膀不舒服時請避免'},
+ {n:'引體向上',m:'背闊肌、肱二頭肌、前臂',tips:['雙手略比肩寬握槓，先讓肩胛下沉','把胸口拉向橫槓，下巴過槓','慢慢放下到手臂接近伸直'],bad:['用擺盪借力','只做半程'],cam:'正面或側面。需要單槓，沒有的話請略過'},
+ {n:'仰臥抬腿',m:'下腹、髖屈肌',tips:['仰躺，下背貼地，手放身體兩側','雙腿伸直（或微彎）抬到接近與地面垂直','慢慢放下，但不要碰到地面'],bad:['下背拱起','甩腿'],cam:'從側面拍'},
+ {n:'側彎',m:'腹斜肌',tips:['雙腳與肩同寬站穩','往側邊慢慢彎，再回正','身體保持在同一個平面，不要前後轉'],bad:['身體前傾或旋轉','用甩的'],cam:'正面'},
+ {n:'站姿抬膝碰肘',m:'腹肌、髖屈肌',tips:['站直，一手放頭旁','抬起同側膝蓋，用手肘靠近膝蓋，同時側邊收緊','左右交替'],bad:['駝背','只動手肘、核心沒用力'],cam:'正面'},
+ {n:'原地踏步',m:'有氧、髖屈肌',tips:['抬膝大約到大腿接近水平的一半','手臂自然擺動','步伐輕快穩定，很適合暖身'],bad:['低頭彎腰','腳步太重'],cam:'正面'},
+ {n:'原地跳繩',m:'小腿、心肺（徒手，不用繩子）',tips:['想像握著繩子，手腕小幅轉動','用前腳掌輕跳，離地約 2–3 公分','膝蓋微彎緩衝'],bad:['跳太高','落地太重'],cam:'正面或側面。這個動作偵測比較不穩，算是實驗功能'},
+ {n:'平板支撐',cat:'撐住類',m:'核心、肩膀',tips:['前臂或手掌撐地，手肘在肩膀正下方','從頭到腳成一直線，收緊腹部和臀部','自然呼吸，不要憋氣'],bad:['塌腰','臀部翹太高'],cam:'從側面拍'},
+ {n:'側棒式',cat:'撐住類',m:'腹斜肌、臀中肌',tips:['側躺，前臂撐地，手肘在肩膀正下方','把髖部抬起，讓身體成一直線','兩腳疊放或前後錯開'],bad:['髖部下沉','身體往前或往後轉'],cam:'從正面或背面拍，讓身體橫向入鏡'},
+ {n:'靠牆深蹲',cat:'撐住類',m:'股四頭肌',tips:['背靠牆，雙腳往前走到膝蓋約 90 度','大腿接近水平，腳跟踩穩','手放身體兩側，不要撐在大腿上'],bad:['蹲太高偷懶','膝蓋往內夾'],cam:'從側面拍'},
+ {n:'臀橋停留',cat:'撐住類',m:'臀大肌、腿後側',tips:['仰躺，膝蓋彎曲，腳跟踩地','把臀部頂高到肩、髖、膝成一直線後撐住','夾緊臀部，自然呼吸'],bad:['下背過度拱起','臀部慢慢掉下來'],cam:'從側面拍'},
+];
+function renderGuide(){
+  const cats=[...CATS,'撐住類'],catOf=g=>g.cat||(EX[g.n]&&EX[g.n].cat)||'其他';
+  const item=g=>`<details><summary>${g.n}　<span class="small mute" style="font-weight:500">${g.m}</span></summary><div class="stack" style="padding-bottom:14px">
+    <div><b>動作要點</b><ul>${g.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    <div><b>常見錯誤</b><ul>${g.bad.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    <p class="small mute">鏡頭擺放：${g.cam}</p>
+    ${EX[g.n]?`<button class="btn teal small" type="button" data-go="${g.n}">用這個動作開鏡頭計數</button>`:HOLDTIP[g.n]?`<button class="btn teal small" type="button" data-hold="${g.n}">到「撐住挑戰」練習</button>`:''}</div></details>`;
+  $('#guideList').innerHTML=cats.map(c=>{const arr=GUIDE.filter(g=>catOf(g)===c);return arr.length?`<h3 style="margin:20px 0 8px">${c}（${arr.length}）</h3>`+arr.map(item).join(''):''}).join('');
+  $$('#guideList [data-go]').forEach(b=>b.onclick=()=>{
+    const n=b.dataset.go;if(![...$('#camEx').options].some(o=>o.value===n)){toast('鏡頭計數的選單裡沒有這個動作');return}
+    $('#camEx').value=n;$('#camEx').dispatchEvent(new Event('change'));$('.tab[data-tab=cam]').click();
+  });
+  $$('#guideList [data-hold]').forEach(b=>b.onclick=()=>{
+    $('.tab[data-tab=game]').click();$('#gSub button[data-sub=hold]').click();
+    $('#hEx').value=b.dataset.hold;$('#hEx').dispatchEvent(new Event('change'));
+  });
+}
+
+/* ================= 備份與還原 ================= */
+$('#stExport').onclick=()=>{
+  const blob=new Blob([JSON.stringify(S)],{type:'application/json'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=`lin-ai-備份-${dkey(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();
+  toast('已匯出備份檔');
+};
+$('#stImport').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const o=JSON.parse(r.result);
+      if(!o||typeof o!=='object'||typeof o.reps!=='number')throw new Error('這不是 Lin AI 的備份檔');
+      if(!confirm('匯入會取代目前這個瀏覽器裡的所有紀錄，確定嗎？'))return;
+      noSave=true;localStorage.setItem(KEY,JSON.stringify(normalizeState({...DEF,...o})));location.reload();
+    }catch(err){toast('匯入失敗：'+err.message)}
+  };
+  r.readAsText(f);e.target.value='';
+};
+
+/* ================= 撐住挑戰（平板支撐、靠牆深蹲） ================= */
+const HOLDTIP={"側棒式":'從正面或背面拍，讓身體橫向入鏡，肩膀、髖部、腳踝都要看得到。側躺，前臂撐地，髖部抬起讓身體成一直線。',"臀橋停留":'從側面拍，讓肩膀、髖部、膝蓋入鏡。仰躺膝蓋彎曲，把臀部頂高到肩、髖、膝成一直線，然後撐住。',"平板支撐":'從側面拍，讓肩膀、髖部、腳踝都入鏡。身體成一直線，臀部不要塌下去也不要翹太高。前臂或手掌撐地都可以。',"靠牆深蹲":'從側面拍，背靠牆，大腿接近水平、膝蓋約 90 度，讓髖部、膝蓋、腳踝都入鏡。'};
+const hold={on:false,phase:'idle',t0:0,last:0,good:0,total:0,lastTen:0,badSince:0,lastR:0,sayAt:0,ex:'平板支撐',target:30,chip:['鏡頭已就緒，按「開始」','ready']};
+function holdCheck(ex,lm){
+  if(ex==='平板支撐'||ex==='側棒式'){
+    const sideP=ex==='側棒式';let best=null;
+    for(const sd of ['l','r']){const a=P(lm,sd+'_sh'),h=P(lm,sd+'_hip'),k=P(lm,sd+'_an');if(a&&h&&k){const sc=lm[IDX[sd+'_sh']][2]+lm[IDX[sd+'_hip']][2]+lm[IDX[sd+'_an']][2];if(!best||sc>best.sc)best={sh:a,hip:h,an:k,sc}}}
+    if(!best)return {ok:false,msg:'請從側面拍，讓肩膀、髖部、腳踝都入鏡'};
+    const dx=best.an[0]-best.sh[0],dy=best.an[1]-best.sh[1],L=Math.hypot(dx,dy);
+    if(L<1||Math.abs(dy)/L>.45||Math.abs(dx)<1)return {ok:false,msg:'請從側面拍，身體要和鏡頭平行（趴著撐住）'};
+    const lineY=best.sh[1]+dy*(best.hip[0]-best.sh[0])/dx,dev=(best.hip[1]-lineY)/L;
+    if(dev>.07)return {ok:false,msg:sideP?'髖部太低，把身體撐成一直線':'臀部太低，收緊核心，把腰頂起來'};
+    if(dev<-.07)return {ok:false,msg:sideP?'髖部太高，往下放一點，讓身體成一直線':'臀部太高，往下壓一點，讓身體成一直線'};
+    return {ok:true};
+  }
+  if(ex==='臀橋停留'){const g=mean(angles(lm,'sh','hip','kn'));if(g===null)return {ok:false,msg:'請從側面拍，讓肩膀、髖部、膝蓋都入鏡'};if(g<158)return {ok:false,msg:'臀部頂高，讓肩、髖、膝成一直線'};return {ok:true}}
+  const a=mean(angles(lm,'hip','kn','an'));
+  if(a===null)return {ok:false,msg:'請從側面拍，讓髖部、膝蓋、腳踝都入鏡'};
+  if(a>115)return {ok:false,msg:'再往下坐一點，大腿接近水平'};
+  if(a<70)return {ok:false,msg:'太低了，起來一點，膝蓋約 90 度'};
+  return {ok:true};
+}
+const holdView=makeView($('[data-stage=hold]'),()=>null,{label:()=>hold.on?'停止':'開始',click:()=>$('#hStart').click()});
+holdView.manualHint=true;holdView.unit='秒';$('.u',holdView.stage).textContent='秒';
+holdView.chipFn=()=>hold.chip;
+holdView.gaugeFn=()=>hold.on&&hold.phase==='run'?Math.min(100,hold.good/hold.target*100)+'%':'0';
+holdView.onLm=(lm,now)=>holdFrame(lm,now);
+function holdFrame(lm,now){
+  const v=holdView;
+  if(!hold.on){hold.chip=['鏡頭已就緒，按「開始」','ready'];return}
+  if(hold.phase==='count'){
+    const r=Math.ceil(3-(now-hold.t0)/1000);
+    if(r>0){v.n.textContent=r;hold.chip=['準備姿勢…','low'];if(r!==hold.lastR){hold.lastR=r;say(r,{cancel:true})}return}
+    hold.phase='run';hold.last=now;hold.good=0;hold.total=0;hold.lastTen=0;hold.badSince=0;say('開始',{cancel:true});
+  }
+  const res=lm?holdCheck(hold.ex,lm):{ok:false,msg:'沒偵測到人，請站進鏡頭'};
+  const dt=Math.min(.25,Math.max(0,(now-hold.last)/1000));hold.last=now;hold.total+=dt;
+  if(res.ok){hold.good+=dt;hold.badSince=0;hold.chip=['撐住中，計時中','ready'];v.hintEl.hidden=true}
+  else{
+    if(!hold.badSince)hold.badSince=now;hold.chip=['姿勢跑掉，暫停計時','warn'];
+    if(now-hold.badSince>400){v.hintEl.hidden=false;v.hintEl.textContent=res.msg;if(now-hold.sayAt>6000){hold.sayAt=now;say(res.msg)}}
+  }
+  v.n.textContent=Math.floor(hold.good);
+  const ten=Math.floor(hold.good/10);if(ten>hold.lastTen){hold.lastTen=ten;say(`${ten*10} 秒`)}
+  if(hold.good>=hold.target)holdFinish(true);
+}
+function holdFinish(reached){
+  if(!hold.on)return;
+  hold.on=false;hold.phase='idle';holdView.hintEl.hidden=true;
+  const secs=Math.floor(hold.good),ex=hold.ex,isBest=secs>(S.holdBest[ex]||0),pct=Math.round(hold.good/Math.max(hold.total,1)*100),xp=Math.floor(secs/2);
+  if(secs>0){
+    if(isBest)S.holdBest[ex]=secs;S.holdSecs=(S.holdSecs||0)+secs;S.xp+=xp;
+    S.holdLog.unshift({ex,t:hold.target,n:secs,ok:pct});S.holdLog=S.holdLog.slice(0,15);
+  }
+  save();renderStats();renderHold();beep(1320,400);
+  $('#hResult').hidden=false;
+  $('#hResult').textContent=`${reached?'達標！':'結束。'}${ex}撐了 ${secs} 秒（目標 ${hold.target} 秒），姿勢正確的時間佔 ${pct}%，獲得 ${xp} 經驗值${isBest&&secs>0?'，新的個人紀錄！':''}`;
+  $('#hStart').textContent='開始（3 秒後計時）';
+  if(fullStage===holdView.stage)exitFull();
+}
+function renderHold(){
+  const ex=$('#hEx').value;hold.ex=ex;holdView.nm.textContent=ex;
+  $('#hBest').textContent=S.holdBest[ex]||'—';$('#hTip').textContent=HOLDTIP[ex];
+  $('#hLog').innerHTML=S.holdLog.length?'<tr><th>項目</th><th>目標</th><th>撐住</th><th>姿勢正確</th></tr>'+S.holdLog.slice(0,6).map(l=>`<tr><td>${esc(l.ex)}</td><td>${l.t} 秒</td><td>${l.n} 秒</td><td>${l.ok}%</td></tr>`).join(''):'<tr><td class="mute">還沒有成績。</td></tr>';
+}
+$('#hEx').onchange=()=>{if(hold.on)holdFinish(false);renderHold()};
+seg($('#hTarget'),b=>{hold.target=+b.dataset.v});
+$('#hCamBtn').onclick=async()=>{$('#hCamBtn').disabled=true;const ok=await camStart(holdView);if(ok)$('#hCamOff').disabled=false;else $('#hCamBtn').disabled=false};
+$('#hCamOff').onclick=()=>camStop();
+$('#hStart').onclick=()=>{
+  if(hold.on){holdFinish(false);return}
+  const w=$('#hWarn');w.hidden=true;
+  if(!(cam.running&&cam.view===holdView)){w.hidden=false;w.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
+  audioInit();hold.ex=$('#hEx').value;hold.on=true;hold.phase='count';hold.t0=performance.now();hold.lastR=0;hold.sayAt=0;
+  $('#hResult').hidden=true;$('#hStart').textContent='停止';
+};
+
+/* ================= AI 教練：近 7 天紀錄摘要 ================= */
+function trainSummary(){
+  const days=lastDays(7),L=[],tot=days.reduce((a,x)=>a+(S.days[x.k]||0),0),act=days.filter(x=>(S.days[x.k]||0)>0).length;
+  L.push(`【使用者最近 7 天的紀錄】練了 ${act} 天，共 ${tot} 下；目前連續 ${streaks().cur} 天。`);
+  const ex={};days.forEach(x=>{for(const [k,v] of Object.entries(S.dayEx[x.k]||{}))ex[k]=(ex[k]||0)+v});
+  const exs=Object.entries(ex).sort((a,b)=>b[1]-a[1]);
+  L.push(exs.length?'各動作次數：'+exs.map(([k,v])=>`${k} ${v} 下`).join('、'):'各動作次數：沒有紀錄');
+  const fo=days.reduce((a,x)=>{const f=S.dayForm[x.k]||{ok:0,bad:0};return [a[0]+f.ok,a[1]+f.bad]},[0,0]);
+  if(fo[0]+fo[1])L.push(`姿勢達標率：${Math.round(fo[0]/(fo[0]+fo[1])*100)}%（共 ${fo[0]+fo[1]} 下有判定）`);
+  const prs=Object.entries(S.pr).map(([k,r])=>`${k} ${r.n} 下`);if(prs.length)L.push('單組最高紀錄：'+prs.join('、'));
+  const hb=Object.entries(S.holdBest).map(([k,v])=>`${k} ${v} 秒`);if(hb.length)L.push('撐住類最佳：'+hb.join('、'));
+  const wt=Object.entries(S.weights).sort((a,b)=>a[0]<b[0]?-1:1).slice(-5);if(wt.length>1)L.push(`體重從 ${wt[0][1]} kg 到 ${wt[wt.length-1][1]} kg（最近 ${wt.length} 筆）`);
+  const fk=days.map(x=>(S.food[x.k]||[]).reduce((a,f)=>a+f.k,0)).filter(v=>v>0);
+  if(fk.length)L.push(`有記錄飲食的 ${fk.length} 天，平均每天約 ${Math.round(mean(fk))} 大卡（目標約 ${Math.round(bodyInfo().target)} 大卡）`);
+  const plan=weekDates().map(d=>[d,(S.sched[d.getDay()]||'').trim()]).filter(([d,p])=>!isRest(p)).map(([d,p])=>`週${WDN[d.getDay()]}：${p}`);
+  if(plan.length)L.push('目前自訂的每週課表：'+plan.join('、'));
+  return L.join('\n')+'\n請根據這些紀錄給建議（哪裡進步、哪裡不足、下週怎麼排），不要編造上面沒有的數據。';
+}
+
+/* ================= 課表與訓練提醒 ================= */
+const WDN=['日','一','二','三','四','五','六'];
+function weekDates(){const t=new Date();t.setHours(0,0,0,0);const mon=new Date(t);mon.setDate(t.getDate()-((t.getDay()+6)%7));return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d})}
+const isRest=v=>!v||/^(休息|rest)$/i.test(String(v).trim());
+$('#scTime').innerHTML=Array.from({length:17},(_,i)=>{const t=String(6+i).padStart(2,'0')+':00';return `<option value="${t}">${t}</option>`}).join('');
+function renderSched(){
+  const wd=weekDates(),todayK=dkey(new Date());
+  $('#scGrid').innerHTML=wd.map(d=>{
+    const k=dkey(d),p=(S.sched[d.getDay()]||'').trim(),done=(S.days[k]||0)>0;
+    const st=isRest(p)?'<span class="mute">休息</span>':done?'<span style="color:var(--teal)">已完成</span>':k>todayK?'<span class="mute">待完成</span>':k===todayK?'<b style="color:var(--yellow)">今天</b>':'<span style="color:var(--coral)">未完成</span>';
+    return `<div class="sc ${k===todayK?'today':''}"><b>週${WDN[d.getDay()]}</b><input type="text" data-d="${d.getDay()}" maxlength="14" placeholder="休息" value="${esc(S.sched[d.getDay()]||'')}" aria-label="週${WDN[d.getDay()]}的課表">${st}</div>`;
+  }).join('');
+  $$('#scGrid input').forEach(i=>i.onchange=()=>{S.sched[+i.dataset.d]=i.value.trim();save();renderSched();renderDaily()});
+  $('#scOn').checked=S.schedOn;$('#scTime').value=S.schedTime;
+  $('#scNote').textContent=S.schedOn?`每天 ${S.schedTime}，如果今天有課表卻還沒有任何運動紀錄，會提醒你。網頁要開著才有效。`:'打開後，到了設定的時間，如果今天有課表卻還沒運動，會提醒你。';
+}
+$('#scOn').onchange=e=>{S.schedOn=e.target.checked;save();renderSched();if(S.schedOn&&'Notification' in window&&Notification.permission==='default')toast('想在網頁縮到背景時也收到提醒，可以到「統計紀錄」的喝水提醒按「允許瀏覽器通知」')};
+$('#scTime').onchange=e=>{S.schedTime=e.target.value;S.schedSeen[dkey(new Date())]=false;save();renderSched()};
+function planTick(){
+  if(!S.schedOn)return;
+  const now=new Date(),k=dkey(now),p=(S.sched[now.getDay()]||'').trim();
+  if(isRest(p)||S.schedSeen[k]||(S.days[k]||0)>0)return;
+  if(S.schedNext&&Date.now()<S.schedNext)return;
+  const [h,m]=S.schedTime.split(':').map(Number);if(now.getHours()*60+now.getMinutes()<h*60+m)return;
+  if(cam.running||tRunning||chRunning)return;
+  S.schedSeen[k]=true;save();
+  const text=`今天的課表是「${p}」，現在開始訓練吧。`;
+  $('#plText').textContent=text;$('#planBar').hidden=false;say('該訓練了');
+  if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){try{new Notification('Lin AI 訓練提醒',{body:text})}catch(e){}}
+}
+$('#plGo').onclick=()=>{$('#planBar').hidden=true;$('.tab[data-tab=cam]').click()};
+$('#plLater').onclick=()=>{S.schedSeen[dkey(new Date())]=false;S.schedNext=Date.now()+30*60000;save();$('#planBar').hidden=true};
+$('#plClose').onclick=()=>{$('#planBar').hidden=true};
+
+/* ================= 飲食紀錄 ================= */
+const FOODS=[['白飯 1 碗',280,5],['雞胸肉 100g',165,31],['水煮蛋 1 顆',75,6],['無糖豆漿 400ml',130,13],['地瓜 中型 1 條',130,2],['香蕉 1 根',90,1],['蛋餅 1 份',250,8],['雞腿便當',800,35],['滷肉飯 小碗',400,10],['牛肉麵 1 碗',600,30],['珍珠奶茶 全糖 700ml',550,4],['無糖優格 150g',100,8],['燕麥片 40g',150,5],['鮭魚 100g',200,20],['板豆腐 半盒',100,9],['乳清蛋白 1 份',120,24],['吐司 1 片',80,3],['水果 1 份',60,1]];
+const foodOf=k=>S.food[k]||[];
+function addFood(n,kcal,pr){
+  n=String(n).trim().slice(0,20);kcal=Math.round(+kcal);pr=Math.round(+pr||0);
+  if(!n||!(kcal>=0&&kcal<=5000)){toast('請輸入食物名稱，和 0 到 5000 之間的大卡');return false}
+  const k=dkey(new Date());(S.food[k]=S.food[k]||[]).push({n,k:kcal,p:pr,t:Date.now()});
+  save();renderStats();renderFood();return true;
+}
+function renderFood(){
+  if(!$('#fdTotal'))return;
+  const list=foodOf(dkey(new Date())),kc=list.reduce((a,f)=>a+f.k,0),pr=list.reduce((a,f)=>a+(f.p||0),0),b=bodyInfo(),tg=Math.round(b.target),left=tg-kc;
+  $('#fdTotal').textContent=`今天已記錄 ${kc} 大卡`;$('#fdTarget').textContent=`目標約 ${tg} 大卡`;
+  $('#fdBar').style.width=Math.min(100,kc/Math.max(tg,1)*100)+'%';
+  $('#fdLeft').textContent=!list.length?'還沒有記錄，從右邊挑一個，或自己輸入。':left>=0?`還可以吃約 ${left} 大卡。`:`比目標多了約 ${-left} 大卡，沒關係，明天抓回來就好。`;
+  $('#fdMacro').innerHTML=`<div class="fact"><b>${pr} g</b><span>今天蛋白質（有填的）</span></div><div class="fact"><b>${Math.round(b.w*1.6)}–${Math.round(b.w*2)} g</b><span>每日建議蛋白質</span></div>`;
+  $('#fdList').innerHTML=list.length?list.map((f,i)=>`<li>${esc(f.n)}　<b style="color:var(--yellow)">${f.k} 大卡</b>${f.p?`　<span class="small">${f.p} g 蛋白質</span>`:''}<button class="xbtn" type="button" data-i="${i}" aria-label="刪除 ${esc(f.n)}">×</button></li>`).join(''):'<li>今天還沒有記錄。</li>';
+  $$('#fdList .xbtn').forEach(x=>x.onclick=()=>{foodOf(dkey(new Date())).splice(+x.dataset.i,1);save();renderStats();renderFood()});
+  const fk=lastDays(7).map(d=>foodOf(d.k).reduce((a,f)=>a+f.k,0)).filter(v=>v>0);
+  $('#fdAvg').textContent=fk.length?`近 7 天有記錄的 ${fk.length} 天，平均每天約 ${Math.round(mean(fk))} 大卡。`:'';
+}
+$('#fdQuick').innerHTML=FOODS.map((f,i)=>`<button class="btn ghost small" type="button" data-i="${i}" title="約 ${f[1]} 大卡">${esc(f[0])}　${f[1]}</button>`).join('');
+$$('#fdQuick button').forEach(b=>b.onclick=()=>{const f=FOODS[+b.dataset.i];addFood(f[0],f[1],f[2])});
+$('#fdAdd').onclick=()=>{if(addFood($('#fdName').value,$('#fdKcal').value,$('#fdP').value)){$('#fdName').value='';$('#fdKcal').value='';$('#fdP').value=''}};
+
+/* ================= 好友排行（Supabase，選用） ================= */
+/* 站長把 Supabase 的 Project URL 和 anon / publishable key 填在這兩行，部署後所有朋友就能用。
+   這兩個值本來就是設計成可以公開的（資料表有鎖，只能呼叫 supabase-setup.sql 建立的函式）。 */
+const FRIEND_CFG={
+  url: "https://cgswbvtkayfboskqorxs.supabase.co",
+  key: "sb_publishable_S7SG4GyAHoXnbpmtFDePqA_gtppDEbC"
+};const sbCfg=()=>({url:String(FRIEND_CFG.url||'').trim().replace(/\/+$/,''),key:String(FRIEND_CFG.key||'').trim()});
+function frCfgOk(){const c=sbCfg();return /^https?:\/\//.test(c.url)&&c.key.length>20}
+async function rpc(fn,args){
+  const {url,key}=sbCfg();if(!url||!key)throw new Error('NOCFG');
+  const h={'content-type':'application/json',apikey:key};if(key.startsWith('eyJ'))h.authorization='Bearer '+key;
+  let r;try{r=await fetch(`${url}/rest/v1/rpc/${fn}`,{method:'POST',headers:h,body:JSON.stringify(args)})}catch(e){throw new Error('NETWORK')}
+  const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(e){}
+  if(!r.ok){const err=new Error((data&&(data.message||data.error||data.hint))||('HTTP '+r.status));err.status=r.status;err.code=data&&data.code;throw err}
+  return data;
+}
+function friendly(e){
+  const m=String(e&&e.message||e);
+  if(m==='NOCFG')return '好友伺服器還沒設定';
+  if(m==='NETWORK')return '連不上伺服器，請檢查網路，或網址有沒有填對';
+  if(e.code==='PGRST202'||(e.status===404&&/function|rpc/i.test(m)))return '伺服器還沒建立好：請先在 Supabase 的 SQL Editor 執行 supabase-setup.sql';
+  if(e.status===401||e.status===403||/invalid api key|jwt/i.test(m))return '金鑰不正確，請重新貼上 anon / publishable key';
+  if(/not found/i.test(m))return '找不到這個好友代碼，請確認有沒有輸入錯';
+  if(/^self$/.test(m))return '不能加自己為好友';
+  if(/profile required/i.test(m))return '請先建立你的資料';
+  if(/name required/i.test(m))return '請輸入暱稱';
+  if(/too many/i.test(m))return '好友人數已達上限（100 位）';
+  return '發生錯誤：'+m;
+}
+const uuid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)});
+const weekKey=()=>dkey(weekDates()[0]);
+const weekRepsNow=()=>weekDates().reduce((a,d)=>a+(S.days[dkey(d)]||0),0);
+const frPayload=()=>({p_id:S.me.id,p_name:S.me.name,p_reps:S.reps|0,p_xp:S.xp|0,p_streak:streaks().cur|0,p_week:weekRepsNow()|0,p_week_key:weekKey()});
+const frSig=()=>JSON.stringify([S.me.name,S.reps,S.xp,streaks().cur,weekRepsNow(),weekKey()]);
+let frPending='',frRows=[],frSort='week',frAt=0,frBusy=false,frSyncT=0,frLastSig='',frLast=0;
+async function friendSync(force){
+  if(!S.me.id||!frCfgOk())return;
+  const sig=frSig();if(!force&&sig===frLastSig)return;
+  const wait=15000-(Date.now()-frLast);
+  if(!force&&wait>0){clearTimeout(frSyncT);frSyncT=setTimeout(()=>friendSync(false),wait+50);return}   // 太頻繁就延後，不要丟掉這次更新
+  frLast=Date.now();
+  try{const code=await rpc('lin_upsert_profile',frPayload());frLastSig=sig;if(code&&code!==S.me.code){S.me.code=code;save();renderFriends()}}
+  catch(e){logErr('friendSync '+e.message)}
+}
+function friendSyncSoon(){if(!S.me.id||!frCfgOk()||frSig()===frLastSig)return;clearTimeout(frSyncT);frSyncT=setTimeout(()=>friendSync(false),8000)}
+async function friendCreate(){
+  const name=$('#frName').value.trim().slice(0,12);
+  if(!name){toast('請輸入暱稱（最多 12 個字）');return}
+  const isNew=!S.me.id,old=S.me.name;if(isNew)S.me.id=uuid();S.me.name=name;
+  try{
+    const code=await rpc('lin_upsert_profile',frPayload());S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
+    toast(isNew?`已建立，你的好友代碼是 ${code}`:'已更新暱稱');
+    if(frPending){const c=frPending;frPending='';await friendAdd(c,false)}
+    await friendBoard();
+  }catch(e){if(isNew){S.me.id='';S.me.name=''}else S.me.name=old;toast(friendly(e))}
+  renderFriends();
+}
+async function friendAdd(code,confirmFirst){
+  code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==6){toast('好友代碼是 6 個英文字母或數字');return}
+  if(!S.me.id){frPending=code;toast('先設定暱稱，建立後會自動加入好友');renderFriends();return}
+  if(confirmFirst&&!confirm(`要用代碼 ${code} 加好友嗎？`))return;
+  try{const nm=await rpc('lin_add_friend',{p_id:S.me.id,p_code:code});toast(`已加入好友：${nm}`);$('#frCode').value='';await friendBoard()}
+  catch(e){toast(friendly(e))}
+}
+async function friendBoard(){
+  if(!S.me.id||!frCfgOk()||frBusy){renderBoard();return}
+  frBusy=true;$('#frNote').hidden=true;
+  try{
+    let rows=await rpc('lin_get_board',{p_id:S.me.id})||[];
+    if(!rows.length){await friendSync(true);rows=await rpc('lin_get_board',{p_id:S.me.id})||[]}   // 伺服器上的資料不見了（例如重設過）就補回去
+    frRows=rows;frAt=Date.now();const n=Math.max(0,rows.length-1);
+    if(n!==S.me.friends){S.me.friends=n;save();renderStats()}
+  }catch(e){$('#frNote').hidden=false;$('#frNote').textContent=friendly(e)}
+  frBusy=false;renderBoard();
+}
+const wkOf=r=>r.week_key===weekKey()?r.week_reps:0;
+const lvOf=r=>Math.floor(r.xp/100)+1;
+const agoTxt=t=>{const m=(Date.now()-new Date(t).getTime())/60000;if(!isFinite(m))return '';return m<2?'剛剛':m<60?Math.round(m)+' 分鐘前':m<1440?Math.round(m/60)+' 小時前':Math.round(m/1440)+' 天前'};
+function renderBoard(){
+  const el=$('#frBoard');
+  if(!S.me.id){el.innerHTML='<p class="mute small">先在上面設定暱稱，才能看到排行榜。</p>';$('#frAt').textContent='';return}
+  if(!frRows.length){el.innerHTML='<p class="mute small">還沒有資料。</p>';return}
+  const val={week:wkOf,total:r=>r.reps,streak:r=>r.streak,level:lvOf}[frSort],unit={week:'下',total:'下',streak:'天',level:'級'}[frSort];
+  const rows=[...frRows].sort((a,b)=>val(b)-val(a)||b.reps-a.reps||String(a.name).localeCompare(String(b.name)));
+  let rank=0,prev=null;
+  el.innerHTML=rows.map((r,i)=>{
+    const v=val(r);if(v!==prev){rank=i+1;prev=v}   // 同分同名次
+    return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(rank,4)}">${rank}</span><div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">本週 ${wkOf(r)}　累計 ${r.reps}　連續 ${r.streak} 天　Lv.${lvOf(r)}　${agoTxt(r.updated_at)}</span></div><span class="fv">${v}<small>${unit}</small></span>${r.is_me?'':`<button class="xbtn" type="button" data-code="${esc(r.code)}" aria-label="刪除好友 ${esc(r.name)}">×</button>`}</div>`;
+  }).join('');
+  $('#frAt').textContent=rows.length<2?'還沒有好友，把你的代碼或邀請連結傳給朋友吧。':`共 ${rows.length-1} 位好友，更新於 ${hhmm(frAt)}`;
+}
+function renderFriends(){
+  const ok=frCfgOk();
+  $('#frNoCfg').hidden=ok;$('#frMain').hidden=!ok;
+  $('#frName').value=S.me.name||$('#frName').value;
+  $('#frSaveMe').textContent=S.me.id?'更新暱稱':'建立我的資料';
+  $('#frMeBox').hidden=!S.me.id;$('#frMyCode').textContent=S.me.code||'—';
+  $('#frAddBox').hidden=false;
+  $$('#frSort button').forEach(b=>b.classList.toggle('on',b.dataset.v===frSort));
+  if(frPending&&ok){$('#frNote').hidden=false;$('#frNote').textContent=S.me.id?'':`你收到好友邀請（代碼 ${frPending}）。先設定暱稱，建立後會自動加入。`}
+}
+$('#frSaveMe').onclick=friendCreate;
+$('#frName').addEventListener('keydown',e=>{if(e.key==='Enter')friendCreate()});
+$('#frAdd').onclick=()=>friendAdd($('#frCode').value,false);
+$('#frCode').addEventListener('keydown',e=>{if(e.key==='Enter')friendAdd($('#frCode').value,false)});
+$('#frRefresh').onclick=friendBoard;
+seg($('#frSort'),b=>{frSort=b.dataset.v;renderBoard()});
+$('#frBoard').onclick=async e=>{
+  const b=e.target.closest('[data-code]');if(!b||!confirm('確定要刪除這位好友嗎？對方的名單裡也會移除你。'))return;
+  try{await rpc('lin_remove_friend',{p_id:S.me.id,p_code:b.dataset.code});toast('已刪除好友');await friendBoard()}catch(err){toast(friendly(err))}
+};
+const inviteLink=()=>`${location.origin}${location.pathname}?add=${S.me.code}`;
+$('#frInvite').onclick=async()=>{
+  const link=inviteLink(),text=`來跟我一起用 Lin AI 健身，加我好友！我的好友代碼：${S.me.code}`;
+  if(navigator.share){try{await navigator.share({title:'Lin AI 好友邀請',text,url:link});return}catch(e){if(e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(text+'\n'+link);toast('已複製邀請文字和連結')}catch(e){prompt('請全選複製：',text+'\n'+link)}
+};
+$('#frCopy').onclick=async()=>{try{await navigator.clipboard.writeText(S.me.code);toast('已複製好友代碼')}catch(e){prompt('好友代碼：',S.me.code)}};
+$('#frDelete').onclick=async()=>{
+  if(!S.me.id||!confirm('確定要刪除你在伺服器上的資料嗎？你會從所有好友的排行榜消失，也要重新加好友。'))return;
+  try{await rpc('lin_delete_me',{p_id:S.me.id});S.me={id:'',code:'',name:'',friends:0};frRows=[];frLastSig='';save();toast('已刪除');renderFriends();renderBoard();renderStats()}catch(e){toast(friendly(e))}
+};
+setInterval(()=>{if(!document.hidden&&$('#tab-friends').classList.contains('active'))friendBoard()},60000);
+(function(){   // 邀請連結：https://網站/?add=ABC123
+  try{const u=new URL(location.href),c=u.searchParams.get('add');
+    if(c){frPending=c.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);u.searchParams.delete('add');history.replaceState(null,'',u.pathname+u.search+u.hash)}}catch(e){logErr('invite: '+e.message)}
+})();
+function handleInvite(){
+  if(!frPending)return;
+  $('.tab[data-tab=friends]').click();
+  if(S.me.id&&frCfgOk()){const c=frPending;frPending='';friendAdd(c,true)}else renderFriends();
+}
+
+/* ================= 進階偵測設定 ================= */
+async function listCams(){
+  try{
+    const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+    $('#camDev').innerHTML='<option value="">自動（依前、後鏡頭選擇）</option>'+ds.map((d,i)=>`<option value="${esc(d.deviceId)}">${esc(d.label||'鏡頭 '+(i+1))}</option>`).join('');
+    $('#camDev').value=S.cam.dev;if($('#camDev').value!==S.cam.dev)$('#camDev').value='';
+  }catch(e){}
+}
+function renderCamCfg(){
+  const c=S.cam;
+  $$('#cfg3d button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='1')===c.use3d));
+  $('#cfgVis').value=Math.round(c.vis*100);$('#cfgVisO').textContent=c.vis.toFixed(2);
+  $('#cfgWin').value=c.win;$('#cfgWinO').textContent=c.win;
+  $('#cfgConf').value=Math.round(c.conf*100);$('#cfgConfO').textContent=c.conf.toFixed(2);
+  $('#cfgModel').value=c.model;$('#cfgMirror').checked=c.mirror;$('#cfgShow').checked=c.show;
+  renderFacing();
+}
+async function restartCam(){if(cam.running){const v=cam.view;await camStart(v)}}
+$$('#cfg3d button').forEach(b=>b.onclick=()=>{S.cam.use3d=b.dataset.v==='1';save();renderCamCfg()});
+$('#cfgVis').oninput=e=>{S.cam.vis=+e.target.value/100;$('#cfgVisO').textContent=S.cam.vis.toFixed(2);save()};
+$('#cfgWin').oninput=e=>{S.cam.win=+e.target.value;$('#cfgWinO').textContent=S.cam.win;save()};
+$('#cfgConf').onchange=e=>{S.cam.conf=+e.target.value/100;$('#cfgConfO').textContent=S.cam.conf.toFixed(2);save();resetPose();restartCam()};
+$('#cfgConf').oninput=e=>{$('#cfgConfO').textContent=(+e.target.value/100).toFixed(2)};
+$('#cfgModel').onchange=e=>{S.cam.model=e.target.value;save();resetPose();restartCam()};
+$('#camDev').onchange=e=>{S.cam.dev=e.target.value;save();renderFacing();restartCam()};
+$('#cfgMirror').onchange=e=>{S.cam.mirror=e.target.checked;save();renderFacing()};
+$('#cfgShow').onchange=e=>{S.cam.show=e.target.checked;save()};
+$('#cfgReset').onclick=()=>{S.cam={...DEF.cam};save();resetPose();renderCamCfg();listCams();restartCam();toast('已還原偵測設定')};
+if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',listCams);
+
+/* ================= 前後鏡頭 ================= */
+function renderFacing(){
+  $$('.stage').forEach(st=>st.classList.toggle('rear',!isMirror()));
+  $$('.facingSeg').forEach(el=>{
+    el.innerHTML=`<button type="button" data-f="user" class="${S.facing==='user'?'on':''}">前鏡頭</button><button type="button" data-f="environment" class="${S.facing==='environment'?'on':''}">後鏡頭</button>`;
+    $$('button',el).forEach(b=>b.onclick=async()=>{
+      if(S.facing===b.dataset.f)return;S.facing=b.dataset.f;save();renderFacing();
+      if(cam.running){const v=cam.view;await camStart(v)}
+    });
+  });
+}
+
+/* ================= 錄影（含骨架、次數、倒數） ================= */
+let recUrl=null;
+/* 優先用 H.264 的 mp4（手機和 Windows 都能直接播放）；不支援時改用 webm。 */
+function makeRecorder(stream){
+  for(const m of ['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4']){
+    if(!MediaRecorder.isTypeSupported(m))continue;
+    try{
+      const mr=new MediaRecorder(stream,{mimeType:m,videoBitsPerSecond:1800000}),actual=(mr.mimeType||m).toLowerCase();
+      if(actual.includes('mp4')&&/vp[89]|av01/.test(actual))continue;   // mp4 裡包 VP9 很多播放器打不開，改用 webm
+      return mr;
+    }catch(e){}
+  }
+  return new MediaRecorder(stream);
+}
+function drawRec(v,counter){
+  const c=rec.canvas,x=rec.ctx,cw=c.width,ch=c.height,k=cw/640;
+  const F='"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif';
+  x.save();if(isMirror()){x.translate(cw,0);x.scale(-1,1)}
+  x.drawImage(v.video,0,0,cw,ch);x.drawImage(v.canvas,0,0,cw,ch);x.restore();
+  const name=counter?counter.key:v.nm.textContent,cnt=counter?counter.count:(+v.n.textContent||0);
+  x.fillStyle='rgba(10,26,32,.62)';x.beginPath();rrect(x,10*k,10*k,170*k,112*k,16*k);x.fill();
+  x.fillStyle='#93aeb3';x.font=`700 ${16*k}px ${F}`;x.fillText(name,22*k,34*k);
+  x.fillStyle='#ffd23f';x.font=`800 ${66*k}px ${F}`;x.fillText(String(cnt),22*k,100*k);
+  const nw=x.measureText(String(cnt)).width;x.fillStyle='#eaf4f1';x.font=`700 ${20*k}px ${F}`;x.fillText(v.unit||'下',22*k+nw+6*k,100*k);
+  if(v.miniState){
+    const m=v.miniState,col={work:'#ffd23f',rest:'#3dd6d0',prepare:'#2b4750',danger:'#ff6b57'}[m.kind]||'#ffd23f';
+    x.fillStyle=col;x.beginPath();rrect(x,cw-132*k,10*k,122*k,86*k,16*k);x.fill();
+    x.fillStyle=(m.kind==='prepare'||m.kind==='danger')?'#ffffff':'#0a1a20';x.textAlign='center';
+    x.font=`700 ${14*k}px ${F}`;x.fillText(m.label.length>9?m.label.slice(0,9)+'…':m.label,cw-71*k,32*k);
+    x.font=`800 ${46*k}px ${F}`;x.fillText(String(m.r),cw-71*k,84*k);x.textAlign='left';
+  }
+  if(v.cueInfo&&performance.now()<v.cueInfo.until){
+    x.font=`800 ${20*k}px ${F}`;const w=x.measureText(v.cueInfo.text).width+36*k;
+    x.fillStyle=v.cueInfo.bad?'#ff6b57':'rgba(61,214,208,.95)';x.beginPath();rrect(x,(cw-w)/2,ch-70*k,w,38*k,19*k);x.fill();
+    x.fillStyle=v.cueInfo.bad?'#fff':'#0a1a20';x.textAlign='center';x.fillText(v.cueInfo.text,cw/2,ch-44*k);x.textAlign='left';
+  }
+  x.fillStyle='rgba(234,244,241,.7)';x.font=`700 ${14*k}px ${F}`;x.textAlign='right';x.fillText('Lin AI',cw-12*k,ch-10*k);x.textAlign='left';
+}
+function recBtnState(v,on){
+  v.recBtn.classList.toggle('on',on);v.recBtn.setAttribute('aria-label',on?'停止錄影':'開始錄影');
+  $('span',v.recBtn).textContent=on?'0:00':'錄影';
+}
+function recStart(v){
+  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){toast('這個瀏覽器不支援錄影，建議用 Chrome 或最新的 Safari');return}
+  if(!(cam.running&&cam.view===v)){toast('請先開啟鏡頭，再開始錄影');return}
+  const W=v.video.videoWidth,H=v.video.videoHeight,sc=Math.min(1,960/Math.max(W,H));
+  rec.canvas=rec.canvas||document.createElement('canvas');rec.ctx=rec.canvas.getContext('2d');rec.scale=sc;
+  rec.canvas.width=Math.round(W*sc);rec.canvas.height=Math.round(H*sc);
+  try{rec.mr=makeRecorder(rec.canvas.captureStream(30))}
+  catch(e){toast('無法開始錄影：'+e.message);return}
+  rec.chunks=[];rec.mr.ondataavailable=e=>{if(e.data&&e.data.size)rec.chunks.push(e.data)};
+  rec.mr.onstop=()=>finishRec(rec.mr.mimeType);
+  drawRec(v,v.getCounter());rec.mr.start(1000);rec.on=true;rec.view=v;rec.t0=Date.now();recBtnState(v,true);
+  rec.timer=setInterval(()=>{
+    const sec=(Date.now()-rec.t0)/1000;$('span',v.recBtn).textContent=mmss(sec);
+    if(sec>=300){toast('已錄滿 5 分鐘，自動停止');recStop()}
+  },500);
+}
+function recStop(){
+  if(!rec.on)return;rec.on=false;clearInterval(rec.timer);
+  if(rec.view)recBtnState(rec.view,false);
+  try{rec.mr.stop()}catch(e){}
+}
+function finishRec(mime){
+  const type=(mime||'video/webm').split(';')[0],ext=type.includes('mp4')?'mp4':'webm';
+  const blob=new Blob(rec.chunks,{type});rec.chunks=[];
+  if(blob.size<1000){toast('錄影檔是空的，請再試一次');return}
+  exitFull();
+  if(recUrl)URL.revokeObjectURL(recUrl);
+  recUrl=URL.createObjectURL(blob);
+  const name=`lin-ai-錄影-${dkey(new Date())}-${hhmm(Date.now()).replace(':','')}.${ext}`;
+  $('#recVideo').src=recUrl;$('#recDl').href=recUrl;$('#recDl').download=name;
+  $('#recInfo').textContent=`長度約 ${mmss((Date.now()-rec.t0)/1000)}，大小 ${(blob.size/1048576).toFixed(1)} MB。影片只在你的裝置上，沒有上傳，也沒有收音。`;
+  const f=new File([blob],name,{type});
+  $('#recShare').hidden=!(navigator.canShare&&navigator.canShare({files:[f]}));
+  $('#recShare').onclick=()=>navigator.share({files:[f],title:'Lin AI 訓練錄影'}).catch(()=>{});
+  const dlg=$('#recDlg');if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');
+}
+$('#recClose').onclick=()=>{const d=$('#recDlg');if(d.close)d.close();else d.removeAttribute('open')};
+$('#recDlg').addEventListener('close',()=>{const v=$('#recVideo');v.pause();v.removeAttribute('src');v.load();if(recUrl){URL.revokeObjectURL(recUrl);recUrl=null}});
+
+/* ================= 訓練音樂：即時合成的原創節拍 + 播放自己的音樂 ================= */
+const PROG=[[110.0,[220.0,261.63,329.63]],[87.31,[174.61,220.0,261.63]],[130.81,[261.63,329.63,392.0]],[98.0,[196.0,246.94,293.66]]]; // Am F C G
+class Synth{
+  constructor(ctx,dest){
+    this.c=ctx;this.d=dest;
+    const n=ctx.sampleRate;this.noise=ctx.createBuffer(1,n,n);const a=this.noise.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;
+  }
+  _env(g,t,peak,att,dec){g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(peak,t+att);g.gain.exponentialRampToValueAtTime(0.0001,t+att+dec)}
+  kick(t,v=.9){const c=this.c,o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
+    this._env(g,t,v,.003,.26);o.connect(g);g.connect(this.d);o.start(t);o.stop(t+.3)}
+  noiseHit(t,{hp=0,bp=0,peak=.4,dec=.1,q=.8}){const c=this.c,s=c.createBufferSource(),g=c.createGain();s.buffer=this.noise;let n=s;
+    if(bp){const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=bp;f.Q.value=q;n.connect(f);n=f}
+    if(hp){const f=c.createBiquadFilter();f.type='highpass';f.frequency.value=hp;n.connect(f);n=f}
+    this._env(g,t,peak,.002,dec);n.connect(g);g.connect(this.d);s.start(t,Math.random()*.5);s.stop(t+dec+.05)}
+  clap(t,v=.5){this.noiseHit(t,{bp:1800,peak:v,dec:.16,q:.7})}
+  snare(t,v=.4){this.noiseHit(t,{bp:2200,peak:v,dec:.14,q:.6});const c=this.c,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=190;this._env(g,t,v*.6,.002,.1);o.connect(g);g.connect(this.d);o.start(t);o.stop(t+.15)}
+  hat(t,open=false,v=.22){this.noiseHit(t,{hp:7000,peak:v,dec:open?.16:.04})}
+  tone(t,f,len,{type='sawtooth',lp=1800,peak=.2,att=.005}={}){const c=this.c,o=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter();
+    o.type=type;o.frequency.value=f;fl.type='lowpass';fl.frequency.value=lp;this._env(g,t,peak,att,len);o.connect(fl);fl.connect(g);g.connect(this.d);o.start(t);o.stop(t+att+len+.05)}
+  click(t,accent){this.tone(t,accent?1500:1000,.04,{type:'sine',lp:6000,peak:.5,att:.001})}
+}
+const STYLES={
+  energy:{name:'電子衝刺',bpm:135,step(S,i,t,bar){
+    const [root,ch]=PROG[bar%4];
+    if(i%4===0)S.kick(t);
+    if(i===4||i===12)S.clap(t,.45);
+    if(i%4===2)S.hat(t,true,.2);else if(i%2===1)S.hat(t,false,.12);
+    if(i%2===0)S.tone(t,i%4===2?root*2:root,.16,{lp:320,peak:.34});
+    S.tone(t,ch[i%3]*(i%8>=4?2:1),.09,{lp:2400,peak:i%2?.07:.12});
+  }},
+  chill:{name:'Lo-fi 放鬆',bpm:80,step(S,i,t,bar,spb){
+    const [root,ch]=PROG[bar%4],sw=(i%4===2)?spb*.28:0;
+    if(i===0||i===10)S.kick(t,.6);
+    if(i===4||i===12)S.snare(t,.28);
+    if(i%2===0)S.hat(t+sw,false,.1+(i%4===0?.05:0));
+    if(i===0)ch.forEach((f,k)=>S.tone(t,f,spb*14,{type:'triangle',lp:1100,peak:.1,att:.06}));
+    if(i===8)ch.forEach(f=>S.tone(t,f,spb*6,{type:'triangle',lp:1100,peak:.07,att:.04}));
+    if(i===0||i===10)S.tone(t,root,spb*5,{type:'sine',lp:400,peak:.4});
+    if(i%2===0)S.tone(t+sw,ch[(i/2)%3]*2,.25,{type:'triangle',lp:2200,peak:.06});
+  }},
+  drums:{name:'鼓點',bpm:110,step(S,i,t){
+    if([0,6,8,14].includes(i))S.kick(t);
+    if(i===4||i===12)S.snare(t,.4);
+    if(i===15)S.snare(t,.12);
+    if(i%2===0)S.hat(t,i%8===6,.18);
+  }},
+  click:{name:'節拍器',bpm:60,step(S,i,t){if(i%4===0)S.click(t,i===0)}},
+};
+const music={on:false,syn:null,master:null,timer:0,step:0,next:0,duck:1,audio:null,list:[],idx:0};
+$('#mStyle').innerHTML=Object.entries(STYLES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+function musicApplyVol(){
+  const v=S.musicVol*music.duck;
+  if(music.master&&ac)music.master.gain.setTargetAtTime(music.on&&S.musicSrc==='built'?v:0,ac.currentTime,.05);
+  if(music.audio)music.audio.volume=Math.max(0,Math.min(1,v));
+}
+function musicDuck(on){music.duck=on?.4:1;musicApplyVol()}
+function musicSchedule(){
+  if(!music.on||S.musicSrc!=='built')return;
+  const spb=60/S.musicBpm/4,ahead=document.hidden?1.5:.12,st=STYLES[S.musicStyle]||STYLES.energy;
+  while(music.next<ac.currentTime+ahead){st.step(music.syn,music.step%16,music.next,Math.floor(music.step/16),spb);music.next+=spb;music.step++}
+}
+function musicStart(){
+  audioInit();
+  if(S.musicSrc==='mine'){
+    if(!music.list.length){toast('先按「選擇音樂檔案」，挑幾首你手機裡的音樂');return}
+    music.audio=music.audio||new Audio();music.audio.onended=()=>musicNext(1);
+    if(!music.audio.src)music.audio.src=music.list[music.idx].url;
+    music.on=true;musicApplyVol();music.audio.play().catch(()=>toast('瀏覽器擋住了自動播放，請再按一次播放'));
+  }else{
+    if(!ac){toast('這個瀏覽器不支援音效');return}
+    if(!music.master){const comp=ac.createDynamicsCompressor(),g=ac.createGain();g.connect(comp);comp.connect(ac.destination);music.master=g;music.syn=new Synth(ac,g)}
+    music.step=0;music.next=ac.currentTime+.08;music.on=true;musicApplyVol();
+    clearInterval(music.timer);music.timer=setInterval(musicSchedule,25);
+  }
+  renderMusic();
+}
+function musicStop(){
+  music.on=false;clearInterval(music.timer);
+  if(music.master&&ac)music.master.gain.setTargetAtTime(0,ac.currentTime,.03);
+  if(music.audio)music.audio.pause();
+  renderMusic();
+}
+function musicNext(d){
+  if(!music.list.length)return;music.idx=(music.idx+d+music.list.length)%music.list.length;
+  music.audio=music.audio||new Audio();music.audio.onended=()=>musicNext(1);music.audio.src=music.list[music.idx].url;
+  if(music.on&&S.musicSrc==='mine'){musicApplyVol();music.audio.play().catch(()=>{})}
+  renderMusic();
+}
+function renderMusic(){
+  $('#musicFab').classList.toggle('on',music.on);$('#mPlay').textContent=music.on?'停止':'播放';
+  $$('#mSrc button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.musicSrc));
+  $('#mBuilt').hidden=S.musicSrc!=='built';$('#mMine').hidden=S.musicSrc!=='mine';
+  $('#mStyle').value=S.musicStyle;$('#mBpm').value=S.musicBpm;$('#mBpmO').textContent=S.musicBpm;
+  $('#mVol').value=Math.round(S.musicVol*100);$('#mVolO').textContent=Math.round(S.musicVol*100)+'%';$('#mAuto').checked=S.musicAuto;
+  $('#mList').innerHTML=music.list.length?music.list.map((t,i)=>`<li class="${i===music.idx?'cur':''}">${esc(t.name)}</li>`).join(''):'<li class="mute">還沒有選檔案</li>';
+}
+$('#musicFab').onclick=()=>{const p=$('#musicPanel');p.hidden=!p.hidden;$('#musicFab').setAttribute('aria-expanded',!p.hidden)};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#musicPanel').hidden){$('#musicPanel').hidden=true;$('#musicFab').setAttribute('aria-expanded','false')}});
+seg($('#mSrc'),b=>{const was=music.on;if(was)musicStop();S.musicSrc=b.dataset.v;save();renderMusic();if(was)musicStart()});
+$('#mStyle').onchange=e=>{S.musicStyle=e.target.value;S.musicBpm=STYLES[S.musicStyle].bpm;save();renderMusic();if(music.on&&S.musicSrc==='built'){music.step=0}};
+$('#mBpm').oninput=e=>{S.musicBpm=+e.target.value;$('#mBpmO').textContent=S.musicBpm;save()};
+$('#mVol').oninput=e=>{S.musicVol=+e.target.value/100;$('#mVolO').textContent=e.target.value+'%';musicApplyVol();save()};
+$('#mAuto').onchange=e=>{S.musicAuto=e.target.checked;save()};
+$('#mPlay').onclick=()=>music.on?musicStop():musicStart();
+$('#mPrev').onclick=()=>musicNext(-1);$('#mNext').onclick=()=>musicNext(1);
+$('#mFiles').onchange=e=>{
+  const fs=[...e.target.files].filter(f=>f.type.startsWith('audio/')||/\.(mp3|m4a|aac|wav|ogg|flac)$/i.test(f.name));
+  if(!fs.length){toast('沒有找到音樂檔案');return}
+  music.list.forEach(t=>URL.revokeObjectURL(t.url));
+  music.list=fs.map(f=>({name:f.name.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)}));music.idx=0;
+  if(music.audio){music.audio.pause();music.audio.removeAttribute('src')}
+  e.target.value='';renderMusic();toast(`已加入 ${fs.length} 首`);
+};
+
+/* ================= 安裝成 App（PWA）與離線 ================= */
+let deferredInstall=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function showInstall(){
+  if(isStandalone()||S.installNo){$('#installBar').hidden=true;return}
+  if(deferredInstall){$('#installTxt').textContent='把 Lin AI 安裝到手機，像 App 一樣使用，第一次載入後也能離線用。';$('#installGo').hidden=false;$('#installBar').hidden=false}
+  else if(isIOS()){$('#installTxt').textContent='iPhone 安裝方法：用 Safari 打開，按下方的「分享」按鈕，選「加入主畫面」，就能像 App 一樣使用。';$('#installGo').hidden=true;$('#installBar').hidden=false}
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;showInstall()});
+window.addEventListener('appinstalled',()=>{$('#installBar').hidden=true;toast('已加到主畫面')});
+$('#installGo').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null;$('#installBar').hidden=true};
+$('#installNo').onclick=()=>{S.installNo=true;save();$('#installBar').hidden=true};
+window.addEventListener('offline',()=>toast('目前離線：已載入過的功能仍可使用，AI 教練需要網路'));
+window.addEventListener('online',()=>toast('已恢復連線'));
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+  const hadController=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadController)$('#updateBar').hidden=false});   // 新版程式接手了，提醒使用者重新整理
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(e=>logErr('sw: '+e.message)));
+}
+$('#updateGo').onclick=()=>location.reload();
+$('#foot').textContent='Lin AI　版本 '+APP_VERSION;$('#diagVer').textContent='版本 '+APP_VERSION;
+function diagText(){
+  const c=S.cam;
+  return ['Lin AI 診斷資訊','版本：'+APP_VERSION,'時間：'+new Date().toISOString(),'網址：'+location.origin+location.pathname,
+    '瀏覽器：'+navigator.userAgent,'螢幕：'+screen.width+'x'+screen.height+'　視窗：'+innerWidth+'x'+innerHeight+'　像素比：'+devicePixelRatio,
+    '離線快取：'+(navigator.serviceWorker&&navigator.serviceWorker.controller?'已啟用':'未啟用'),
+    '鏡頭功能：'+(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia?'有':'沒有')+'　錄影：'+(window.MediaRecorder?'有':'沒有')+'　語音：'+('speechSynthesis' in window?'有':'沒有')+'　通知：'+('Notification' in window?Notification.permission:'不支援'),
+    '偵測設定：'+JSON.stringify({use3d:c.use3d,vis:c.vis,win:c.win,model:c.model,conf:c.conf,mirror:c.mirror,dev:c.dev?'已選':'自動'}),
+    '姿勢模型：'+(poseLM?'已載入':'尚未載入'),'好友伺服器：'+(typeof frCfgOk==='function'&&frCfgOk()?'已設定':'未設定'),
+    '最近錯誤：'+(ERRS.length?'\n  '+ERRS.join('\n  '):'無')].join('\n');
+}
+$('#diagCopy').onclick=async()=>{try{await navigator.clipboard.writeText(diagText());toast('已複製診斷資訊')}catch(e){prompt('請全選複製：',diagText())}};
+
+const TAB_ICONS={
+ cam:'<path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 3h6"/>',
+ game:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/>',
+ stats:'<path d="M5 20V10M12 20V4M19 20v-8"/>',
+ ach:'<circle cx="12" cy="9" r="5"/><path d="M9 13.5 7 21l5-3 5 3-2-7.5"/>',
+ friends:'<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 5a3.5 3.5 0 0 1 0 7M18 14c2.2.7 3.5 2.7 3.5 6"/>',
+ body:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 10a4 4 0 0 1 8 0M12 10l2-2"/>',
+ food:'<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 2-3 5-3 8h3v10"/>',
+ guide:'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/>',
+ coach:'<path d="M4 5h16v11H9l-5 4z"/>'};
+$$('.tab').forEach(b=>{const ic=TAB_ICONS[b.dataset.tab];if(ic)b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${ic}</svg><span>${b.textContent}</span>`});
+
+/* ================= 啟動 ================= */
+if(S.waterOn&&!S.waterNext)waterSchedule();
+const idle=f=>('requestIdleCallback' in window)?requestIdleCallback(f,{timeout:1500}):setTimeout(f,60);
+renderCamCfg();renderHold();setInterval(planTick,20000);setTimeout(planTick,4000);
+renderMusic();showInstall();renderFacing();renderVoice();renderStats(true);renderHist();chRefresh();renderBoss();calc();plan();
+renderFriends();setTimeout(handleInvite,600);
+idle(()=>{listCams();renderSched();renderFood();renderGuide();renderWeights();renderPresets();renderAch()});   // 第一次畫面先出來，其餘慢慢補
+window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,waterTick,addWater,showWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,attack,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
+</script>
+</body>
+</html>

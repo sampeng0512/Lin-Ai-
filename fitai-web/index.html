@@ -391,9 +391,27 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
   <div class="brand">Lin AI<small>健身教練</small></div>
   <div class="top-right">
     <button class="btn ghost small" id="voiceBtn" type="button"></button>
+    <button class="btn ghost small" id="accountBtn" type="button">登入 / 註冊</button>
     <div class="stats" id="stats"></div>
   </div>
 </header>
+<dialog class="recdlg" id="accountDlg" aria-labelledby="accountTitle">
+  <h3 id="accountTitle" style="margin-top:0">Lin AI 帳號</h3>
+  <div id="accountSignedOut" class="stack">
+    <p class="small mute">登入後，訓練與個人紀錄會同步到你的帳號。</p>
+    <label class="f" for="accountEmail">Email</label><input type="email" id="accountEmail" autocomplete="email" required>
+    <label class="f" for="accountPassword">密碼</label><input type="password" id="accountPassword" autocomplete="current-password" minlength="8" required>
+    <div class="row"><button class="btn grow" id="accountLogin" type="button">登入</button><button class="btn teal grow" id="accountSignup" type="button">建立帳號</button></div>
+    <button class="btn ghost small" id="accountRecover" type="button">忘記密碼</button>
+  </div>
+  <div id="accountSignedIn" class="stack" hidden>
+    <p id="accountEmailText" class="small"></p>
+    <p id="accountSyncText" class="small mute">紀錄已同步</p>
+    <button class="btn ghost" id="accountLogout" type="button">登出</button>
+  </div>
+  <p id="accountStatus" class="small" role="status" aria-live="polite"></p>
+  <div class="row"><button class="btn ghost small" id="accountClose" type="button">關閉</button></div>
+</dialog>
 <div class="wbar" id="planBar" role="alert" hidden>
   <span id="plText"></span>
   <button class="btn small" id="plGo" type="button">去訓練</button>
@@ -637,6 +655,10 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
   <div class="stack">
     <div class="facts" id="stFacts"></div>
     <div class="card stack">
+      <div><h3 style="margin:0">各動作累計</h3><p class="small mute" style="margin:4px 0 0">依動作分類統計，總訓練量不會混在單一動作裡。</p></div>
+      <div id="stExTotals"></div>
+    </div>
+    <div class="card stack">
       <div class="row" style="justify-content:space-between">
         <h3 style="margin:0">近期次數</h3>
         <div class="seg" id="stRange"><button class="on" data-n="7">7 天</button><button data-n="30">30 天</button></div>
@@ -721,7 +743,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
           <div><label class="f">我的好友代碼（給朋友，讓他加你）</label><div class="codebox" id="frMyCode">—</div></div>
           <div class="row"><button class="btn teal grow" type="button" id="frInvite">分享邀請連結</button><button class="btn ghost" type="button" id="frCopy">複製代碼</button></div>
         </div>
-        <p class="small mute">好友只看得到你的暱稱、累計次數、本週次數、連續天數和等級，看不到影像和訓練細節。</p>
+        <p class="small mute">好友只看得到你的暱稱、總次數、各動作累計與本週次數、連續天數和等級，看不到影像和訓練細節。</p>
       </div>
       <div class="card stack" id="frAddBox">
         <h3 style="margin:0">加好友</h3>
@@ -736,7 +758,10 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
           <h3 style="margin:0">排行榜</h3>
           <button class="btn ghost small" type="button" id="frRefresh">重新整理</button>
         </div>
-        <div class="seg" id="frSort"><button type="button" data-v="week" class="on">本週次數</button><button type="button" data-v="total">累計次數</button><button type="button" data-v="streak">連續天數</button><button type="button" data-v="level">等級</button></div>
+        <div class="row">
+          <div class="grow"><label class="f" for="frExercise">動作排名</label><select id="frExercise"><option value="">全部動作</option></select></div>
+          <div class="seg" id="frSort"><button type="button" data-v="week" class="on">本週次數</button><button type="button" data-v="total">累計次數</button><button type="button" data-v="streak">連續天數</button><button type="button" data-v="level">等級</button></div>
+        </div>
         <div id="frBoard"></div>
         <p class="small mute" id="frAt"></p>
       </div>
@@ -920,7 +945,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
 <script type="module">
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION='2026.10.14-v8';
+const APP_VERSION='2026.10.15-v3';
 const ERRS=[];
 const logErr=m=>{ERRS.push(new Date().toLocaleTimeString()+'  '+String(m).slice(0,220));if(ERRS.length>8)ERRS.shift()};
 addEventListener('error',e=>logErr(`${e.message} @${(e.filename||'').split('/').pop()}:${e.lineno}`));
@@ -928,10 +953,13 @@ addEventListener('unhandledrejection',e=>logErr('promise: '+((e.reason&&e.reason
 const mmss=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 
 /* ================= 資料儲存（只存在使用者自己的瀏覽器） ================= */
-const KEY='fitai_web_v1';
+const KEY='fitai_web_v1',AUTH_KEY='fitai_auth_v1',ACTIVE_KEY='fitai_active_user_v1';
+let activeUserId=localStorage.getItem(ACTIVE_KEY)||'',accountSession=null;
+const stateKey=()=>activeUserId?`${KEY}:user:${activeUserId}`:KEY;
+const dirtyKey=id=>`${KEY}:dirty:${id}`;
 const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0},sb:{url:'',key:''}};
 let S;
-try{S={...DEF,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){S={...DEF}}
+try{S={...DEF,...JSON.parse(localStorage.getItem(stateKey())||'{}')}}catch(e){S={...DEF}}
 /* 讀進來的資料型別不對（舊版備份、手動改壞）時，把那一欄還原成預設值，避免整個網站壞掉 */
 function normalizeState(o){
   for(const [k,d] of Object.entries(DEF)){
@@ -946,10 +974,10 @@ function normalizeState(o){
 S=normalizeState(S);
 /* 連續多次修改只寫一次（250 毫秒內合併），離開頁面前一定會寫入 */
 let noSave=false,saveT=0;
-const saveNow=()=>{clearTimeout(saveT);saveT=0;if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const saveNow=()=>{clearTimeout(saveT);saveT=0;if(noSave)return;try{localStorage.setItem(stateKey(),JSON.stringify(S));if(accountSession&&activeUserId){localStorage.setItem(dirtyKey(activeUserId),'1');scheduleCloudSave()}}catch(e){}};
 const save=()=>{if(!saveT)saveT=setTimeout(saveNow,250)};
-addEventListener('pagehide',saveNow);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveNow()});
+addEventListener('pagehide',()=>{saveNow();if(accountSession)syncAccountNow().catch(()=>{})});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){saveNow();if(accountSession)syncAccountNow().catch(()=>{})}});
 const level=()=>Math.floor(S.xp/100)+1;
 const dkey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const dayN=k=>{const [y,m,d]=k.split('-').map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)};
@@ -1012,7 +1040,7 @@ $('#voiceBtn').onclick=()=>{S.voice=!S.voice;save();renderVoice();if(S.voice)say
 function renderStats(silent){
   const st=streaks();
   $('#stats').innerHTML=
-    `<div class="stat"><b>${S.reps}</b><span>累計次數</span></div>`+
+    `<div class="stat"><b>${S.reps}</b><span>總訓練量</span></div>`+
     `<div class="stat opt"><b>${Math.round(S.reps*0.5)}</b><span>大卡</span></div>`+
     `<div class="stat opt"><b>${st.cur}</b><span>連續天數</span></div>`+
     `<div class="stat"><b>Lv.${level()}</b><span>遊戲等級</span></div>`;
@@ -1767,7 +1795,7 @@ function lastDays(n){const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.set
 function renderStatsTab(){
   const days=lastDays(chartN),vals=days.map(x=>S.days[x.k]||0);
   const sum7=lastDays(7).reduce((a,x)=>a+(S.days[x.k]||0),0),st=streaks();
-  $('#stFacts').innerHTML=[[sum7,'近 7 天總次數'],[Math.round(sum7/7),'近 7 天日均'],[maxDay(),'最佳單日'],[st.cur+' 天','目前連續'],[st.longest+' 天','最長連續']]
+  $('#stFacts').innerHTML=[[sum7,'近 7 天總訓練量'],[Math.round(sum7/7),'近 7 天日均訓練量'],[maxDay(),'最佳單日'],[st.cur+' 天','目前連續'],[st.longest+' 天','最長連續']]
     .map(([b,l])=>`<div class="fact"><b>${b}</b><span>${l}</span></div>`).join('');
   const mx=Math.max(10,...vals),top=mx<=20?20:mx<=50?50:Math.ceil(mx/50)*50;
   const W=700,H=250,L=34,R=6,T=16,B=34,bw=(W-L-R)/days.length,ch=H-T-B;let g='';
@@ -1783,11 +1811,22 @@ function renderStatsTab(){
   $('#stGoal').value=S.goal;$('#stGoalBar').style.width=Math.min(100,today/S.goal*100)+'%';
   $('#stGoalTxt').textContent=today>=S.goal?`今天已達標，做了 ${today} 下。`:`今天已完成 ${today} / ${S.goal} 下，還差 ${S.goal-today} 下。`;
   renderWater();
-  renderHeat();renderPR();
+  renderHeat();renderPR();renderExerciseTotals();
+}
+function renderExerciseTotals(){
+  const known=new Set(ORDER),groups=CATS.map(cat=>[cat,ORDER.filter(ex=>EX[ex].cat===cat)]);
+  const unlisted=Object.keys(S.exs).filter(ex=>!known.has(ex)).sort((a,b)=>a.localeCompare(b));
+  if(unlisted.length)groups.push(['其他動作',unlisted]);
+  const html=groups.map(([cat,exercises])=>`<div><h4>${esc(cat)}</h4><table><tbody>${exercises.map(ex=>`<tr><td>${esc(ex)}</td><td style="text-align:right"><b style="color:var(--yellow)">${Math.max(0,Number(S.exs[ex])||0)}</b> 下</td></tr>`).join('')}</tbody></table></div>`).join('');
+  const knownTotal=Object.values(S.exs).reduce((sum,n)=>sum+(Number(n)||0),0),unclassified=Math.max(0,(Number(S.reps)||0)-knownTotal);
+  $('#stExTotals').innerHTML=html+(unclassified?`<p class="small mute">未分類舊紀錄：${unclassified} 下（此部分沒有動作名稱，無法回溯分類）</p>`:'');
 }
 seg($('#stRange'),b=>{chartN=+b.dataset.n;renderStatsTab()});
 $('#stGoal').onchange=e=>{S.goal=Math.max(10,Math.min(1000,Math.round(+e.target.value)||50));save();renderStatsTab()};
-$('#stReset').onclick=()=>{if(confirm('要清除所有紀錄嗎？次數、等級、成就和統計都會歸零。\n（好友排行榜上的資料不會被清掉，要刪除請到「好友排行」分頁。）')){noSave=true;try{localStorage.removeItem(KEY)}catch(e){}location.reload()}};
+$('#stReset').onclick=async()=>{if(!confirm('要清除所有紀錄嗎？次數、等級、成就和統計都會歸零。\n（好友排行榜上的資料不會被清掉，要刪除請到「好友排行」分頁。）'))return;noSave=true;
+  try{if(accountSession){const session=await freshAccountSession();await accountDataRequest('POST',session,{...DEF});localStorage.removeItem(dirtyKey(activeUserId))}localStorage.removeItem(stateKey());location.reload()}
+  catch(error){noSave=false;toast('雲端清除失敗，紀錄沒有刪除：'+accountErrorText(error))}
+};
 
 /* ================= 每日挑戰 ================= */
 const DAILY_T={"深蹲":40,"伏地挺身":20,"捲腹":30,"側平舉":30,"二頭彎舉":30,"開合跳":60,"弓箭步":30,"登山者":50,"臀橋":30,"高抬腿":60,
@@ -2171,6 +2210,121 @@ async function rpc(fn,args){
   if(!r.ok){const err=new Error((data&&(data.message||data.error||data.hint))||('HTTP '+r.status));err.status=r.status;err.code=data&&data.code;throw err}
   return data;
 }
+const ACCOUNT_TABLE='fitai_user_data';
+let accountSyncMessage='紀錄已同步',cloudSaveT=0,cloudQueue=Promise.resolve();
+function readAccountSession(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'null')}catch(e){return null}}
+function saveAccountSession(raw){
+  accountSession={...raw,expires_at:raw.expires_at||Math.floor(Date.now()/1000)+(raw.expires_in||3600)};
+  localStorage.setItem(AUTH_KEY,JSON.stringify(accountSession));return accountSession;
+}
+function clearAccountSession(){accountSession=null;localStorage.removeItem(AUTH_KEY)}
+async function accountAuthRequest(path,payload,token){
+  const {url,key}=sbCfg();if(!url||!key)throw new Error('帳號服務尚未設定。');
+  let response;try{response=await fetch(`${url}/auth/v1/${path}`,{method:'POST',headers:{'content-type':'application/json',apikey:key,...(token?{authorization:`Bearer ${token}`}:{})},body:JSON.stringify(payload||{})})}catch(e){throw new Error('目前無法連線到帳號服務。')}
+  const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
+  if(!response.ok){const err=new Error(data&&(data.msg||data.message||data.error_description||data.error)||`帳號服務錯誤（${response.status}）`);err.status=response.status;err.code=data&&(data.code||data.error_code);throw err}
+  return data;
+}
+function accountRestHeaders(session,extra={}){const {key}=sbCfg();return {apikey:key,authorization:`Bearer ${session.access_token}`,'content-type':'application/json',...extra}}
+async function accountDataRequest(method,session,state){
+  const {url}=sbCfg(),id=session.user.id;
+  const path=method==='GET'?`?select=state&user_id=eq.${encodeURIComponent(id)}&limit=1`:'?on_conflict=user_id';
+  let response;try{response=await fetch(`${url}/rest/v1/${ACCOUNT_TABLE}${path}`,{method,headers:accountRestHeaders(session,method==='GET'?{}:{prefer:'resolution=merge-duplicates,return=minimal'}),...(method==='GET'?{}:{body:JSON.stringify({user_id:id,state})})})}catch(e){throw new Error('目前無法連線到雲端資料庫。')}
+  const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
+  if(!response.ok){const err=new Error(data&&(data.message||data.hint||data.details)||`資料庫錯誤（${response.status}）`);err.status=response.status;err.code=data&&data.code;throw err}
+  return data;
+}
+async function freshAccountSession(){
+  if(!accountSession)throw new Error('請先登入帳號。');
+  if(accountSession.expires_at>Date.now()/1000+90)return accountSession;
+  const data=await accountAuthRequest('token?grant_type=refresh_token',{refresh_token:accountSession.refresh_token});
+  return saveAccountSession({...data,user:data.user||accountSession.user});
+}
+function readAccountCache(id){try{const raw=localStorage.getItem(`${KEY}:user:${id}`);return raw?normalizeState({...DEF,...JSON.parse(raw)}):null}catch(e){return null}}
+function writeAccountCache(id,state){localStorage.setItem(`${KEY}:user:${id}`,JSON.stringify(state))}
+function accountErrorText(error){
+  const message=String(error&&error.message||error);
+  if(error&&error.code==='PGRST205'||/fitai_user_data|schema cache/i.test(message))return '尚未建立帳號資料表，請先在 Supabase 執行 fitai-web/supabase-accounts.sql。';
+  if(/invalid login credentials/i.test(message))return 'Email 或密碼不正確。';
+  if(/email not confirmed/i.test(message))return '請先到信箱完成驗證，再登入。';
+  if(/already registered|user already exists/i.test(message))return '這個 Email 已註冊，請直接登入。';
+  if(/password should be at least|weak password/i.test(message))return '密碼未符合 Supabase 的密碼規則。';
+  return message;
+}
+function showAccountStatus(message,isError=false){const el=$('#accountStatus');el.textContent=message;el.style.color=isError?'var(--coral)':'var(--teal)'}
+function renderAccount(){
+  const signed=!!accountSession;
+  $('#accountSignedOut').hidden=signed;$('#accountSignedIn').hidden=!signed;
+  $('#accountBtn').textContent=signed?'帳號':'登入 / 註冊';
+  $('#accountBtn').setAttribute('aria-label',signed?`帳號：${accountSession.user.email||'已登入'}`:'登入或建立帳號');
+  if(signed){$('#accountEmailText').textContent=accountSession.user.email||'已登入';$('#accountSyncText').textContent=accountSyncMessage}
+}
+function scheduleCloudSave(){
+  clearTimeout(cloudSaveT);cloudSaveT=setTimeout(()=>syncAccountNow().catch(()=>{}),1200);
+}
+function syncAccountNow(){
+  if(!accountSession||!activeUserId)return Promise.resolve();
+  const snapshot=JSON.stringify(S);
+  cloudQueue=cloudQueue.catch(()=>{}).then(async()=>{
+    if(!accountSession||activeUserId!==accountSession.user.id)return;
+    const session=await freshAccountSession();await accountDataRequest('POST',session,JSON.parse(snapshot));
+    if(activeUserId===session.user.id&&JSON.stringify(S)===snapshot){localStorage.removeItem(dirtyKey(activeUserId));accountSyncMessage='雲端已同步';renderAccount()}
+    else scheduleCloudSave();
+  }).catch(error=>{accountSyncMessage='同步待處理：'+accountErrorText(error);renderAccount();logErr('account sync '+error.message);throw error});
+  return cloudQueue;
+}
+async function activateAccount(rawSession){
+  const session=saveAccountSession(rawSession),id=session.user.id,cached=readAccountCache(id),wasDirty=localStorage.getItem(dirtyKey(id))==='1';
+  try{
+    const fresh=await freshAccountSession(),rows=await accountDataRequest('GET',fresh),remote=Array.isArray(rows)&&rows.length?rows[0].state:null;
+    if(remote&&!(wasDirty&&cached))S=normalizeState({...DEF,...remote});
+    else if(cached)S=cached;
+    await accountDataRequest('POST',fresh,S);
+    activeUserId=id;localStorage.setItem(ACTIVE_KEY,id);writeAccountCache(id,S);localStorage.removeItem(dirtyKey(id));
+    location.reload();
+  }catch(error){clearAccountSession();throw error}
+}
+async function initializeAccount(){
+  if(!activeUserId){accountSession=null;renderAccount();return}
+  const saved=readAccountSession();
+  if(!saved||!saved.user||saved.user.id!==activeUserId){localStorage.removeItem(ACTIVE_KEY);activeUserId='';location.reload();return}
+  accountSession=saved;
+  try{
+    const session=await freshAccountSession(),rows=await accountDataRequest('GET',session),remote=Array.isArray(rows)&&rows.length?rows[0].state:null,cached=readAccountCache(activeUserId),wasDirty=localStorage.getItem(dirtyKey(activeUserId))==='1';
+    if(remote&&wasDirty&&cached){S=cached;await accountDataRequest('POST',session,S);localStorage.removeItem(dirtyKey(activeUserId))}
+    else if(remote){S=normalizeState({...DEF,...remote});writeAccountCache(activeUserId,S);localStorage.removeItem(dirtyKey(activeUserId))}
+    else{await accountDataRequest('POST',session,S);localStorage.removeItem(dirtyKey(activeUserId))}
+    accountSyncMessage='雲端已同步';
+  }catch(error){accountSyncMessage='同步待處理：'+accountErrorText(error);logErr('account startup '+error.message)}
+  renderAccount();
+}
+$('#accountBtn').onclick=()=>{$('#accountDlg').showModal();renderAccount()};
+$('#accountClose').onclick=()=>$('#accountDlg').close();
+$('#accountLogin').onclick=async()=>{
+  const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
+  if(!email||!password){showAccountStatus('請輸入 Email 和密碼。',true);return}
+  $('#accountLogin').disabled=true;$('#accountSignup').disabled=true;showAccountStatus('正在登入…');
+  try{const data=await accountAuthRequest('token?grant_type=password',{email,password});await activateAccount(data)}catch(error){showAccountStatus(accountErrorText(error),true)}
+  finally{$('#accountLogin').disabled=false;$('#accountSignup').disabled=false}
+};
+$('#accountSignup').onclick=async()=>{
+  const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
+  if(!email||!password){showAccountStatus('請輸入 Email 和密碼。',true);return}
+  if(password.length<8){showAccountStatus('密碼至少需要 8 個字元。',true);return}
+  $('#accountLogin').disabled=true;$('#accountSignup').disabled=true;showAccountStatus('正在建立帳號…');
+  try{const data=await accountAuthRequest('signup',{email,password});if(data.session)await activateAccount(data.session);else showAccountStatus('驗證信已寄出，完成 Email 驗證後即可登入。')}
+  catch(error){showAccountStatus(accountErrorText(error),true)}
+  finally{$('#accountLogin').disabled=false;$('#accountSignup').disabled=false}
+};
+$('#accountRecover').onclick=async()=>{
+  const email=$('#accountEmail').value.trim();if(!email){showAccountStatus('請先輸入註冊用的 Email。',true);return}
+  try{await accountAuthRequest('recover',{email});showAccountStatus('若此 Email 已註冊，密碼重設信已寄出。')}catch(error){showAccountStatus(accountErrorText(error),true)}
+};
+$('#accountLogout').onclick=async()=>{
+  $('#accountLogout').disabled=true;saveNow();
+  try{await syncAccountNow();const session=await freshAccountSession();await accountAuthRequest('logout',{},session.access_token)}catch(error){logErr('account logout '+error.message)}
+  clearAccountSession();localStorage.removeItem(ACTIVE_KEY);activeUserId='';location.reload();
+};
 function friendly(e){
   const m=String(e&&e.message||e);
   if(m==='NOCFG')return '好友伺服器還沒設定';
@@ -2187,16 +2341,27 @@ function friendly(e){
 const uuid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)});
 const weekKey=()=>dkey(weekDates()[0]);
 const weekRepsNow=()=>weekDates().reduce((a,d)=>a+(S.days[dkey(d)]||0),0);
-const frPayload=()=>({p_id:S.me.id,p_name:S.me.name,p_reps:S.reps|0,p_xp:S.xp|0,p_streak:streaks().cur|0,p_week:weekRepsNow()|0,p_week_key:weekKey()});
-const frSig=()=>JSON.stringify([S.me.name,S.reps,S.xp,streaks().cur,weekRepsNow(),weekKey()]);
-let frPending='',frRows=[],frSort='week',frAt=0,frBusy=false,frSyncT=0,frLastSig='',frLast=0;
+const weekExerciseRepsNow=()=>weekDates().reduce((totals,d)=>{for(const [ex,n] of Object.entries(S.dayEx[dkey(d)]||{}))totals[ex]=(totals[ex]||0)+n;return totals},{});
+const frBasePayload=()=>({p_id:S.me.id,p_name:S.me.name,p_reps:S.reps|0,p_xp:S.xp|0,p_streak:streaks().cur|0,p_week:weekRepsNow()|0,p_week_key:weekKey()});
+const frPayload=()=>({...frBasePayload(),p_ex_reps:S.exs,p_week_ex_reps:weekExerciseRepsNow()});
+const frSig=()=>JSON.stringify([S.me.name,S.reps,S.exs,S.xp,streaks().cur,weekRepsNow(),weekExerciseRepsNow(),weekKey()]);
+let frPending='',frRows=[],frSort='week',frAt=0,frBusy=false,frSyncT=0,frLastSig='',frLast=0,frExerciseStatsSupported=null;
+async function friendUpsert(){
+  if(frExerciseStatsSupported===false)return rpc('lin_upsert_profile',frBasePayload());
+  try{const code=await rpc('lin_upsert_profile',frPayload());frExerciseStatsSupported=true;return code}
+  catch(e){
+    if(frExerciseStatsSupported===false||!(e.code==='PGRST202'||e.code==='PGRST203'||/parameter|could not find function|does not exist/i.test(String(e.message))))throw e;
+    frExerciseStatsSupported=false;
+    return rpc('lin_upsert_profile',frBasePayload());
+  }
+}
 async function friendSync(force){
   if(!S.me.id||!frCfgOk())return;
   const sig=frSig();if(!force&&sig===frLastSig)return;
   const wait=15000-(Date.now()-frLast);
   if(!force&&wait>0){clearTimeout(frSyncT);frSyncT=setTimeout(()=>friendSync(false),wait+50);return}   // 太頻繁就延後，不要丟掉這次更新
   frLast=Date.now();
-  try{const code=await rpc('lin_upsert_profile',frPayload());frLastSig=sig;if(code&&code!==S.me.code){S.me.code=code;save();renderFriends()}}
+  try{const code=await friendUpsert();frLastSig=sig;if(code&&code!==S.me.code){S.me.code=code;save();renderFriends()}}
   catch(e){logErr('friendSync '+e.message)}
 }
 function friendSyncSoon(){if(!S.me.id||!frCfgOk()||frSig()===frLastSig)return;clearTimeout(frSyncT);frSyncT=setTimeout(()=>friendSync(false),8000)}
@@ -2205,7 +2370,7 @@ async function friendCreate(){
   if(!name){toast('請輸入暱稱（最多 12 個字）');return}
   const isNew=!S.me.id,old=S.me.name;if(isNew)S.me.id=uuid();S.me.name=name;
   try{
-    const code=await rpc('lin_upsert_profile',frPayload());S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
+    const code=await friendUpsert();S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
     toast(isNew?`已建立，你的好友代碼是 ${code}`:'已更新暱稱');
     if(frPending){const c=frPending;frPending='';await friendAdd(c,false)}
     await friendBoard();
@@ -2234,16 +2399,24 @@ async function friendBoard(){
 const wkOf=r=>r.week_key===weekKey()?r.week_reps:0;
 const lvOf=r=>Math.floor(r.xp/100)+1;
 const agoTxt=t=>{const m=(Date.now()-new Date(t).getTime())/60000;if(!isFinite(m))return '';return m<2?'剛剛':m<60?Math.round(m)+' 分鐘前':m<1440?Math.round(m/60)+' 小時前':Math.round(m/1440)+' 天前'};
+$('#frExercise').insertAdjacentHTML('beforeend',optsByCat(ORDER));
 function renderBoard(){
   const el=$('#frBoard');
   if(!S.me.id){el.innerHTML='<p class="mute small">先在上面設定暱稱，才能看到排行榜。</p>';$('#frAt').textContent='';return}
   if(!frRows.length){el.innerHTML='<p class="mute small">還沒有資料。</p>';return}
-  const val={week:wkOf,total:r=>r.reps,streak:r=>r.streak,level:lvOf}[frSort],unit={week:'下',total:'下',streak:'天',level:'級'}[frSort];
+  const ex=$('#frExercise').value,actionField=frSort==='week'?'week_ex_reps':'ex_reps';
+  if(ex&&!['week','total'].includes(frSort)){$('#frExercise').value='';return renderBoard()}
+  if(ex&&!frRows.every(r=>r[actionField]&&typeof r[actionField]==='object')){
+    el.innerHTML='<p class="notice warn small">好友伺服器尚未提供分動作統計，請更新 Supabase 的 lin_upsert_profile 與 lin_get_board，加入每個動作的累計及本週次數欄位後再使用。</p>';
+    $('#frAt').textContent='';return;
+  }
+  const val=ex?r=>Number((r[actionField]||{})[ex])||0:{week:wkOf,total:r=>r.reps,streak:r=>r.streak,level:lvOf}[frSort],unit={week:'下',total:'下',streak:'天',level:'級'}[frSort];
   const rows=[...frRows].sort((a,b)=>val(b)-val(a)||b.reps-a.reps||String(a.name).localeCompare(String(b.name)));
   let rank=0,prev=null;
   el.innerHTML=rows.map((r,i)=>{
     const v=val(r);if(v!==prev){rank=i+1;prev=v}   // 同分同名次
-    return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(rank,4)}">${rank}</span><div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">本週 ${wkOf(r)}　累計 ${r.reps}　連續 ${r.streak} 天　Lv.${lvOf(r)}　${agoTxt(r.updated_at)}</span></div><span class="fv">${v}<small>${unit}</small></span>${r.is_me?'':`<button class="xbtn" type="button" data-code="${esc(r.code)}" aria-label="刪除好友 ${esc(r.name)}">×</button>`}</div>`;
+    const summary=ex?`${ex} 本週 ${Number((r.week_ex_reps||{})[ex])||0}　累計 ${Number((r.ex_reps||{})[ex])||0}`:`本週 ${wkOf(r)}　累計 ${r.reps}`;
+    return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(rank,4)}">${rank}</span><div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">${summary}　連續 ${r.streak} 天　Lv.${lvOf(r)}　${agoTxt(r.updated_at)}</span></div><span class="fv">${v}<small>${unit}</small></span>${r.is_me?'':`<button class="xbtn" type="button" data-code="${esc(r.code)}" aria-label="刪除好友 ${esc(r.name)}">×</button>`}</div>`;
   }).join('');
   $('#frAt').textContent=rows.length<2?'還沒有好友，把你的代碼或邀請連結傳給朋友吧。':`共 ${rows.length-1} 位好友，更新於 ${hhmm(frAt)}`;
 }
@@ -2263,6 +2436,7 @@ $('#frAdd').onclick=()=>friendAdd($('#frCode').value,false);
 $('#frCode').addEventListener('keydown',e=>{if(e.key==='Enter')friendAdd($('#frCode').value,false)});
 $('#frRefresh').onclick=friendBoard;
 seg($('#frSort'),b=>{frSort=b.dataset.v;renderBoard()});
+$('#frExercise').onchange=renderBoard;
 $('#frBoard').onclick=async e=>{
   const b=e.target.closest('[data-code]');if(!b||!confirm('確定要刪除這位好友嗎？對方的名單裡也會移除你。'))return;
   try{await rpc('lin_remove_friend',{p_id:S.me.id,p_code:b.dataset.code});toast('已刪除好友');await friendBoard()}catch(err){toast(friendly(err))}
@@ -2540,7 +2714,7 @@ window.addEventListener('appinstalled',()=>{$('#installBar').hidden=true;toast('
 $('#installGo').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null;$('#installBar').hidden=true};
 $('#installNo').onclick=()=>{S.installNo=true;save();$('#installBar').hidden=true};
 window.addEventListener('offline',()=>toast('目前離線：已載入過的功能仍可使用，AI 教練需要網路'));
-window.addEventListener('online',()=>toast('已恢復連線'));
+window.addEventListener('online',()=>{toast('已恢復連線');if(accountSession)syncAccountNow().catch(()=>{})});
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
   const hadController=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadController)$('#updateBar').hidden=false});   // 新版程式接手了，提醒使用者重新整理
@@ -2577,6 +2751,7 @@ $$('.tab').forEach(b=>{const ic=TAB_ICONS[b.dataset.tab];if(ic)b.innerHTML=`<svg
 if(S.waterOn&&!S.waterNext)waterSchedule();
 const idle=f=>('requestIdleCallback' in window)?requestIdleCallback(f,{timeout:1500}):setTimeout(f,60);
 renderCamCfg();renderHold();setInterval(planTick,20000);setTimeout(planTick,4000);
+await initializeAccount();
 renderMusic();showInstall();renderFacing();renderVoice();renderStats(true);renderHist();chRefresh();renderBoss();calc();plan();
 renderFriends();setTimeout(handleInvite,600);
 idle(()=>{listCams();renderSched();renderFood();renderGuide();renderWeights();renderPresets();renderAch()});   // 第一次畫面先出來，其餘慢慢補

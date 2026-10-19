@@ -65,7 +65,7 @@ label.f{display:block; font-size:.875rem; color:var(--mute); margin-bottom:6px}
 .rule{border:0; border-top:1px solid var(--line); margin:18px 0}
 
 /* 表單 */
-select,input[type=number],input[type=password],input[type=text],textarea{width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:inherit}
+select,input[type=number],input[type=password],input[type=text],input[type=email],textarea{width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:inherit}
 input[type=range]{width:100%; accent-color:var(--yellow)}
 input[type=checkbox]{accent-color:var(--yellow); width:18px; height:18px; vertical-align:-3px}
 .slider{display:grid; grid-template-columns:1fr auto; gap:2px 12px; align-items:center}
@@ -314,7 +314,17 @@ h3{letter-spacing:.01em}
 .btn.block{padding:15px 24px; font-size:1.05rem}
 .seg button{transition:background .15s,color .15s}
 .seg button:hover:not(.on){background:rgba(255,255,255,.1)}
-select,input[type=number],input[type=password],input[type=text],textarea{border-radius:12px; transition:border-color .15s,box-shadow .15s}
+select,input[type=number],input[type=password],input[type=text],input[type=email],textarea{border-radius:12px; transition:border-color .15s,box-shadow .15s}
+.acc-tabs{display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin:4px 0 14px; background:var(--bg2); border-radius:999px; box-shadow:inset 0 0 0 1px var(--line)}
+.acc-tabs button{appearance:none; border:0; background:none; color:var(--mute); font:inherit; font-weight:700; padding:9px 12px; border-radius:999px; cursor:pointer; transition:background .15s,color .15s}
+.acc-tabs button:hover:not([aria-selected=true]){color:var(--ink)}
+.acc-tabs button[aria-selected=true]{background:var(--yellow); color:var(--dark)}
+.acc-tabs button[data-mode=signup][aria-selected=true]{background:var(--teal)}
+.acc-link{appearance:none; border:0; background:none; color:var(--mute); font:inherit; font-size:.88rem; padding:2px 0; cursor:pointer; text-decoration:underline; text-underline-offset:3px; display:block; margin-left:auto}
+.acc-link[hidden]{display:none}
+#accountSubmit{width:100%}
+.acc-link:hover{color:var(--ink)}
+.acc-foot{display:flex; justify-content:flex-end; margin-top:6px}
 select:focus,input:focus,textarea:focus{outline:0; border-color:var(--yellow); box-shadow:0 0 0 3px rgba(255,210,63,.18)}
 details>summary{list-style:none; display:flex; align-items:center; gap:8px}
 details>summary::-webkit-details-marker{display:none}
@@ -397,12 +407,19 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
 </header>
 <dialog class="recdlg" id="accountDlg" aria-labelledby="accountTitle">
   <h3 id="accountTitle" style="margin-top:0">Lin AI 帳號</h3>
-  <div id="accountSignedOut" class="stack">
-    <p class="small mute">登入後，訓練與個人紀錄會同步到你的帳號。</p>
-    <label class="f" for="accountEmail">Email</label><input type="email" id="accountEmail" autocomplete="email" required>
-    <label class="f" for="accountPassword">密碼</label><input type="password" id="accountPassword" autocomplete="current-password" minlength="8" required>
-    <div class="row"><button class="btn grow" id="accountLogin" type="button">登入</button><button class="btn teal grow" id="accountSignup" type="button">建立帳號</button></div>
-    <button class="btn ghost small" id="accountRecover" type="button">忘記密碼</button>
+  <div id="accountSignedOut">
+    <div class="acc-tabs" role="tablist" aria-label="帳號操作">
+      <button type="button" role="tab" id="accountTabLogin" data-mode="login" aria-selected="true" aria-controls="accountForm">登入</button>
+      <button type="button" role="tab" id="accountTabSignup" data-mode="signup" aria-selected="false" aria-controls="accountForm">建立帳號</button>
+    </div>
+    <form id="accountForm" class="stack" role="tabpanel" novalidate>
+      <p class="small mute" id="accountHint">登入後，訓練與個人紀錄會同步到你的帳號。</p>
+      <label class="f" for="accountEmail">Email</label><input type="email" id="accountEmail" autocomplete="email" placeholder="you@example.com" required>
+      <label class="f" for="accountPassword">密碼</label><input type="password" id="accountPassword" autocomplete="current-password" minlength="8" required>
+      <div id="accountConfirmWrap" class="stack" hidden><label class="f" for="accountPassword2">確認密碼</label><input type="password" id="accountPassword2" autocomplete="new-password" minlength="8"></div>
+      <button class="btn" id="accountSubmit" type="submit">登入</button>
+      <button class="acc-link" id="accountRecover" type="button">忘記密碼？</button>
+    </form>
   </div>
   <div id="accountSignedIn" class="stack" hidden>
     <p id="accountEmailText" class="small"></p>
@@ -410,7 +427,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
     <button class="btn ghost" id="accountLogout" type="button">登出</button>
   </div>
   <p id="accountStatus" class="small" role="status" aria-live="polite"></p>
-  <div class="row"><button class="btn ghost small" id="accountClose" type="button">關閉</button></div>
+  <div class="acc-foot"><button class="btn ghost small" id="accountClose" type="button">關閉</button></div>
 </dialog>
 <div class="wbar" id="planBar" role="alert" hidden>
   <span id="plText"></span>
@@ -908,7 +925,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
     <div id="mBuilt" class="stack">
       <div><label class="f" for="mStyle">風格</label><select id="mStyle"></select></div>
       <div class="slider"><label class="f" style="margin:0" for="mBpm">速度（BPM）</label><output id="mBpmO">135</output><input type="range" id="mBpm" min="60" max="180" step="1" value="135"></div>
-      <p class="small mute">內建音樂是程式即時合成的原創節拍，沒有版權問題。用「節拍器」可以練深蹲、伏地挺身的節奏。</p>
+      <p class="small mute">內建 12 種風格都是程式即時合成的原創節拍，沒有版權問題，可安心錄影或直播。用「節拍器」可以練深蹲、伏地挺身的節奏。</p>
     </div>
     <div id="mMine" class="stack" hidden>
       <label class="btn ghost small" style="cursor:pointer; align-self:flex-start">選擇音樂檔案<input type="file" id="mFiles" accept="audio/*" multiple hidden></label>
@@ -2298,23 +2315,38 @@ async function initializeAccount(){
   }catch(error){accountSyncMessage='同步待處理：'+accountErrorText(error);logErr('account startup '+error.message)}
   renderAccount();
 }
-$('#accountBtn').onclick=()=>{$('#accountDlg').showModal();renderAccount()};
+let accountMode='login';
+function setAccountMode(mode){
+  accountMode=mode;const signup=mode==='signup';
+  for(const b of document.querySelectorAll('.acc-tabs button'))b.setAttribute('aria-selected',String(b.dataset.mode===mode));
+  $('#accountHint').textContent=signup?'建立新帳號，密碼至少 8 個字元。註冊後可能需要先到信箱完成驗證。':'登入後，訓練與個人紀錄會同步到你的帳號。';
+  $('#accountConfirmWrap').hidden=!signup;$('#accountRecover').hidden=signup;
+  $('#accountPassword').autocomplete=signup?'new-password':'current-password';
+  $('#accountSubmit').textContent=signup?'建立帳號':'登入';$('#accountSubmit').classList.toggle('teal',signup);
+  $('#accountPassword2').value='';showAccountStatus('');
+}
+for(const b of document.querySelectorAll('.acc-tabs button'))b.onclick=()=>setAccountMode(b.dataset.mode);
+$('#accountBtn').onclick=()=>{setAccountMode('login');$('#accountDlg').showModal();renderAccount()};
 $('#accountClose').onclick=()=>$('#accountDlg').close();
-$('#accountLogin').onclick=async()=>{
-  const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
-  if(!email||!password){showAccountStatus('請輸入 Email 和密碼。',true);return}
-  $('#accountLogin').disabled=true;$('#accountSignup').disabled=true;showAccountStatus('正在登入…');
-  try{const data=await accountAuthRequest('token?grant_type=password',{email,password});await activateAccount(data)}catch(error){showAccountStatus(accountErrorText(error),true)}
-  finally{$('#accountLogin').disabled=false;$('#accountSignup').disabled=false}
-};
-$('#accountSignup').onclick=async()=>{
-  const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
-  if(!email||!password){showAccountStatus('請輸入 Email 和密碼。',true);return}
+async function accountLogin(email,password){
+  showAccountStatus('正在登入…');
+  const data=await accountAuthRequest('token?grant_type=password',{email,password});await activateAccount(data);
+}
+async function accountSignup(email,password){
   if(password.length<8){showAccountStatus('密碼至少需要 8 個字元。',true);return}
-  $('#accountLogin').disabled=true;$('#accountSignup').disabled=true;showAccountStatus('正在建立帳號…');
-  try{const data=await accountAuthRequest('signup',{email,password});if(data.session)await activateAccount(data.session);else showAccountStatus('驗證信已寄出，完成 Email 驗證後即可登入。')}
-  catch(error){showAccountStatus(accountErrorText(error),true)}
-  finally{$('#accountLogin').disabled=false;$('#accountSignup').disabled=false}
+  if(password!==$('#accountPassword2').value){showAccountStatus('兩次輸入的密碼不一致。',true);return}
+  showAccountStatus('正在建立帳號…');
+  const data=await accountAuthRequest('signup',{email,password});
+  if(data.session)await activateAccount(data.session);
+  else{setAccountMode('login');showAccountStatus('驗證信已寄出，完成 Email 驗證後即可登入。')}
+}
+$('#accountForm').onsubmit=async e=>{
+  e.preventDefault();
+  const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
+  if(!email||!password){showAccountStatus('請輸入 Email 和密碼。',true);return}
+  $('#accountSubmit').disabled=true;
+  try{await(accountMode==='signup'?accountSignup:accountLogin)(email,password)}catch(error){showAccountStatus(accountErrorText(error),true)}
+  finally{$('#accountSubmit').disabled=false}
 };
 $('#accountRecover').onclick=async()=>{
   const email=$('#accountEmail').value.trim();if(!email){showAccountStatus('請先輸入註冊用的 Email。',true);return}
@@ -2588,6 +2620,8 @@ $('#recDlg').addEventListener('close',()=>{const v=$('#recVideo');v.pause();v.re
 
 /* ================= 訓練音樂：即時合成的原創節拍 + 播放自己的音樂 ================= */
 const PROG=[[110.0,[220.0,261.63,329.63]],[87.31,[174.61,220.0,261.63]],[130.81,[261.63,329.63,392.0]],[98.0,[196.0,246.94,293.66]]]; // Am F C G
+const PROG_UP=[[130.81,[261.63,329.63,392.0]],[98.0,[196.0,246.94,293.66]],[110.0,[220.0,261.63,329.63]],[87.31,[174.61,220.0,261.63]]]; // C G Am F
+const PROG_DARK=[[110.0,[220.0,261.63,329.63]],[73.42,[146.83,174.61,220.0]],[110.0,[220.0,261.63,329.63]],[82.41,[164.81,207.65,246.94]]]; // Am Dm Am E
 class Synth{
   constructor(ctx,dest){
     this.c=ctx;this.d=dest;
@@ -2631,6 +2665,72 @@ const STYLES={
     if(i===4||i===12)S.snare(t,.4);
     if(i===15)S.snare(t,.12);
     if(i%2===0)S.hat(t,i%8===6,.18);
+  }},
+  hiit:{name:'高強度 HIIT',bpm:150,step(S,i,t,bar,spb){
+    const [root,ch]=PROG_DARK[bar%4];
+    if(i%4===0||(i===14&&bar%2))S.kick(t);
+    if(i===4||i===12)S.clap(t,.5);
+    S.hat(t,i%4===2,i%4===2?.18:.09);
+    if(i%4===2)S.tone(t,root,.12,{lp:500,peak:.36});
+    if(i%4===0&&i)S.tone(t,ch[2]*2,.05,{type:'square',lp:3000,peak:.05});
+    if(bar%4===3&&i>=8)S.noiseHit(t,{hp:1500+(i-8)*700,peak:.04+(i-8)*.012,dec:spb});
+  }},
+  house:{name:'House 律動',bpm:124,step(S,i,t,bar){
+    const [root,ch]=PROG_UP[bar%4];
+    if(i%4===0)S.kick(t);
+    if(i===4||i===12)S.clap(t,.4);
+    if(i%4===2)S.hat(t,true,.2);else S.hat(t,false,.06);
+    if(i%4===2)S.tone(t,root,.14,{lp:420,peak:.34});
+    if(i===3||i===6||i===11)ch.forEach(f=>S.tone(t,f*2,.12,{type:'square',lp:1600,peak:.05}));
+  }},
+  hiphop:{name:'Hip-hop 重拍',bpm:90,step(S,i,t,bar,spb){
+    const [root,ch]=PROG[bar%4],sw=(i%4===2)?spb*.25:0;
+    if(i===0||i===7||i===10)S.kick(t,.85);
+    if(i===4||i===12)S.snare(t,.42);
+    if(i%2===0)S.hat(t+sw,false,.12);
+    if(i===0||i===7||i===10)S.tone(t,root/2,spb*2.5,{type:'sine',lp:300,peak:.45});
+    if(i===0)ch.forEach(f=>S.tone(t,f,spb*12,{type:'triangle',lp:900,peak:.06,att:.08}));
+  }},
+  trap:{name:'Trap 爆發',bpm:140,step(S,i,t,bar,spb){
+    const [root]=PROG_DARK[bar%4];
+    if(i===0||i===11||(i===3&&bar%2))S.kick(t,.8);
+    if(i===8)S.clap(t,.5);
+    S.hat(t,false,.1);
+    if(i>=12&&bar%2)S.hat(t+spb/2,false,.07);
+    if(i===0||i===11)S.tone(t,root/2,spb*(i?4:9),{type:'sine',lp:250,peak:.5});
+  }},
+  dnb:{name:'Drum & Bass 衝刺',bpm:172,step(S,i,t,bar,spb){
+    const [root,ch]=PROG[bar%4];
+    if(i===0||i===10)S.kick(t);
+    if(i===4||i===12)S.snare(t,.45);
+    if(i===7&&bar%2)S.snare(t,.15);
+    if(i%2===0)S.hat(t,false,.1);
+    if(i===0||i===10)S.tone(t,root/2,spb*(i?5:9),{lp:260,peak:.32});
+    if(i===0&&bar%2===0)ch.forEach(f=>S.tone(t,f*2,spb*30,{type:'triangle',lp:1400,peak:.05,att:.3}));
+  }},
+  synthwave:{name:'Synthwave 夜跑',bpm:108,step(S,i,t,bar,spb){
+    const [root,ch]=PROG_UP[bar%4];
+    if(i===0||i===8)S.kick(t);
+    if(i===4||i===12)S.snare(t,.38);
+    if(i%2===0)S.hat(t,false,.08);
+    if(i%2===0)S.tone(t,i%4===2?root*2:root,spb*1.6,{lp:500,peak:.28});
+    S.tone(t,ch[[0,1,2,1][i%4]]*(i>=8?4:2),spb*.9,{lp:2600,peak:.05});
+  }},
+  rock:{name:'搖滾能量',bpm:120,step(S,i,t,bar,spb){
+    const [root]=PROG_UP[bar%4];
+    if(i===0||i===8||i===10)S.kick(t);
+    if(i===4||i===12)S.snare(t,.48);
+    if(i===0&&bar%4===0)S.hat(t,true,.3);else if(i%2===0)S.hat(t,false,.12);
+    if(i%2===0)S.tone(t,root,spb*1.5,{type:'square',lp:700,peak:.2});
+    if(i===0||i===6||i===8)[root*2,root*3,root*4].forEach(f=>S.tone(t,f,spb*(i===6?1.5:5),{lp:1500,peak:.05}));
+  }},
+  latin:{name:'拉丁 Dembow',bpm:96,step(S,i,t,bar,spb){
+    const [root,ch]=PROG[bar%4];
+    if(i%4===0)S.kick(t,.8);
+    if(i===3||i===6||i===11||i===14)S.snare(t,.32);
+    if(i%2===0)S.hat(t,false,.1);
+    if(i===0||i===6||i===8||i===14)S.tone(t,root/2,spb*1.5,{type:'sine',lp:300,peak:.42});
+    if(i===2||i===10)ch.forEach(f=>S.tone(t,f*2,spb*.8,{type:'triangle',lp:2200,peak:.05}));
   }},
   click:{name:'節拍器',bpm:60,step(S,i,t){if(i%4===0)S.click(t,i===0)}},
 };

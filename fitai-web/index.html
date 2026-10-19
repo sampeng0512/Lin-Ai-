@@ -125,6 +125,12 @@ input[type=checkbox]{accent-color:var(--yellow); width:18px; height:18px; vertic
 .bar{height:10px; border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden}
 .bar i{display:block; height:100%; background:var(--teal)}
 .bar.hp i{background:var(--coral)}
+.nj-intro{padding:14px 16px; border-radius:18px; background:linear-gradient(135deg,rgba(61,214,208,.12),rgba(255,210,63,.08)); border:1px solid var(--line)}
+.nj-intro ul{margin:8px 0 0; padding-left:0; list-style:none; display:grid; gap:6px; line-height:1.5}
+.nj-result{padding:16px; border-radius:18px; background:var(--bg2); border:1px solid var(--line); text-align:center}
+.nj-result .big{font:800 3rem/1 var(--num); color:var(--yellow)}
+.nj-result .rank{font-size:2.2rem}
+.nj-result .facts{margin-top:12px}
 .boss{text-align:center; padding:18px; border-radius:20px; background:var(--bg2); border:1px solid var(--line)}
 .boss .e{font-size:4.5rem; line-height:1.1}
 .boss .nm{font-weight:900; font-size:1.4rem; color:var(--yellow)}
@@ -222,6 +228,25 @@ dialog.recdlg::backdrop{background:rgba(0,0,0,.72)}
 .fab{position:fixed; right:16px; bottom:16px; z-index:45; width:54px; height:54px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; display:grid; place-items:center; box-shadow:0 8px 26px rgba(0,0,0,.45); padding:0}
 .fab svg{width:26px; height:26px}
 .fab.on{background:var(--yellow); color:var(--dark); border-color:var(--yellow)}
+.bd-fab{position:fixed; left:12px; bottom:10px; z-index:45; width:76px; height:110px; padding:0; border:0; background:none; cursor:pointer; filter:drop-shadow(0 8px 16px rgba(0,0,0,.45)); animation:bdBob 2.6s ease-in-out infinite}
+.bd-fab:hover{transform:scale(1.06)}
+.bd-fab .bd-svg{width:100%; height:100%}
+.bd-svg .bd-arm-r{transform-origin:60% 40%; animation:bdWave 3.2s ease-in-out infinite}
+@keyframes bdBob{50%{translate:0 -4px}}
+@keyframes bdWave{0%,70%,100%{rotate:0deg}80%{rotate:-18deg}90%{rotate:8deg}}
+.bd-bubble{position:fixed; left:92px; bottom:70px; z-index:45; max-width:min(64vw,260px); padding:10px 14px; border-radius:16px 16px 16px 4px; background:var(--ink); color:var(--dark); font-size:.88rem; font-weight:600; line-height:1.45; box-shadow:0 10px 26px rgba(0,0,0,.4); animation:bdIn .25s ease-out}
+.bd-bubble[hidden]{display:none}
+@keyframes bdIn{from{opacity:0; transform:translateY(6px)}}
+.bd-panel{left:16px; right:auto; bottom:126px}
+.bd-figs{display:flex; align-items:flex-end; justify-content:center; gap:6px; margin:10px 0; padding:12px 8px 4px; border-radius:16px; background:var(--bg2)}
+.bd-figs figure{margin:0; text-align:center; width:120px}
+.bd-figs .bd-svg{width:100%; height:180px}
+.bd-figs figcaption{font-size:.8rem; color:var(--mute)}.bd-figs figcaption b{color:var(--ink); font-size:1rem}
+.bd-arrow{color:var(--teal); font-size:1.4rem; padding-bottom:70px}
+.bd-bmi{position:relative; height:10px; margin-top:12px; border-radius:6px; background:linear-gradient(90deg,#5aa9ff 0 17.5%,#8fd16a 17.5% 45%,#ffb347 45% 60%,#ff6b57 60%)}
+.bd-bmi i{position:absolute; top:-5px; width:4px; height:20px; margin-left:-2px; border-radius:2px; background:var(--ink); box-shadow:0 0 0 2px var(--dark)}
+.bd-bmi-l{display:flex; justify-content:space-between; margin-top:4px}
+@media (prefers-reduced-motion:reduce){.bd-fab,.bd-svg .bd-arm-r{animation:none}}
 .mpanel{position:fixed; right:16px; bottom:82px; z-index:46; width:min(92vw,350px); max-height:calc(100dvh - 110px); overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:16px; box-shadow:0 18px 50px rgba(0,0,0,.55)}
 .mpanel[hidden]{display:none}
 .mpanel h3{margin:0 0 10px; font-size:1.05rem}
@@ -271,6 +296,13 @@ body{
 .stats{gap:0; padding:8px 6px; border:1px solid var(--line); border-radius:18px; background:var(--glass); box-shadow:var(--sh)}
 .stat{padding:2px 16px; text-align:center}
 .stat+.stat{border-left:1px solid var(--line)}
+.stat{appearance:none; background:none; border:0; border-radius:12px; color:inherit; font:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px; min-width:92px; transition:background .15s}
+.stat:hover{background:rgba(255,255,255,.05)}
+.stat small{font-size:.68rem; color:var(--mute); opacity:.85; white-space:nowrap}
+.stat.done b{color:var(--teal)}.stat.done small{color:var(--teal)}
+.stat.warn small{color:var(--coral); opacity:1}
+.stat .sbar{display:block; width:100%; max-width:84px; height:4px; margin-top:4px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden}
+.stat .sbar i{display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,var(--teal),var(--yellow))}
 .stat b{font-size:1.65rem; line-height:1.1}
 #voiceBtn{box-shadow:none}
 
@@ -500,6 +532,19 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
   <p id="accountStatus" class="small" role="status" aria-live="polite"></p>
   <div class="acc-foot"><button class="btn ghost small" id="accountClose" type="button">關閉</button></div>
 </dialog>
+<dialog class="recdlg" id="voiceDlg" aria-labelledby="voiceTitle">
+  <h3 id="voiceTitle" style="margin-top:0">語音設定</h3>
+  <div class="stack">
+    <label class="row" style="justify-content:space-between"><b>語音報數</b><input type="checkbox" id="vcOn"></label>
+    <div><label class="f" for="vcVoice">聲音</label><select id="vcVoice"></select></div>
+    <p class="small mute" id="vcNote" style="margin:0"></p>
+    <div class="slider"><label class="f" style="margin:0" for="vcRate">語速</label><output id="vcRateO"></output><input type="range" id="vcRate" min="0.7" max="1.5" step="0.05"></div>
+    <div class="slider"><label class="f" style="margin:0" for="vcPitch">音調</label><output id="vcPitchO"></output><input type="range" id="vcPitch" min="0.7" max="1.4" step="0.05"></div>
+    <div class="slider"><label class="f" style="margin:0" for="vcVol">音量</label><output id="vcVolO"></output><input type="range" id="vcVol" min="20" max="100" step="5"></div>
+    <div><label class="f">報數頻率</label><div class="seg" id="vcEvery"><button type="button" data-v="1">每一下</button><button type="button" data-v="5">每 5 下</button><button type="button" data-v="10">每 10 下</button></div></div>
+    <div class="row"><button class="btn teal grow" id="vcTest" type="button">🔊 試聽</button><button class="btn ghost" id="vcReset" type="button">恢復預設</button><button class="btn ghost" id="vcClose" type="button">完成</button></div>
+  </div>
+</dialog>
 <dialog class="recdlg" id="scanDlg" aria-labelledby="scanTitle">
   <h3 id="scanTitle" style="margin-top:0">掃描好友 QR Code</h3>
   <div class="stack">
@@ -678,7 +723,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
   <div class="seg" id="gSub" style="margin-bottom:18px">
     <button class="on" data-sub="ch">一分鐘挑戰</button>
     <button data-sub="hold">撐住挑戰</button>
-    <button data-sub="boss">打怪模式</button>
+    <button data-sub="ninja">🥷 健身忍者</button>
   </div>
 
   <div id="sub-ch">
@@ -739,30 +784,34 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
     </div>
   </div>
 
-  <div id="sub-boss" hidden>
+  <div id="sub-ninja" hidden>
     <div class="grid2">
       <div class="stack">
-        <div class="boss"><div class="e" id="bEmoji"></div><div class="nm" id="bName"></div><div class="small mute" id="bSub"></div></div>
-        <div><div class="row" style="justify-content:space-between"><span class="small mute">魔王血量</span><span class="small" id="bHpTxt"></span></div><div class="bar hp"><i id="bHp"></i></div></div>
-        <div class="row">
-          <div class="grow"><label class="f" for="bMove">攻擊動作</label><select id="bMove"></select></div>
-          <div style="width:110px"><label class="f" for="bReps">做了幾下</label><input type="number" id="bReps" min="1" max="100" value="10"></div>
-        </div>
-        <div class="row">
-          <button class="btn grow" id="bAtk">攻擊</button>
-          <button class="btn teal grow" id="bAtkCam">用鏡頭計數攻擊</button>
-        </div>
-        <p class="small mute">鏡頭計數來自「鏡頭計數」分頁目前還沒儲存的次數。連續換不同動作會累積連擊，還有 20% 機率爆擊。</p>
+        <div data-stage="ninja"></div>
+        <div id="njResult" class="nj-result" hidden></div>
       </div>
       <div class="stack">
-        <div class="facts">
-          <div class="fact"><b id="bLv">1</b><span>等級</span></div>
-          <div class="fact"><b id="bCombo">x1.0</b><span>連擊</span></div>
-          <div class="fact"><b id="bDef">0</b><span>擊敗魔王</span></div>
+        <div class="nj-intro">
+          <h3 style="margin:0">🥷 健身忍者</h3>
+          <ul class="small">
+            <li>🍎 用<b>手</b>去碰畫面上的水果，連續打中會累積<b>連擊倍率</b></li>
+            <li>⬇️ 標著「蹲」的低目標要<b>蹲下</b>才打得到，分數加倍，還會算進深蹲次數</li>
+            <li>⭐ 金星 +30 分；💣 炸彈千萬別碰，會扣分又斷連擊</li>
+            <li>⚡ 最後 10 秒進入<b>狂熱時間</b>，目標變多、分數 ×2</li>
+          </ul>
         </div>
-        <div><div class="row" style="justify-content:space-between"><span class="small mute">經驗值</span><span class="small" id="bXpTxt"></span></div><div class="bar"><i id="bXp"></i></div></div>
-        <div><h4>戰鬥紀錄</h4><ul class="log" id="bLog"></ul></div>
-        <button class="btn ghost" id="bReset">重新開始遊戲</button>
+        <div><label class="f">難度</label><div class="seg" id="njDiff"></div></div>
+        <div class="facts">
+          <div class="fact"><b id="njBest">—</b><span>這個難度最高分</span></div>
+          <div class="fact"><b id="njCombo">0</b><span>最高連擊</span></div>
+          <div class="fact"><b id="njHits">0</b><span>累計擊中</span></div>
+        </div>
+        <p class="small mute">站離鏡頭約 2 公尺，讓<b>頭到膝蓋</b>都在畫面裡，手往兩側伸直也不會出框最好。</p>
+        <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+        <div class="row"><button class="btn teal grow" id="njCamBtn" type="button">開啟鏡頭</button><button class="btn ghost" id="njCamOff" type="button" disabled>關閉</button></div>
+        <button class="btn block" id="njStart" type="button">開始遊戲</button>
+        <div id="njWarn" class="notice warn small" hidden></div>
+        <div><h4>最近的成績</h4><table id="njLog"></table></div>
       </div>
     </div>
   </div>
@@ -1027,6 +1076,15 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
 </main>
 <footer class="foot" id="foot"></footer>
 
+<button class="bd-fab" id="bdFab" type="button" aria-label="我的健身夥伴" aria-expanded="false"></button>
+<div class="bd-bubble" id="bdBubble" role="status" aria-live="polite" hidden></div>
+<div class="mpanel bd-panel" id="bdPanel" role="dialog" aria-label="我的健身夥伴" hidden>
+  <div class="row" style="justify-content:space-between"><h3 style="margin:0">我的健身夥伴</h3><button class="xbtn" id="bdClose" type="button" aria-label="關閉">×</button></div>
+  <p class="small mute" style="margin:4px 0 0">夥伴的高矮胖瘦會照著你的身高、體重變化。</p>
+  <div class="bd-figs" id="bdFigs"></div>
+  <div id="bdInfo"></div>
+  <div class="row" style="margin-top:12px"><button class="btn teal grow" id="bdEdit" type="button">更新身高體重</button><button class="btn ghost" id="bdTalk" type="button">💬 跟我聊</button></div>
+</div>
 <button class="fab" id="musicFab" type="button" aria-label="訓練音樂" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
 <div class="mpanel" id="musicPanel" role="dialog" aria-label="訓練音樂" hidden>
   <h3>訓練音樂</h3>
@@ -1084,7 +1142,7 @@ const KEY='fitai_web_v1',AUTH_KEY='fitai_auth_v1',ACTIVE_KEY='fitai_active_user_
 let activeUserId=localStorage.getItem(ACTIVE_KEY)||'',accountSession=null;
 const stateKey=()=>activeUserId?`${KEY}:user:${activeUserId}`:KEY;
 const dirtyKey=id=>`${KEY}:dirty:${id}`;
-const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''}};
+const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''},voiceCfg:{uri:'',rate:1,pitch:1,vol:1,every:1},body:{set:false,sex:'男',age:25,h:170,w:65,act:1.2,goal:'維持'},kx:{},kxHold0:-1,ninja:{best:{},bestCombo:0,hits:0,plays:0,secs:0,log:[]}};
 let S;
 try{S={...DEF,...JSON.parse(localStorage.getItem(stateKey())||'{}')}}catch(e){S={...DEF}}
 /* 讀進來的資料型別不對（舊版備份、手動改壞）時，把那一欄還原成預設值，避免整個網站壞掉 */
@@ -1095,7 +1153,8 @@ function normalizeState(o){
     const ok=t==='array'?Array.isArray(v):t==='object'?(v&&typeof v==='object'&&!Array.isArray(v)):t==='number'?Number.isFinite(v):typeof v===t;
     if(!ok)o[k]=Array.isArray(d)?[]:(typeof d==='object'?{...d}:d);
   }
-  o.cam={...DEF.cam,...o.cam};o.me={...DEF.me,...o.me};o.sb={...DEF.sb,...o.sb};
+  o.cam={...DEF.cam,...o.cam};o.me={...DEF.me,...o.me};o.sb={...DEF.sb,...o.sb};o.body={...DEF.body,...o.body};o.voiceCfg={...DEF.voiceCfg,...o.voiceCfg};o.ninja={...DEF.ninja,...o.ninja};
+  if(!(o.kxHold0>=0))o.kxHold0=o.holdSecs||0;
   return o;
 }
 S=normalizeState(S);
@@ -1134,6 +1193,18 @@ function addReps(n,ex){
   if(!(n>0))return;S.reps+=n;const k=dkey(new Date());S.days[k]=(S.days[k]||0)+n;
   if(ex){S.exs[ex]=(S.exs[ex]||0)+n;const de=S.dayEx[k]||(S.dayEx[k]={});de[ex]=(de[ex]||0)+n}
 }
+/* ===== 消耗熱量：用「修正 MET」= MET × 自己的基礎代謝（由身高、體重、年齡、性別算出）=====
+   每個動作：[MET, 每下約幾秒]；大卡 = MET × BMR/86400 × 秒數 */
+const EX_MET={深蹲:[5,3],伏地挺身:[3.8,3],捲腹:[2.8,3],仰臥起坐:[3.8,3],側平舉:[3.5,3],前平舉:[3.5,3],二頭彎舉:[3.5,3],肩推:[3.5,3],啞鈴臥推:[3.5,3],
+ 開合跳:[8,1.2],弓箭步:[4,3],登山者:[8,1],臀橋:[3,3],高抬腿:[8,.8],深蹲跳:[8,2.5],椅子臂屈伸:[3.8,3],仰臥抬腿:[2.8,3],引體向上:[8,3.5],
+ 髖鉸鏈:[3.5,3],側抬腿:[2.8,2.5],側彎:[2.5,2.5],站姿抬膝碰肘:[4,1.5],原地踏步:[3.5,1],原地跳繩:[11,.5],波比跳:[8,4]};
+const bmrOf=b=>Math.max(800,10*b.w+6.25*b.h-5*b.age+(b.sex==='男'?5:-161));
+const kcalPerSec=met=>met*bmrOf(S.body)/86400;
+const exKcal=(ex,n)=>{const [met,sec]=EX_MET[String(ex).replace(/（.*?）/g,'').trim()]||[4,2.5];return kcalPerSec(met)*sec*n};
+const exMapKcal=(m,reps)=>{let named=0,k=0;for(const [e,n] of Object.entries(m||{})){named+=n;k+=exKcal(e,n)}return k+exKcal('',Math.max(0,(reps||0)-named))};
+function addKcal(k){if(!(k>0))return;const d=dkey(new Date());S.kx[d]=(S.kx[d]||0)+k}   // 撐住、健身忍者這類「按秒算」的熱量
+const kcalToday=()=>{const d=dkey(new Date());return exMapKcal(S.dayEx[d],S.days[d])+(S.kx[d]||0)};
+const kcalTotal=()=>exMapKcal(S.exs,S.reps)+Object.values(S.kx).reduce((a,b)=>a+b,0)+(S.kxHold0||0)*kcalPerSec(4);   // kxHold0：這個功能上線前就累積的撐住秒數
 function streaks(){
   const nums=Object.keys(S.days).filter(k=>S.days[k]>0).map(dayN).sort((x,y)=>x-y);
   let longest=0,run=0,prev=null;
@@ -1149,7 +1220,7 @@ const ACH=[
  {id:'streak',g:'連',n:'連續打卡',d:'連續有運動的天數',t:[3,7,30],u:'天',v:()=>streaks().longest},
  {id:'timer',g:'時',n:'計時達人',d:'計時器訓練的分鐘數',t:[10,60,300],u:'分鐘',v:()=>Math.floor(S.workSecs/60)},
  {id:'stars',g:'星',n:'三星挑戰',d:'一分鐘挑戰拿到三顆星的次數',t:[1,5,20],u:'次',v:()=>S.stars3||0},
- {id:'boss',g:'斬',n:'魔王殺手',d:'擊敗的魔王數',t:[1,5,15],u:'隻',v:()=>S.defeated},
+ {id:'boss',g:'忍',n:'健身忍者',d:'健身忍者累計擊中數',t:[50,300,1000],u:'個',v:()=>S.ninja.hits},
  {id:'lv',g:'升',n:'遊戲等級',d:'遊戲等級',t:[5,10,20],u:'級',v:()=>level()},
  {id:'var',g:'全',n:'全能運動員',d:'做過的不同動作數',t:[5,12,20],u:'種',v:()=>Object.keys(S.exs).length},
  {id:'water',g:'水',n:'補水達人',d:'喝水達標的天數',t:[1,7,30],u:'天',v:()=>Object.keys(S.waterHit).length},
@@ -1180,20 +1251,74 @@ function checkBadges(silent){
   if(changed)save();
 }
 /* 語音（瀏覽器內建，不需要網路） */
-function say(text,o={}){
-  if(!S.voice||!('speechSynthesis' in window))return;
-  try{if(o.cancel)speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text));u.lang='zh-TW';u.rate=o.rate||1.1;speechSynthesis.speak(u)}catch(e){}
+/* 自動挑最自然的中文語音：Edge 的「曉臻／曉雨 Natural」、Chrome 的「Google 國語（臺灣）」、Apple 的「美佳」都比預設的機器音好聽很多 */
+const hasTTS='speechSynthesis' in window;
+function voiceScore(v){
+  const n=v.name,l=(v.lang||'').toLowerCase().replace('_','-');
+  if(!/^(zh|cmn)/.test(l))return -1;
+  let sc=l.includes('tw')||l.includes('hant')?30:l.includes('cn')||l.includes('hans')?18:l.includes('hk')?5:10;
+  if(/natural|neural|online/i.test(n))sc+=60;
+  if(/google/i.test(n))sc+=40;
+  if(/hsiaochen|hsiaoyu|曉臻|曉雨|xiaoxiao|xiaoyi|mei-?jia|美佳|ting-?ting|婷婷|premium|enhanced|增強|優化/i.test(n))sc+=25;
+  if(/hanhan|yating|zhiwei|huihui|kangkang|yaoyao/i.test(n)&&!/online|natural/i.test(n))sc-=20;   // Windows 舊版桌面語音，聲音比較機械
+  if(v.localService===false)sc+=5;
+  return sc;
 }
+let ttsVoices=[];
+function loadVoices(){
+  if(!hasTTS)return;
+  ttsVoices=speechSynthesis.getVoices().map(v=>({v,sc:voiceScore(v)})).filter(x=>x.sc>=0).sort((a,b)=>b.sc-a.sc).map(x=>x.v);
+  if($('#voiceDlg').open)renderVoiceDlg();
+}
+if(hasTTS){loadVoices();speechSynthesis.addEventListener?.('voiceschanged',loadVoices)}
+const pickVoice=()=>ttsVoices.find(v=>v.voiceURI===S.voiceCfg.uri)||ttsVoices[0]||null;
+function say(text,o={}){
+  if(!(S.voice||o.force)||!hasTTS)return;
+  try{
+    if(o.cancel)speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(String(text)),c=S.voiceCfg,v=pickVoice();
+    if(v){u.voice=v;u.lang=v.lang}else u.lang='zh-TW';
+    u.rate=Math.max(.5,Math.min(2,(o.rate||1.05)*c.rate));u.pitch=c.pitch;u.volume=c.vol;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function sayCount(n){const e=S.voiceCfg.every||1;if(e===1||n%e===0)say(n,{cancel:true})}   // 報數頻率：每下／每 5 下／每 10 下
 function renderVoice(){const b=$('#voiceBtn');b.textContent='語音報數：'+(S.voice?'開':'關');b.setAttribute('aria-pressed',S.voice)}
-$('#voiceBtn').onclick=()=>{S.voice=!S.voice;save();renderVoice();if(S.voice)say('語音報數已開啟',{cancel:true})};
+function renderVoiceDlg(){
+  const c=S.voiceCfg,cur=pickVoice();
+  $('#vcOn').checked=S.voice;
+  $('#vcVoice').innerHTML=ttsVoices.length?ttsVoices.map((v,i)=>`<option value="${esc(v.voiceURI)}">${i===0?'⭐ ':''}${esc(v.name)}（${esc(v.lang)}）</option>`).join(''):'<option value="">找不到中文語音</option>';
+  if(cur)$('#vcVoice').value=cur.voiceURI;
+  $('#vcRate').value=c.rate;$('#vcRateO').textContent=c.rate.toFixed(2)+'×';
+  $('#vcPitch').value=c.pitch;$('#vcPitchO').textContent=c.pitch.toFixed(2);
+  $('#vcVol').value=Math.round(c.vol*100);$('#vcVolO').textContent=Math.round(c.vol*100)+'%';
+  $$('#vcEvery button').forEach(b=>b.classList.toggle('on',+b.dataset.v===c.every));
+  const natural=cur&&/natural|neural|online|google|premium|enhanced/i.test(cur.name);
+  $('#vcNote').textContent=!hasTTS?'這個瀏覽器不支援語音。':!ttsVoices.length?'這台裝置沒有安裝中文語音。Windows 可到「設定 → 時間與語言 → 語音」加入中文（台灣）語音。':
+    natural?'已選用自然語音，聽起來最像真人。':'目前的語音比較機械。用 Microsoft Edge 開啟可使用「曉臻 Natural」，Chrome 可選「Google 國語（臺灣）」，iPhone 可到「設定 → 輔助使用 → 語音內容 → 聲音」下載「美佳（增強版）」。';
+}
+$('#voiceBtn').onclick=()=>{loadVoices();renderVoiceDlg();$('#voiceDlg').showModal()};
+$('#vcOn').onchange=e=>{S.voice=e.target.checked;save();renderVoice();if(S.voice)say('語音報數已開啟',{cancel:true})};
+$('#vcVoice').onchange=e=>{S.voiceCfg.uri=e.target.value;save();renderVoiceDlg();say('你好，我是你的健身教練，我們開始吧！',{cancel:true,force:true})};
+$('#vcRate').oninput=e=>{S.voiceCfg.rate=+e.target.value;$('#vcRateO').textContent=S.voiceCfg.rate.toFixed(2)+'×';save()};
+$('#vcPitch').oninput=e=>{S.voiceCfg.pitch=+e.target.value;$('#vcPitchO').textContent=S.voiceCfg.pitch.toFixed(2);save()};
+$('#vcVol').oninput=e=>{S.voiceCfg.vol=e.target.value/100;$('#vcVolO').textContent=e.target.value+'%';save()};
+$('#vcRate').onchange=$('#vcPitch').onchange=$('#vcVol').onchange=()=>say('一、二、三，很好，保持節奏！',{cancel:true,force:true});
+$('#vcEvery').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.voiceCfg.every=+b.dataset.v;save();renderVoiceDlg()};
+$('#vcTest').onclick=()=>say('第十下！做得很好，再撐一下，你可以的！',{cancel:true,force:true});
+$('#vcReset').onclick=()=>{S.voiceCfg={...DEF.voiceCfg};save();renderVoiceDlg();say('已恢復預設語音',{cancel:true,force:true})};
+$('#vcClose').onclick=()=>$('#voiceDlg').close();
+$('#stats').onclick=e=>{const b=e.target.closest('[data-go]');if(b){const t=$(`.tab[data-tab=${b.dataset.go}]`);if(t){t.click();scrollTo({top:0,behavior:'smooth'})}}};
 function renderStats(silent){
   const st=streaks();
+  const today=S.days[dkey(new Date())]||0,gp=Math.min(100,today/S.goal*100),kt=Math.round(kcalToday()),ka=Math.round(kcalTotal()),b=S.body;
+  const tile=(cls,tab,title,val,lbl,sub,pct)=>`<button type="button" class="stat ${cls}" data-go="${tab}" title="${title}"><b>${val}</b><span>${lbl}</span><small>${sub}</small>${pct===undefined?'':`<i class="sbar"><i style="width:${pct}%"></i></i>`}</button>`;
   $('#stats').innerHTML=
-    `<div class="stat"><b>${S.reps}</b><span>總訓練量</span></div>`+
-    `<div class="stat opt"><b>${Math.round(S.reps*0.5)}</b><span>大卡</span></div>`+
-    `<div class="stat opt"><b>${st.cur}</b><span>連續天數</span></div>`+
-    `<div class="stat"><b>Lv.${level()}</b><span>遊戲等級</span></div>`;
-  checkDaily();renderDaily();friendSyncSoon();
+    tile(gp>=100?'done':'','stats',`累計 ${S.reps} 下・每日目標 ${S.goal} 下`,today,'今日次數',gp>=100?'✓ 達標':`目標 ${S.goal}`,gp)+
+    tile('opt'+(b.set?'':' warn'),b.set?'stats':'body',b.set?`依 ${b.h} cm、${b.w} kg、${b.age} 歲、${b.sex}性估算`:'還沒設定身高體重，先用 170 cm／65 kg 估算，點這裡設定',kt,'今日大卡',b.set?`累計 ${ka}`:'⚠ 設定身高體重')+
+    tile('opt','stats',`最長紀錄 ${st.longest} 天`,`${st.cur?'🔥':''}${st.cur}`,'連續天數',`最長 ${st.longest}`)+
+    tile('','ach',`經驗值 ${S.xp%100} / 100`,`Lv.${level()}`,'等級',`${S.xp%100}/100 XP`,S.xp%100);
+  checkDaily();renderDaily();friendSyncSoon();buddyOnStats();
   checkBadges(silent);
   if($('#tab-ach').classList.contains('active'))renderAch();
   if($('#tab-stats').classList.contains('active'))renderStatsTab();
@@ -1486,7 +1611,7 @@ function tick(){
     if(!v.manualHint){const showHint=v.badFrames>20;if(v.hintEl.hidden===showHint)v.hintEl.hidden=!showHint;if(showHint&&v.hintEl.textContent!==msg)v.hintEl.textContent=msg}
     if(counter){
       setT(v.n,String(counter.count));
-      if(counter.count!==v.spoken){if(counter.count>v.spoken)say(counter.count,{cancel:true});v.spoken=counter.count}
+      if(counter.count!==v.spoken){if(counter.count>v.spoken)sayCount(counter.count);v.spoken=counter.count}
       if(info.ev)for(const e of info.ev)handleCue(v,counter,e,performance.now());
     }else v.spoken=0;
     let [txt,cls]=CHIP[info.status];
@@ -1757,54 +1882,137 @@ $('#chSubmit').onclick=()=>{
   if(isBest)S.best[key]=n;if(stars===3)S.stars3=(S.stars3||0)+1;S.xp+=xp;addReps(n,p.ex);S.log.unshift({ex:p.ex,d:p.d,t:p.t,n,s:stars});S.log=S.log.slice(0,20);
   save();renderStats();chPending=null;$('#chResult').hidden=true;waterNudge('挑戰完成，喝點水休息一下吧。');
   $('#chDone').hidden=false;$('#chDone').textContent=`${stars?'★'.repeat(stars):'再接再厲'}　${p.ex} ${n} 下（目標 ${p.t}），獲得 ${xp} 經驗值${isBest?'，新的個人紀錄！':''}`;
-  chRefresh();renderBoss();
+  chRefresh();
 };
 
-/* ================= 打怪模式 ================= */
-const MOVES={"深蹲":3,"伏地挺身":4,"捲腹":3,"側平舉":2,"二頭彎舉":2,"開合跳":2,"弓箭步":3,"登山者":3,"臀橋":2,"高抬腿":2,
- "仰臥起坐":3,"深蹲跳":4,"啞鈴臥推":4,"肩推":3,"椅子臂屈伸":3,"仰臥抬腿":3,"前平舉":2,"引體向上":5,"髖鉸鏈":3,"側抬腿":2,"側彎":1,"站姿抬膝碰肘":2,"原地踏步":1,"原地跳繩":1,"波比跳":5};
-const BOSSES=[["懶惰史萊姆","🟢",60],["泡麵哥布林","👺",120],["沙發石巨人","🗿",200],["熬夜暗影騎士","🥷",300],["暴食火焰龍","🐉",450]];
-const maxHp=(i,l)=>Math.round(BOSSES[i][2]*(1+.5*l));
-$('#bMove').innerHTML=optsByCat(Object.keys(MOVES));
-function renderBoss(){
-  if(S.bossHp===null)S.bossHp=maxHp(S.bossIdx,S.bossLoop);
-  const [name,emo]=BOSSES[S.bossIdx],mh=maxHp(S.bossIdx,S.bossLoop);
-  $('#bEmoji').textContent=emo;$('#bName').textContent=name;$('#bSub').textContent=`第 ${S.bossLoop+1} 輪，第 ${S.bossIdx+1}/${BOSSES.length} 隻`;
-  $('#bHp').style.width=S.bossHp/mh*100+'%';$('#bHpTxt').textContent=`${S.bossHp} / ${mh}`;
-  $('#bLv').textContent=level();$('#bCombo').textContent='x'+(1+.2*S.combo).toFixed(1);$('#bDef').textContent=S.defeated;
-  $('#bXp').style.width=(S.xp%100)+'%';$('#bXpTxt').textContent=`${S.xp%100} / 100`;
-  $('#bLog').innerHTML=S.blog.length?S.blog.map(l=>`<li>${esc(l)}</li>`).join(''):'<li>還沒開打，先做幾下運動吧。</li>';
+/* ================= 健身忍者：用手打水果、蹲下打低目標、躲炸彈 ================= */
+const NJ_DIFF={easy:{n:'輕鬆',secs:45,spawn:1150,life:3200,bomb:.07,low:.15},normal:{n:'標準',secs:60,spawn:850,life:2500,bomb:.13,low:.22},hard:{n:'地獄',secs:60,spawn:600,life:1900,bomb:.2,low:.3}};
+const NJ_FRUIT=['🍎','🍊','🍉','🍋','🍇','🍓','🥝','🍑','🍍','🥥'];
+const nj={on:false,phase:'idle',diff:'normal',targets:[],fx:[],body:null,elapsed:0,chip:['開啟鏡頭後按「開始遊戲」','']};
+const njView=makeView($('[data-stage=ninja]'),()=>null,{label:()=>nj.on?'停止':'開始遊戲',click:()=>$('#njStart').click()});
+njView.manualHint=true;$('.u',njView.stage).textContent='分';njView.nm.textContent='健身忍者';
+njView.chipFn=()=>nj.chip;
+njView.gaugeFn=()=>nj.on&&nj.phase==='run'?Math.max(0,100-nj.elapsed/NJ_DIFF[nj.diff].secs*100)+'%':'0';
+njView.onLm=(lm,now)=>njFrame(lm,now);
+const njVis=(lm,i)=>lm&&lm[i]&&lm[i][2]>.5;
+function njUpright(ctx,x,y,fn){ctx.save();ctx.translate(x,y);if(isMirror())ctx.scale(-1,1);fn();ctx.restore()}   // 畫面是鏡像的，文字要再翻回來
+function njSpawn(now,fever){
+  const b=nj.body,d=NJ_DIFF[nj.diff],W=njView.canvas.width,H=njView.canvas.height;if(!b)return;
+  const r0=Math.max(30,Math.min(95,b.sw*.42)),roll=Math.random();
+  const kind=roll<d.bomb?'bomb':roll<d.bomb+.08?'gold':roll<d.bomb+.08+d.low?'low':'fruit';
+  for(let tries=0;tries<8;tries++){
+    const low=kind==='low',x=b.cx+(Math.random()*2-1)*b.sw*(low?1.3:2),y=low?b.ky-b.sw*.15+Math.random()*b.sw*.3:b.sy-b.sw*1.4+Math.random()*(b.hy-b.sy+b.sw*1.4);
+    const r=r0*(kind==='gold'?.85:1),cx=Math.max(r,Math.min(W-r,x)),cy=Math.max(r,Math.min(H-r,y));
+    if(nj.targets.some(t=>Math.hypot(t.x-cx,t.y-cy)<t.r+r))continue;
+    nj.targets.push({x:cx,y:cy,r,kind,e:kind==='bomb'?'💣':kind==='gold'?'⭐':NJ_FRUIT[Math.random()*NJ_FRUIT.length|0],born:now,life:d.life*(fever?.85:1)});return;
+  }
 }
-function attack(move,reps){
-  if(reps<=0)return;
-  S.combo=move!==S.lastMove?Math.min(S.combo+1,5):0;S.lastMove=move;
-  const mult=1+.2*S.combo,crit=Math.random()<.2,dmg=Math.round(reps*MOVES[move]*mult*(crit?2:1));
-  S.bossHp=Math.max(0,S.bossHp-dmg);addReps(reps,move);S.xp+=reps*2;
-  S.blog.unshift(`${crit?'爆擊！':''}${move} × ${reps} 下，造成 ${dmg} 傷害（連擊 x${mult.toFixed(1)}）`);
-  if(S.bossHp<=0){S.xp+=50;S.defeated++;S.blog.unshift(`擊敗了 ${BOSSES[S.bossIdx][0]}，獲得 50 經驗值`);
-    S.bossIdx++;if(S.bossIdx>=BOSSES.length){S.bossIdx=0;S.bossLoop++}S.bossHp=maxHp(S.bossIdx,S.bossLoop)}
-  S.blog=S.blog.slice(0,6);save();renderStats();renderBoss();
+function njPop(x,y,text,color,now){nj.fx.push({x,y,text,color,t:now})}
+function njHit(t,now,fever){
+  if(t.kind==='bomb'){nj.score=Math.max(0,nj.score-30);nj.combo=0;nj.bombs++;njPop(t.x,t.y,'-30','#ff6b57',now);beep(160,320);nj.flash=now;return}
+  nj.combo=now-nj.lastHit<1800?nj.combo+1:1;nj.lastHit=now;nj.maxCombo=Math.max(nj.maxCombo,nj.combo);
+  const base=t.kind==='gold'?30:t.kind==='low'?20:10,pts=Math.round(base*(1+Math.min(nj.combo-1,10)*.1)*(fever?2:1));
+  nj.score+=pts;nj.hits++;if(t.kind==='low')nj.low++;
+  njPop(t.x,t.y,`+${pts}`,t.kind==='gold'?'#ffd23f':t.kind==='low'?'#3dd6d0':'#ffffff',now);
+  beep(t.kind==='gold'?1568:t.kind==='low'?1046:880,70);
+  if(nj.combo%5===0)say(`${nj.combo} 連擊`,{cancel:true});
 }
-$('#bAtk').onclick=()=>attack($('#bMove').value,Math.max(1,Math.round(+$('#bReps').value||0)));
-$('#bAtkCam').onclick=()=>{const n=camCounter.count;if(n<=0){alert('「鏡頭計數」分頁目前沒有未儲存的次數。先去那邊用鏡頭做幾下。');return}attack($('#bMove').value,n);camCounter.reset();camView.n.textContent='0'};
-$('#bReset').onclick=()=>{if(!confirm('要重新開始遊戲嗎？等級和魔王進度會歸零。'))return;
-  Object.assign(S,{xp:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,blog:[]});save();renderStats();renderBoss()};
-seg($('#gSub'),b=>{['ch','boss','hold'].forEach(k=>{$('#sub-'+k).hidden=b.dataset.sub!==k});if(cam.running)camStop();exitFull()});
+function njFrame(lm,now){
+  const v=njView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,d=NJ_DIFF[nj.diff];
+  if(lm&&njVis(lm,11)&&njVis(lm,12)){   // 用肩膀、髖、膝蓋算出身體位置，目標都生在手搆得到的地方
+    const sw=Math.max(40,dist(lm[11],lm[12])),cx=(lm[11][0]+lm[12][0])/2,sy=(lm[11][1]+lm[12][1])/2;
+    const hy=njVis(lm,23)&&njVis(lm,24)?(lm[23][1]+lm[24][1])/2:sy+sw*1.6,ky=njVis(lm,25)&&njVis(lm,26)?(lm[25][1]+lm[26][1])/2:hy+sw*1.3;
+    const o=nj.body;nj.body=o&&nj.phase==='run'?{sw:o.sw*.9+sw*.1,cx:o.cx*.9+cx*.1,sy:o.sy*.9+sy*.1,hy:o.hy*.9+hy*.1,ky:o.ky*.95+ky*.05}:{sw,cx,sy,hy,ky};
+  }else if(!lm)nj.body=null;
+  if(!nj.on){nj.chip=[nj.body?'鏡頭已就緒，按「開始遊戲」':'請站進鏡頭，讓頭到膝蓋入鏡',nj.body?'ready':'warn'];return}
+  if(nj.phase==='count'){
+    const r=Math.ceil(3-(now-nj.t0)/1000);
+    if(r>0){v.n.textContent=r;nj.chip=['準備！雙手放鬆','low'];if(r!==nj.lastR){nj.lastR=r;say(r,{cancel:true});beep(660,120)}return}
+    Object.assign(nj,{phase:'run',start:now,next:now,score:0,hits:0,low:0,bombs:0,miss:0,combo:0,maxCombo:0,lastHit:0,targets:[],fx:[],feverSaid:false,flash:0});say('開始',{cancel:true});beep(1320,200);
+  }
+  nj.elapsed=(now-nj.start)/1000;const left=d.secs-nj.elapsed,fever=left<=10;
+  if(left<=0){njFinish(true);return}
+  if(fever&&!nj.feverSaid){nj.feverSaid=true;say('狂熱時間！',{cancel:true})}
+  if(!nj.body){nj.chip=['看不到你，請站回鏡頭前','warn'];v.hintEl.hidden=false;v.hintEl.textContent='請讓頭到膝蓋都在畫面裡'}
+  else{v.hintEl.hidden=true;nj.chip=[fever?'⚡ 狂熱時間 ×2':`剩 ${Math.ceil(left)} 秒`,fever?'low':'ready']}
+  if(now>=nj.next&&nj.body){njSpawn(now,fever);nj.next=now+d.spawn*(fever?.6:1)*(.8+Math.random()*.4)}
+  const hands=lm?[15,16,19,20].filter(i=>njVis(lm,i)).map(i=>lm[i]):[];
+  nj.targets=nj.targets.filter(t=>{
+    if(now-t.born>150&&hands.some(h=>Math.hypot(h[0]-t.x,h[1]-t.y)<t.r*1.1)){njHit(t,now,fever);return false}
+    if(now-t.born>t.life){if(t.kind!=='bomb'){nj.miss++;nj.combo=0}return false}
+    return true;
+  });
+  /* 畫目標：外圈是剩餘時間 */
+  for(const t of nj.targets){
+    const age=(now-t.born)/t.life,r=t.r*Math.min(1,(now-t.born)/180),col=t.kind==='bomb'?'#ff6b57':t.kind==='gold'?'#ffd23f':t.kind==='low'?'#3dd6d0':'#ffffff';
+    ctx.beginPath();ctx.arc(t.x,t.y,r,0,7);ctx.fillStyle=t.kind==='bomb'?'rgba(255,107,87,.22)':'rgba(10,26,32,.45)';ctx.fill();
+    ctx.lineWidth=Math.max(4,r*.12);ctx.strokeStyle=col;ctx.beginPath();ctx.arc(t.x,t.y,r,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-age));ctx.stroke();
+    njUpright(ctx,t.x,t.y,()=>{ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`${Math.round(r*1.15)}px sans-serif`;ctx.fillText(t.e,0,r*.05);
+      if(t.kind==='low'){ctx.font=`800 ${Math.round(r*.5)}px "Noto Sans TC",sans-serif`;ctx.fillStyle='#3dd6d0';ctx.fillText('蹲',0,-r*1.35)}});
+  }
+  for(const h of hands){ctx.beginPath();ctx.arc(h[0],h[1],Math.max(10,(nj.body?nj.body.sw:80)*.12),0,7);ctx.fillStyle='rgba(255,210,63,.55)';ctx.fill()}
+  nj.fx=nj.fx.filter(f=>now-f.t<700);
+  for(const f of nj.fx){const a=(now-f.t)/700;njUpright(ctx,f.x,f.y-a*70,()=>{ctx.globalAlpha=1-a;ctx.textAlign='center';ctx.font=`900 ${Math.round(Math.max(34,(nj.body?nj.body.sw:100)*.4))}px "Noto Sans TC",sans-serif`;ctx.lineWidth=6;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.strokeText(f.text,0,0);ctx.fillStyle=f.color;ctx.fillText(f.text,0,0);ctx.globalAlpha=1})}
+  if(nj.flash&&now-nj.flash<250){ctx.fillStyle=`rgba(255,107,87,${.35*(1-(now-nj.flash)/250)})`;ctx.fillRect(0,0,W,H)}
+  if(fever){ctx.lineWidth=14;ctx.strokeStyle=`rgba(255,210,63,${.35+.25*Math.sin(now/120)})`;ctx.strokeRect(0,0,W,H)}
+  v.n.textContent=nj.score;
+  const label=`剩 ${Math.ceil(left)} 秒${nj.combo>1?`　連擊 ×${nj.combo}`:''}`;if(v.nm.textContent!==label)v.nm.textContent=label;
+}
+const njRank=sc=>sc>=900?['S','傳說忍者']:sc>=600?['A','上忍']:sc>=350?['B','中忍']:sc>=150?['C','下忍']:['D','見習忍者'];
+function njFinish(done){
+  if(!nj.on)return;
+  const ran=nj.phase==='run';nj.on=false;nj.phase='idle';nj.targets=[];nj.fx=[];njView.hintEl.hidden=true;njView.nm.textContent='健身忍者';
+  $('#njStart').textContent='開始遊戲';if(fullStage===njView.stage)exitFull();
+  if(!ran||nj.elapsed<3){renderNinja();return}
+  const secs=Math.min(NJ_DIFF[nj.diff].secs,Math.round(nj.elapsed)),kc=secs*kcalPerSec(7),xp=Math.round(nj.score/8)+(done?10:0),N=S.ninja;
+  const best=N.best[nj.diff]||0,isBest=nj.score>best;
+  if(isBest)N.best[nj.diff]=nj.score;N.bestCombo=Math.max(N.bestCombo,nj.maxCombo);N.hits+=nj.hits;N.plays++;N.secs+=secs;
+  N.log.unshift({d:nj.diff,sc:nj.score,h:nj.hits,c:nj.maxCombo,t:Date.now()});N.log=N.log.slice(0,10);
+  S.xp+=xp;addKcal(kc);addReps(nj.low,'深蹲');save();renderStats();renderNinja();beep(1320,400);
+  const [rk,title]=njRank(nj.score),acc=Math.round(nj.hits/Math.max(1,nj.hits+nj.miss)*100);
+  const r=$('#njResult');r.hidden=false;
+  r.innerHTML=`<div class="rank">${rk==='S'?'🏆':rk==='A'?'🥇':rk==='B'?'🥈':'🥷'}</div><div class="small mute">${NJ_DIFF[nj.diff].n}・評價 <b style="color:var(--yellow)">${rk}</b>（${title}）</div><div class="big">${nj.score}</div><div class="small">${isBest?'🎉 新的最高分！':`這個難度最高 ${best} 分`}</div>
+  <div class="facts"><div class="fact"><b>${nj.hits}</b><span>擊中（命中率 ${acc}%）</span></div><div class="fact"><b>${nj.maxCombo}</b><span>最高連擊</span></div><div class="fact"><b>${nj.low}</b><span>蹲下擊中（算深蹲）</span></div><div class="fact"><b>${Math.round(kc)}</b><span>消耗大卡</span></div></div>
+  <p class="small mute" style="margin:10px 0 0">獲得 ${xp} 經驗值${nj.bombs?`・碰到炸彈 ${nj.bombs} 次`:''}</p>`;
+  say(`遊戲結束，${nj.score} 分`,{cancel:true});
+}
+function renderNinja(){
+  $('#njDiff').innerHTML=Object.entries(NJ_DIFF).map(([k,v])=>`<button type="button" data-v="${k}" class="${k===nj.diff?'on':''}">${v.n}（${v.secs} 秒）</button>`).join('');
+  $('#njBest').textContent=S.ninja.best[nj.diff]||'—';$('#njCombo').textContent=S.ninja.bestCombo;$('#njHits').textContent=S.ninja.hits;
+  $('#njLog').innerHTML=S.ninja.log.length?'<tr><th>難度</th><th>分數</th><th>擊中</th><th>連擊</th></tr>'+S.ninja.log.slice(0,6).map(l=>`<tr><td>${(NJ_DIFF[l.d]||NJ_DIFF.normal).n}</td><td><b style="color:var(--yellow)">${l.sc}</b> ${njRank(l.sc)[0]}</td><td>${l.h}</td><td>${l.c}</td></tr>`).join(''):'<tr><td class="mute">還沒有成績，來玩一場吧！</td></tr>';
+}
+$('#njDiff').onclick=e=>{const b=e.target.closest('button');if(!b||nj.on)return;nj.diff=b.dataset.v;renderNinja()};
+$('#njCamBtn').onclick=async()=>{$('#njCamBtn').disabled=true;const ok=await camStart(njView);if(ok)$('#njCamOff').disabled=false;else $('#njCamBtn').disabled=false};
+$('#njCamOff').onclick=()=>{njFinish(false);camStop();$('#njCamBtn').disabled=false;$('#njCamOff').disabled=true};
+$('#njStart').onclick=()=>{
+  if(nj.on){njFinish(false);return}
+  const w=$('#njWarn');w.hidden=true;
+  if(!(cam.running&&cam.view===njView)){w.hidden=false;w.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
+  audioInit();nj.on=true;nj.phase='count';nj.t0=performance.now();nj.lastR=0;$('#njResult').hidden=true;$('#njStart').textContent='停止';
+};
+seg($('#gSub'),b=>{if(nj.on)njFinish(false);['ch','ninja','hold'].forEach(k=>{$('#sub-'+k).hidden=b.dataset.sub!==k});if(cam.running)camStop();exitFull()});
 
 /* ================= 身體數據與菜單 ================= */
-let sex='男',goalType='維持';
-seg($('#bSex'),b=>{sex=b.dataset.v;calc()});seg($('#bGoal'),b=>{goalType=b.dataset.v;calc()});
-['#bAge','#bH','#bW','#bAct'].forEach(s=>$(s).oninput=calc);
+let sex=S.body.sex,goalType=S.body.goal;
+seg($('#bSex'),b=>{sex=b.dataset.v;calc(true)});seg($('#bGoal'),b=>{goalType=b.dataset.v;calc(true)});
+['#bAge','#bH','#bW','#bAct'].forEach(s=>$(s).oninput=()=>calc(true));
+function applyBody(){   // 把存起來的身體數據填回表單（換裝置登入也會帶過來）
+  const b=S.body;sex=b.sex;goalType=b.goal;
+  $('#bAge').value=b.age;$('#bH').value=b.h;$('#bW').value=b.w;$('#bAct').value=String(b.act);
+  $$('#bSex button').forEach(x=>x.classList.toggle('on',x.dataset.v===sex));$$('#bGoal button').forEach(x=>x.classList.toggle('on',x.dataset.v===goalType));
+}
 function bodyInfo(){
   const age=+$('#bAge').value||25,h=+$('#bH').value||170,w=+$('#bW').value||65,act=+$('#bAct').value;
   const bmi=w/((h/100)**2),bmr=10*w+6.25*h-5*age+(sex==='男'?5:-161),tdee=bmr*act;
   const target={減脂:Math.max(tdee-400,bmr),維持:tdee,增肌:tdee+300}[goalType];
   return {age,h,w,bmi,bmr,tdee,target,cat:bmi<18.5?'過輕':bmi<24?'正常':bmi<27?'過重':'肥胖'};
 }
-function calc(){
+function calc(edited){
   const b=bodyInfo(),f=(v,l)=>`<div class="fact"><b>${v}</b><span>${l}</span></div>`;
   $('#bOut').innerHTML=f(b.bmi.toFixed(1)+'（'+b.cat+'）','BMI')+f(Math.round(b.bmr),'基礎代謝（大卡）')+f(Math.round(b.tdee),'每日總消耗（大卡）')+
     f(Math.round(b.target),`建議攝取（${goalType}，大卡）`)+f(Math.round(b.w*1.6)+'–'+Math.round(b.w*2),'蛋白質（克）')+f((b.w*35/1000).toFixed(1),'每日喝水（公升）');
+  const ok=b.h>=120&&b.h<=220&&b.w>=30&&b.w<=200&&b.age>=10&&b.age<=100;
+  if(ok){S.body={set:S.body.set||!!edited,sex,age:b.age,h:b.h,w:b.w,act:+$('#bAct').value||1.2,goal:goalType};save();renderStats(true)}
 }
 const GROUPS={"下肢":["深蹲","弓箭步","臀橋","髖鉸鏈","側抬腿","深蹲跳"],"上肢核心":["伏地挺身","肩推（可用水瓶）","二頭彎舉（可用水瓶）","側平舉（可用水瓶）","椅子臂屈伸","捲腹","仰臥抬腿"],"有氧燃脂":["開合跳","登山者","高抬腿","原地跳繩","波比跳"],"全身":["深蹲","伏地挺身","登山者","捲腹","波比跳","髖鉸鏈"]};
 const CNT={新手:4,中階:5,進階:6};
@@ -1991,7 +2199,7 @@ function renderDaily(){
   $('#dailyTxt').innerHTML=`今日挑戰：<span style="color:var(--yellow)">${t.ex} ${t.target} 下</span>`;
   $('#dailyBar').style.width=Math.min(100,p/t.target*100)+'%';
   const plan=(S.sched[new Date().getDay()]||'').trim();$('#dailyPlan').textContent=isRest(plan)?'':`今日課表：${plan}${(S.days[dkey(new Date())]||0)>0?'（今天已運動）':''}`;
-  $('#dailySub').textContent=done?'已完成，30 經驗值已入帳。':`進度 ${p} / ${t.target} 下，完成可得 30 經驗值。（鏡頭、計時器、挑戰、打怪的次數都算）`;
+  $('#dailySub').textContent=done?'已完成，30 經驗值已入帳。':`進度 ${p} / ${t.target} 下，完成可得 30 經驗值。（鏡頭、計時器、挑戰、健身忍者蹲下擊中的次數都算）`;
 }
 $('#dailyGo').onclick=()=>{const t=dailyTask();$('#camEx').value=t.ex;$('#camEx').dispatchEvent(new Event('change'))};
 
@@ -2045,7 +2253,7 @@ async function makeShare(){
   x.strokeStyle='rgba(255,255,255,.045)';x.lineWidth=2;for(let i=0;i<W;i+=120){x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke()}
   x.fillStyle='#eaf4f1';x.font=`800 80px ${F}`;x.fillText('Lin AI',60,140);
   x.fillStyle='#93aeb3';x.font=`500 32px ${F}`;const d=new Date();x.fillText(`健身成就卡　${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`,60,196);
-  const st=streaks(),stats=[[S.reps,'累計次數'],[st.cur,'連續天數'],[level(),'遊戲等級'],[Math.round(S.reps*.5),'消耗大卡']];
+  const st=streaks(),stats=[[S.reps,'累計次數'],[st.cur,'連續天數'],[level(),'遊戲等級'],[Math.round(kcalTotal()),'消耗大卡']];
   stats.forEach(([v,l],i)=>{const bx=60+i*210;x.fillStyle='rgba(255,255,255,.06)';x.beginPath();rrect(x,bx,250,195,150,20);x.fill();
     x.fillStyle='#ffd23f';x.font=`800 60px ${F}`;x.textAlign='center';x.fillText(String(v),bx+97,332);x.fillStyle='#93aeb3';x.font=`500 26px ${F}`;x.fillText(l,bx+97,378);x.textAlign='left'});
   x.fillStyle='#eaf4f1';x.font=`800 40px ${F}`;x.fillText('我的徽章',60,490);
@@ -2094,7 +2302,7 @@ function renderWeights(){
 $('#wtAdd').onclick=()=>{
   const v=Math.round(+$('#wtIn').value*10)/10;
   if(!(v>=30&&v<=200)){toast('請輸入 30 到 200 之間的體重');return}
-  S.weights[dkey(new Date())]=v;$('#bW').value=v;calc();$('#wtIn').value='';save();renderWeights();renderStats();toast(`已記錄體重 ${v} kg`);
+  S.weights[dkey(new Date())]=v;$('#bW').value=v;calc(true);$('#wtIn').value='';save();renderWeights();renderStats();toast(`已記錄體重 ${v} kg`);
 };
 
 /* ================= 我的菜單（計時器預設） ================= */
@@ -2239,7 +2447,7 @@ function holdFinish(reached){
   hold.on=false;hold.phase='idle';holdView.hintEl.hidden=true;
   const secs=Math.floor(hold.good),ex=hold.ex,isBest=secs>(S.holdBest[ex]||0),pct=Math.round(hold.good/Math.max(hold.total,1)*100),xp=Math.floor(secs/2);
   if(secs>0){
-    if(isBest)S.holdBest[ex]=secs;S.holdSecs=(S.holdSecs||0)+secs;S.xp+=xp;
+    if(isBest)S.holdBest[ex]=secs;S.holdSecs=(S.holdSecs||0)+secs;S.xp+=xp;addKcal(secs*kcalPerSec(4));
     S.holdLog.unshift({ex,t:hold.target,n:secs,ok:pct});S.holdLog=S.holdLog.slice(0,15);
   }
   save();renderStats();renderHold();beep(1320,400);
@@ -2904,6 +3112,78 @@ function finishRec(mime){
 $('#recClose').onclick=()=>{const d=$('#recDlg');if(d.close)d.close();else d.removeAttribute('open')};
 $('#recDlg').addEventListener('close',()=>{const v=$('#recVideo');v.pause();v.removeAttribute('src');v.load();if(recUrl){URL.revokeObjectURL(recUrl);recUrl=null}});
 
+/* ================= 左下角健身夥伴：體型照著帳號本人的身高體重畫 ================= */
+const bmiOf=b=>b.w/((b.h/100)**2);
+const healthyW=b=>{const m=(b.h/100)**2;return [18.5*m,24*m]};
+function buddyGoalW(b){const [lo,hi]=healthyW(b),bmi=bmiOf(b);return bmi>24?hi:bmi<18.5?lo:b.w}
+/* 參數化小人：高度跟身高成比例，胖瘦跟 BMI 成比例 */
+function buddySVG(b,o={}){
+  const bmi=b.w/((b.h/100)**2),f=Math.max(.72,Math.min(1.75,bmi/21.5)),hs=Math.max(.82,Math.min(1.12,b.h/172));
+  const H=150*hs,top=170-H,head=15,cx=50,neck=top+head*2,legH=H*.42,torsoH=H-head*2-legH,hip=neck+torsoH;
+  const tw=26*f,lw=8.5*Math.sqrt(f),aw=6.5*Math.sqrt(f),belly=Math.max(0,f-1.1)*16;
+  const happy=o.mood!=='tired',ghost=o.ghost;
+  const fill=c=>ghost?'rgba(61,214,208,.32)':c,st='';
+  const skin=fill('#f5c9a0'),shirt=fill(b.sex==='女'?'#ff8fc7':'#3dd6d0'),pants=fill('#1d3a44'),shoe=fill('#ffd23f');
+  return `<svg viewBox="0 0 100 175" class="bd-svg${ghost?' ghost':''}" aria-hidden="true">
+    ${ghost?'':'<ellipse cx="50" cy="171" rx="'+(18+tw*.4)+'" ry="4" fill="rgba(0,0,0,.25)"/>'}
+    <rect x="${cx-tw/2+2}" y="${hip-4}" width="${lw}" height="${legH}" rx="${lw/2}" fill="${pants}" ${st}/>
+    <rect x="${cx+tw/2-2-lw}" y="${hip-4}" width="${lw}" height="${legH}" rx="${lw/2}" fill="${pants}" ${st}/>
+    <rect x="${cx-tw/2-1}" y="${hip+legH-8}" width="${lw+4}" height="7" rx="3" fill="${shoe}" ${st}/>
+    <rect x="${cx+tw/2-3-lw}" y="${hip+legH-8}" width="${lw+4}" height="7" rx="3" fill="${shoe}" ${st}/>
+    <g class="bd-arm-l"><rect x="${cx-tw/2-aw-1}" y="${neck+4}" width="${aw}" height="${torsoH*.95}" rx="${aw/2}" fill="${skin}" ${st}/></g>
+    <g class="bd-arm-r"><rect x="${cx+tw/2+1}" y="${neck+4}" width="${aw}" height="${torsoH*.95}" rx="${aw/2}" fill="${skin}" ${st}/></g>
+    <path d="M${cx-tw/2} ${neck+6} q0 -6 8 -6 h${tw-16} q8 0 8 6 v${torsoH-4} q${belly/2} 0 0 ${2} h-${tw} q-${belly/2} 0 0 -${2}z" fill="${shirt}" ${st}/>
+    ${belly&&!ghost?`<ellipse cx="${cx}" cy="${neck+torsoH*.62}" rx="${tw/2+belly*.35}" ry="${torsoH*.32}" fill="${shirt}"/>`:''}
+    <circle cx="${cx}" cy="${top+head}" r="${head}" fill="${skin}" ${st}/>
+    ${ghost?'':`<path d="M${cx-head} ${top+head-4} a${head} ${head} 0 0 1 ${head*2} 0 z" fill="#2a2320"/>
+    <rect x="${cx-head}" y="${top+head-6}" width="${head*2}" height="4" rx="2" fill="#ffd23f"/>
+    <circle cx="${cx-5}" cy="${top+head+2}" r="1.8" fill="#1a1a1a"/><circle cx="${cx+5}" cy="${top+head+2}" r="1.8" fill="#1a1a1a"/>
+    <path d="M${cx-5} ${top+head+7} q5 ${happy?4:-2} 10 0" stroke="#1a1a1a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <circle cx="${cx-9}" cy="${top+head+6}" r="2.2" fill="#ff8f8f" opacity=".6"/><circle cx="${cx+9}" cy="${top+head+6}" r="2.2" fill="#ff8f8f" opacity=".6"/>`}
+  </svg>`;
+}
+function buddyTip(){
+  const b=S.body,today=S.days[dkey(new Date())]||0,kt=Math.round(kcalToday()),st=streaks(),hr=new Date().getHours();
+  if(!b.set)return '告訴我你的身高體重，我就會變成你的樣子，熱量也會算得更準！';
+  const tips=[];
+  if(today>=S.goal)tips.push(`今天 ${today} 下已達標，我們都超棒！`);
+  else if(today>0)tips.push(`今天做了 ${today} 下，再 ${S.goal-today} 下就達標！`);
+  else tips.push(hr<12?'早安！今天動一動，我陪你。':hr<18?'午後來幾組深蹲提提神吧！':'睡前來一點伸展或核心訓練？');
+  if(kt>0)tips.push(`今天已燒掉約 ${kt} 大卡，差不多 ${Math.max(1,Math.round(kt/70))} 顆茶葉蛋的熱量 🥚`);
+  if(st.cur>=2)tips.push(`連續 ${st.cur} 天了，別讓火焰熄滅 🔥`);
+  const gw=buddyGoalW(b),diff=b.w-gw;
+  if(Math.abs(diff)>=.5)tips.push(diff>0?`距離健康體重還有 ${diff.toFixed(1)} kg，一起慢慢來！`:`再增加 ${(-diff).toFixed(1)} kg 就進入健康範圍，記得吃夠蛋白質！`);
+  else tips.push(`BMI ${bmiOf(b).toFixed(1)} 在健康範圍，維持下去！`);
+  return tips[Math.floor(Math.random()*tips.length)];
+}
+var bdBubbleT=0;
+function buddySay(msg,ms=6000){const el=$('#bdBubble');el.textContent=msg||buddyTip();el.hidden=false;clearTimeout(bdBubbleT);bdBubbleT=setTimeout(()=>{el.hidden=true},ms)}
+function renderBuddy(){
+  const b=S.body,today=S.days[dkey(new Date())]||0;
+  $('#bdFab').innerHTML=buddySVG(b,{mood:today>=S.goal||today>0?'happy':'tired'});
+  const p=$('#bdPanel');if(p.hidden)return;
+  const bmi=bmiOf(b),[lo,hi]=healthyW(b),gw=buddyGoalW(b),cat=bmi<18.5?'過輕':bmi<24?'正常':bmi<27?'過重':'肥胖';
+  const gb={...b,w:gw},same=Math.abs(gw-b.w)<.5;
+  $('#bdFigs').innerHTML=`<figure>${buddySVG(b)}<figcaption>現在的你<br><b>${b.w} kg</b></figcaption></figure>`+
+    (same?'':`<div class="bd-arrow">➜</div><figure>${buddySVG(gb,{ghost:true})}<figcaption>健康目標<br><b>${gw.toFixed(1)} kg</b></figcaption></figure>`);
+  const pos=Math.max(0,Math.min(100,(bmi-15)/(35-15)*100));
+  $('#bdInfo').innerHTML=`<div class="facts">
+      <div class="fact"><b>${b.h}</b><span>身高 cm</span></div><div class="fact"><b>${b.w}</b><span>體重 kg</span></div>
+      <div class="fact"><b>${bmi.toFixed(1)}</b><span>BMI（${cat}）</span></div><div class="fact"><b>${Math.round(kcalToday())}</b><span>今日大卡</span></div></div>
+    <div class="bd-bmi"><i style="left:${pos}%"></i></div><div class="bd-bmi-l small mute"><span>過輕</span><span>正常 ${lo.toFixed(0)}–${hi.toFixed(0)} kg</span><span>過重</span><span>肥胖</span></div>
+    <p class="small" style="margin:10px 0 0">${b.set?(same?'你在健康範圍內，我們保持這個體型！':`${gw<b.w?'減':'增'} ${Math.abs(b.w-gw).toFixed(1)} kg 就能到達健康範圍，我會一路陪你。`):'⚠ 還沒設定身高體重，現在先用 170 cm／65 kg 示範。'}</p>`;
+}
+$('#bdFab').onclick=()=>{const p=$('#bdPanel');p.hidden=!p.hidden;$('#bdFab').setAttribute('aria-expanded',String(!p.hidden));$('#bdBubble').hidden=true;renderBuddy()};
+$('#bdClose').onclick=()=>{$('#bdPanel').hidden=true;$('#bdFab').setAttribute('aria-expanded','false')};
+$('#bdEdit').onclick=()=>{$('#bdPanel').hidden=true;$('.tab[data-tab=body]').click();scrollTo({top:0,behavior:'smooth'});setTimeout(()=>$('#bH').focus(),300)};
+$('#bdTalk').onclick=()=>buddySay();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#bdPanel').hidden)$('#bdClose').click()});
+var bdLastReps=S.reps;
+function buddyOnStats(){   // 每次數字更新時重畫夥伴；做完運動偶爾說句話
+  renderBuddy();
+  if(S.reps>bdLastReps){const d=S.reps-bdLastReps;bdLastReps=S.reps;if(d>=5||Math.random()<.3)buddySay(`+${d} 下！${buddyTip()}`,5000)}
+}
+setTimeout(()=>buddySay(),2500);
 /* ================= 訓練音樂：即時合成的原創節拍 + 播放自己的音樂 ================= */
 const PROG=[[110.0,[220.0,261.63,329.63]],[87.31,[174.61,220.0,261.63]],[130.81,[261.63,329.63,392.0]],[98.0,[196.0,246.94,293.66]]]; // Am F C G
 const PROG_UP=[[130.81,[261.63,329.63,392.0]],[98.0,[196.0,246.94,293.66]],[110.0,[220.0,261.63,329.63]],[87.31,[174.61,220.0,261.63]]]; // C G Am F
@@ -3138,10 +3418,10 @@ if(S.waterOn&&!S.waterNext)waterSchedule();
 const idle=f=>('requestIdleCallback' in window)?requestIdleCallback(f,{timeout:1500}):setTimeout(f,60);
 renderCamCfg();renderHold();setInterval(planTick,20000);setTimeout(planTick,4000);
 await initializeAccount();
-renderMusic();showInstall();renderFacing();renderVoice();renderStats(true);renderHist();chRefresh();renderBoss();calc();plan();
+renderMusic();showInstall();renderFacing();renderVoice();applyBody();calc();renderStats(true);renderHist();chRefresh();renderNinja();plan();
 renderFriends();setTimeout(handleInvite,600);
 idle(()=>{listCams();renderSched();renderFood();renderGuide();renderWeights();renderPresets();renderAch()});   // 第一次畫面先出來，其餘慢慢補
-window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,waterTick,addWater,showWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,attack,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
+window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,waterTick,addWater,showWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,nj,njFinish,kcalToday,kcalTotal,renderBuddy,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
 </script>
 </body>
 </html>

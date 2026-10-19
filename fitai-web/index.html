@@ -325,6 +325,67 @@ select,input[type=number],input[type=password],input[type=text],input[type=email
 #accountSubmit{width:100%}
 .acc-link:hover{color:var(--ink)}
 .acc-foot{display:flex; justify-content:flex-end; margin-top:6px}
+.acc-card{display:flex; align-items:center; gap:14px; padding:14px; background:var(--bg2); border-radius:16px; box-shadow:inset 0 0 0 1px var(--line)}
+.av{flex:none; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:1.1rem; line-height:1; color:var(--dark); box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
+.av.emo{font-size:1.3rem}
+.av.lg{width:56px; height:56px; font-size:1.5rem}.av.lg.emo{font-size:1.8rem}
+.av.xl{width:84px; height:84px; font-size:2.2rem}.av.xl.emo{font-size:2.8rem}
+.av-btn{position:relative; flex:none; appearance:none; border:0; padding:0; background:none; border-radius:50%; cursor:pointer}
+.av-btn::after{content:"✎"; position:absolute; right:-2px; bottom:-2px; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:.75rem; background:var(--card); color:var(--ink); box-shadow:0 0 0 2px var(--line)}
+.av-btn:hover .av,.av-btn:focus-visible .av{box-shadow:0 0 0 3px var(--yellow)}
+.av-prev{display:flex; align-items:center; gap:16px; padding:14px; background:var(--bg2); border-radius:16px}
+.av-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(44px,1fr)); gap:6px}
+.av-grid button{appearance:none; border:0; height:44px; border-radius:12px; background:var(--bg2); font-size:1.4rem; cursor:pointer; box-shadow:inset 0 0 0 1px var(--line)}
+.av-grid button[aria-pressed=true]{box-shadow:inset 0 0 0 2px var(--yellow); background:rgba(255,210,63,.12)}
+.av-colors{display:flex; flex-wrap:wrap; gap:10px}
+.av-colors button{appearance:none; border:0; width:34px; height:34px; border-radius:50%; cursor:pointer}
+.av-colors button[aria-pressed=true]{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--ink)}
+.fr .av{margin-left:-4px}
+.av.img{background:var(--bg2); overflow:hidden}
+.av.img img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block}
+/* 好友：分享區（代碼＋QR）、掃描器、頒獎台排行榜 */
+.fr-share{display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center}
+.fr-share .stack{min-width:0}
+.fr-qr{width:156px; height:156px; padding:8px; background:#fff; border-radius:16px; display:grid; place-items:center; cursor:zoom-in; border:0}
+.fr-qr svg{width:100%; height:100%; display:block}
+.fr-qr .small{color:#555; text-align:center; padding:8px}
+.qr-big{width:min(78vw,340px); aspect-ratio:1; margin:0 auto; padding:14px; background:#fff; border-radius:20px}
+.qr-big svg{width:100%; height:100%; display:block}
+.fr-addways{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.scan-box{position:relative; width:100%; aspect-ratio:1; max-height:60vh; border-radius:18px; overflow:hidden; background:#000}
+.scan-box video{width:100%; height:100%; object-fit:cover; display:block}
+.scan-box::after{content:""; position:absolute; inset:16%; border-radius:18px; box-shadow:0 0 0 999px rgba(0,0,0,.45); border:3px solid var(--yellow)}
+.scan-box i{position:absolute; left:16%; right:16%; top:16%; height:3px; background:var(--teal); box-shadow:0 0 12px var(--teal); animation:scanLine 2s ease-in-out infinite alternate; z-index:1}
+@keyframes scanLine{to{top:84%}}
+.fr-mine{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; background:linear-gradient(135deg,rgba(255,210,63,.14),rgba(61,214,208,.10)); border:1px solid rgba(255,210,63,.35); margin-bottom:12px}
+.fr-mine b{color:var(--yellow)}
+.podium{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; align-items:end; margin:6px 0 14px}
+.pod{position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; min-width:0}
+.pod .av{box-shadow:0 0 0 3px var(--pc),0 8px 22px rgba(0,0,0,.35)}
+.pod .crown{position:absolute; top:-20px; font-size:1.3rem}
+.pod b{max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.95rem}
+.pod .pv{font:800 1.3rem/1 var(--num); color:var(--yellow)}.pod .pv small{font:600 .7rem "Noto Sans TC",sans-serif; color:var(--mute); margin-left:2px}
+.pod .step{width:100%; border-radius:14px 14px 6px 6px; display:grid; place-items:center; font:800 1.6rem var(--num); color:var(--dark); background:var(--pc)}
+.pod.p1{--pc:#ffd23f}.pod.p1 .step{height:86px}
+.pod.p2{--pc:#c8d1da}.pod.p2 .step{height:62px}
+.pod.p3{--pc:#cd7f32}.pod.p3 .step{height:46px}
+.pod.me b{color:var(--yellow)}
+.pod .xbtn{position:absolute; top:-6px; right:0; font-size:1rem}
+.fr .meter{display:block; height:4px; border-radius:4px; background:rgba(255,255,255,.08); margin-top:6px; overflow:hidden}
+.fr .meter i{display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,var(--teal),var(--yellow))}
+.fr-empty{text-align:center; padding:18px 8px}
+.fr-empty .big{font-size:2.6rem}
+@media (max-width:560px){.fr-share{grid-template-columns:1fr}.fr-qr{margin:0 auto}}
+.acc-who{min-width:0; display:flex; flex-direction:column; gap:4px; align-items:flex-start}
+.acc-email{font-weight:700; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.acc-sync{display:inline-flex; align-items:center; gap:6px; font-size:.82rem; font-weight:700; padding:3px 10px; border-radius:999px; color:var(--teal); background:rgba(61,214,208,.12)}
+.acc-sync i{width:7px; height:7px; border-radius:50%; background:currentColor}
+.acc-sync.pending{color:var(--coral); background:rgba(255,107,87,.12)}
+.acc-sync.busy{color:var(--yellow); background:rgba(255,210,63,.12)}
+.acc-sync.busy i{animation:accPulse 1s ease-in-out infinite}
+@keyframes accPulse{50%{opacity:.25}}
+.acc-actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px}
+.acc-logout:hover{color:var(--coral); border-color:var(--coral)}
 select:focus,input:focus,textarea:focus{outline:0; border-color:var(--yellow); box-shadow:0 0 0 3px rgba(255,210,63,.18)}
 details>summary{list-style:none; display:flex; align-items:center; gap:8px}
 details>summary::-webkit-details-marker{display:none}
@@ -421,13 +482,53 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
       <button class="acc-link" id="accountRecover" type="button">忘記密碼？</button>
     </form>
   </div>
-  <div id="accountSignedIn" class="stack" hidden>
-    <p id="accountEmailText" class="small"></p>
-    <p id="accountSyncText" class="small mute">紀錄已同步</p>
-    <button class="btn ghost" id="accountLogout" type="button">登出</button>
+  <div id="accountSignedIn" hidden>
+    <div class="acc-card">
+      <button type="button" class="av-btn" id="accountAvatar" aria-label="更換頭像" title="更換頭像"></button>
+      <div class="acc-who">
+        <div class="small mute">已登入</div>
+        <div class="acc-email" id="accountEmailText"></div>
+        <span class="acc-sync" id="accountSyncText"><i></i><span>紀錄已同步</span></span>
+      </div>
+    </div>
+    <p class="small mute" style="margin:12px 2px 0">訓練、飲食與成就紀錄會自動備份到雲端，換手機登入同一個帳號就能接續使用。</p>
+    <div class="acc-actions">
+      <button class="btn teal" id="accountSyncNow" type="button">立即同步</button>
+      <button class="btn ghost acc-logout" id="accountLogout" type="button">登出</button>
+    </div>
   </div>
   <p id="accountStatus" class="small" role="status" aria-live="polite"></p>
   <div class="acc-foot"><button class="btn ghost small" id="accountClose" type="button">關閉</button></div>
+</dialog>
+<dialog class="recdlg" id="scanDlg" aria-labelledby="scanTitle">
+  <h3 id="scanTitle" style="margin-top:0">掃描好友 QR Code</h3>
+  <div class="stack">
+    <div class="scan-box"><video id="scanVideo" playsinline muted></video><i></i></div>
+    <p class="small mute" id="scanMsg" role="status" aria-live="polite">把朋友的 QR Code 放進框框裡。</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="scanClose" type="button">取消</button></div>
+  </div>
+</dialog>
+<dialog class="recdlg" id="qrDlg" aria-labelledby="qrTitle">
+  <h3 id="qrTitle" style="margin-top:0;text-align:center">讓朋友掃這個加你</h3>
+  <div class="stack" style="text-align:center">
+    <div class="qr-big" id="qrBig"></div>
+    <div class="codebox" id="qrCode"></div>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="qrClose" type="button">關閉</button></div>
+  </div>
+</dialog>
+<dialog class="recdlg" id="avatarDlg" aria-labelledby="avatarTitle">
+  <h3 id="avatarTitle" style="margin-top:0">選擇頭像</h3>
+  <div class="stack">
+    <div class="av-prev"><span id="avPreview"></span><div><b id="avPreviewName"></b><div class="small mute">好友排行榜和帳號都會顯示這個頭像</div></div></div>
+    <div class="row">
+      <label class="btn teal grow" style="cursor:pointer; text-align:center">📷 上傳照片<input type="file" id="avFile" accept="image/*" hidden></label>
+      <button class="btn ghost" id="avReset" type="button">改用名字首字</button>
+    </div>
+    <div class="seg" id="avTabs"></div>
+    <div class="av-grid" id="avEmojis"></div>
+    <div id="avColorBox"><label class="f">底色</label><div class="av-colors" id="avColors"></div></div>
+    <div class="row" style="justify-content:flex-end"><span class="row"><button class="btn ghost" id="avCancel" type="button">取消</button><button class="btn" id="avSave" type="button">儲存</button></span></div>
+  </div>
 </dialog>
 <div class="wbar" id="planBar" role="alert" hidden>
   <span id="plText"></span>
@@ -753,20 +854,29 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
       <div class="card stack">
         <h3 style="margin:0">我的資料</h3>
         <div class="row" style="align-items:flex-end">
+          <button type="button" class="av-btn" id="frAvatarBtn" aria-label="更換頭像" title="更換頭像"></button>
           <div class="grow"><label class="f" for="frName">暱稱（最多 12 個字）</label><input type="text" id="frName" maxlength="12" placeholder="例如：小林"></div>
           <button class="btn" type="button" id="frSaveMe">建立我的資料</button>
         </div>
-        <div id="frMeBox" class="stack" hidden>
-          <div><label class="f">我的好友代碼（給朋友，讓他加你）</label><div class="codebox" id="frMyCode">—</div></div>
-          <div class="row"><button class="btn teal grow" type="button" id="frInvite">分享邀請連結</button><button class="btn ghost" type="button" id="frCopy">複製代碼</button></div>
+        <div id="frMeBox" class="fr-share" hidden>
+          <div class="stack">
+            <div><label class="f">我的好友代碼（給朋友，讓他加你）</label><div class="codebox" id="frMyCode">—</div></div>
+            <div class="row"><button class="btn teal grow" type="button" id="frInvite">分享邀請連結</button><button class="btn ghost" type="button" id="frCopy">複製代碼</button></div>
+            <p class="small mute" style="margin:0">朋友用手機相機或 App 內的「掃描 QR Code」掃右邊的圖，就能直接加你。</p>
+          </div>
+          <button type="button" class="fr-qr" id="frQR" aria-label="放大我的 QR Code"></button>
         </div>
-        <p class="small mute">好友只看得到你的暱稱、總次數、各動作累計與本週次數、連續天數和等級，看不到影像和訓練細節。</p>
+        <p class="small mute">好友只看得到你的頭像、暱稱、總次數、各動作累計與本週次數、連續天數和等級，看不到影像和訓練細節。</p>
       </div>
       <div class="card stack" id="frAddBox">
         <h3 style="margin:0">加好友</h3>
         <div class="row" style="align-items:flex-end">
           <div class="grow"><label class="f" for="frCode">對方的 6 碼好友代碼</label><input type="text" id="frCode" maxlength="8" placeholder="例如：K7M2QX" autocapitalize="characters" autocomplete="off"></div>
           <button class="btn" type="button" id="frAdd">加入</button>
+        </div>
+        <div class="fr-addways">
+          <button class="btn teal" type="button" id="frScan">📷 掃描 QR Code</button>
+          <label class="btn ghost" style="cursor:pointer; text-align:center">🖼️ 從相簿讀取<input type="file" id="frScanFile" accept="image/*" hidden></label>
         </div>
         <p class="small mute">加了之後，雙方都會出現在對方的排行榜裡。</p>
       </div>
@@ -974,7 +1084,7 @@ const KEY='fitai_web_v1',AUTH_KEY='fitai_auth_v1',ACTIVE_KEY='fitai_active_user_
 let activeUserId=localStorage.getItem(ACTIVE_KEY)||'',accountSession=null;
 const stateKey=()=>activeUserId?`${KEY}:user:${activeUserId}`:KEY;
 const dirtyKey=id=>`${KEY}:dirty:${id}`;
-const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0},sb:{url:'',key:''}};
+const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''}};
 let S;
 try{S={...DEF,...JSON.parse(localStorage.getItem(stateKey())||'{}')}}catch(e){S={...DEF}}
 /* 讀進來的資料型別不對（舊版備份、手動改壞）時，把那一欄還原成預設值，避免整個網站壞掉 */
@@ -989,6 +1099,28 @@ function normalizeState(o){
   return o;
 }
 S=normalizeState(S);
+/* 頭像：「表情|顏色編號」短字串，或縮小過的照片 data:image/...；沒選的人用名字首字＋由代碼決定的顏色，好友一樣分得出來 */
+const AV_GROUPS={
+  '人物':['🧑','👦','👧','👨','👩','🧔','👱','👱‍♀️','🧑‍🦱','👩‍🦰','👨‍🦳','👵','🧑‍🎓','🧑‍💻','🧑‍🚀','🥷','🦸','🦹','🧙','🧛','😎','🤓','😤','🥳'],
+  '運動':['💪','🏋️','🔥','⚡','🏃','🧘','🥊','🚴','🏊','⛹️','🤸','⭐','🏆','🎯','🚀','👑'],
+  '動物':['🐯','🦁','🐻','🐼','🐨','🦊','🐶','🐱','🐰','🐸','🐧','🦄','🐺','🦅','🦈','🐉'],
+};
+const AV_EMOJI=Object.values(AV_GROUPS).flat();
+const AV_COLORS=['#ffd23f','#3dd6d0','#ff6b57','#8fd16a','#b48cff','#5aa9ff','#ff8fc7','#ffb347'];
+const AV_IMG=/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+function avParse(av){
+  av=String(av||'');if(av.length<=20000&&AV_IMG.test(av))return{e:'',ci:-1,img:av};
+  const [e='',c='']=av.split('|'),ci=parseInt(c,10);return{e:AV_EMOJI.includes(e)?e:'',ci:Number.isInteger(ci)&&ci>=0&&ci<AV_COLORS.length?ci:-1,img:''};
+}
+const avHash=s=>{let h=0;for(const ch of String(s||''))h=(h*31+ch.codePointAt(0))|0;return Math.abs(h)};
+function avatarHTML(av,name,seed,cls=''){
+  const p=avParse(av);
+  if(p.img)return `<span class="av ${cls} img" aria-hidden="true"><img src="${p.img}" alt=""></span>`;
+  const ci=p.ci>=0?p.ci:avHash(seed||name)%AV_COLORS.length,txt=p.e||([...String(name||'').trim()][0]||'?').toUpperCase();
+  return `<span class="av ${cls}${p.e?' emo':''}" style="background:${AV_COLORS[ci]}" aria-hidden="true">${esc(txt)}</span>`;
+}
+const scriptCache={};
+function loadScript(src){return scriptCache[src]||(scriptCache[src]=new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>{delete scriptCache[src];no(new Error('load '+src))};document.head.appendChild(s)}))}
 /* 連續多次修改只寫一次（250 毫秒內合併），離開頁面前一定會寫入 */
 let noSave=false,saveT=0;
 const saveNow=()=>{clearTimeout(saveT);saveT=0;if(noSave)return;try{localStorage.setItem(stateKey(),JSON.stringify(S));if(accountSession&&activeUserId){localStorage.setItem(dirtyKey(activeUserId),'1');scheduleCloudSave()}}catch(e){}};
@@ -2274,7 +2406,13 @@ function renderAccount(){
   $('#accountSignedOut').hidden=signed;$('#accountSignedIn').hidden=!signed;
   $('#accountBtn').textContent=signed?'帳號':'登入 / 註冊';
   $('#accountBtn').setAttribute('aria-label',signed?`帳號：${accountSession.user.email||'已登入'}`:'登入或建立帳號');
-  if(signed){$('#accountEmailText').textContent=accountSession.user.email||'已登入';$('#accountSyncText').textContent=accountSyncMessage}
+  if(signed){
+    const email=accountSession.user.email||'已登入',sync=$('#accountSyncText');
+    $('#accountEmailText').textContent=email;$('#accountEmailText').title=email;
+    $('#accountAvatar').innerHTML=avatarHTML(S.me.avatar,S.me.name||email,S.me.code||email,'lg');
+    sync.querySelector('span').textContent=accountSyncMessage;
+    sync.classList.toggle('pending',/待處理/.test(accountSyncMessage));sync.classList.toggle('busy',/同步中/.test(accountSyncMessage));
+  }
 }
 function scheduleCloudSave(){
   clearTimeout(cloudSaveT);cloudSaveT=setTimeout(()=>syncAccountNow().catch(()=>{}),1200);
@@ -2352,6 +2490,12 @@ $('#accountRecover').onclick=async()=>{
   const email=$('#accountEmail').value.trim();if(!email){showAccountStatus('請先輸入註冊用的 Email。',true);return}
   try{await accountAuthRequest('recover',{email});showAccountStatus('若此 Email 已註冊，密碼重設信已寄出。')}catch(error){showAccountStatus(accountErrorText(error),true)}
 };
+$('#accountSyncNow').onclick=async()=>{
+  const btn=$('#accountSyncNow');btn.disabled=true;saveNow();
+  accountSyncMessage='同步中…';renderAccount();showAccountStatus('');
+  try{await syncAccountNow();accountSyncMessage='雲端已同步';renderAccount()}catch(error){}
+  finally{btn.disabled=false}
+};
 $('#accountLogout').onclick=async()=>{
   $('#accountLogout').disabled=true;saveNow();
   try{await syncAccountNow();const session=await freshAccountSession();await accountAuthRequest('logout',{},session.access_token)}catch(error){logErr('account logout '+error.message)}
@@ -2403,6 +2547,7 @@ async function friendCreate(){
   const isNew=!S.me.id,old=S.me.name;if(isNew)S.me.id=uuid();S.me.name=name;
   try{
     const code=await friendUpsert();S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
+    if(S.me.avatar)pushAvatar();
     toast(isNew?`已建立，你的好友代碼是 ${code}`:'已更新暱稱');
     if(frPending){const c=frPending;frPending='';await friendAdd(c,false)}
     await friendBoard();
@@ -2424,10 +2569,67 @@ async function friendBoard(){
     let rows=await rpc('lin_get_board',{p_id:S.me.id})||[];
     if(!rows.length){await friendSync(true);rows=await rpc('lin_get_board',{p_id:S.me.id})||[]}   // 伺服器上的資料不見了（例如重設過）就補回去
     frRows=rows;frAt=Date.now();const n=Math.max(0,rows.length-1);
+    await friendAvatars(rows);
     if(n!==S.me.friends){S.me.friends=n;save();renderStats()}
   }catch(e){$('#frNote').hidden=false;$('#frNote').textContent=friendly(e)}
   frBusy=false;renderBoard();
 }
+let frAvatars={},frAvatarOk=null;   // frAvatarOk=false：伺服器還沒執行 supabase-avatars.sql
+const avMissing=e=>e.code==='PGRST202'||/could not find (the )?function/i.test(String(e.message));
+async function friendAvatars(rows){
+  if(frAvatarOk===false)return;
+  try{
+    const res=await rpc('lin_get_avatars',{p_codes:rows.map(r=>r.code).filter(Boolean)})||[];
+    frAvatarOk=true;frAvatars=Object.fromEntries(res.map(x=>[x.code,x.avatar]));
+    if(S.me.code&&(frAvatars[S.me.code]||'|')!==(S.me.avatar||'|'))pushAvatar();   // 伺服器上的頭像跟本機不同就補上
+  }catch(e){if(avMissing(e))frAvatarOk=false;else logErr('friendAvatars '+e.message)}
+}
+async function pushAvatar(){
+  if(!S.me.id||!S.me.code||!frCfgOk()||frAvatarOk===false)return;
+  try{await rpc('lin_set_avatar',{p_id:S.me.id,p_code:S.me.code,p_avatar:S.me.avatar||'|'});frAvatarOk=true;frAvatars[S.me.code]=S.me.avatar||'|'}
+  catch(e){if(avMissing(e))frAvatarOk=false;else logErr('pushAvatar '+e.message)}
+}
+let avDraft={e:'',ci:-1,img:''},avTab='人物';
+function myAvatarName(){return S.me.name||(accountSession&&accountSession.user.email)||'我'}
+const avDraftValue=()=>avDraft.img||(avDraft.e||avDraft.ci>=0?`${avDraft.e}|${avDraft.ci>=0?avDraft.ci:''}`:'');
+function renderAvatarDlg(){
+  const seed=S.me.code||myAvatarName();
+  $('#avPreview').innerHTML=avatarHTML(avDraftValue(),myAvatarName(),seed,'xl');$('#avPreviewName').textContent=myAvatarName();
+  $('#avTabs').innerHTML=Object.keys(AV_GROUPS).map(g=>`<button type="button" data-g="${g}" class="${g===avTab?'on':''}">${g}</button>`).join('');
+  $('#avEmojis').innerHTML=AV_GROUPS[avTab].map(e=>`<button type="button" data-e="${e}" aria-label="頭像 ${e}" aria-pressed="${!avDraft.img&&e===avDraft.e}">${e}</button>`).join('');
+  $('#avColorBox').hidden=!!avDraft.img;
+  const shown=avDraft.ci>=0?avDraft.ci:avHash(seed)%AV_COLORS.length;
+  $$('#avColors button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.ci===shown)));
+}
+function openAvatarDlg(){avDraft=avParse(S.me.avatar);avTab=Object.keys(AV_GROUPS).find(g=>AV_GROUPS[g].includes(avDraft.e))||'人物';renderAvatarDlg();$('#avatarDlg').showModal()}
+/* 照片裁成正方形、縮到 96×96 的 JPEG，通常只有幾 KB，好友排行榜載入也快 */
+async function avatarFromFile(file){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url});
+    const side=Math.min(img.naturalWidth,img.naturalHeight),cv=document.createElement('canvas');cv.width=cv.height=96;
+    cv.getContext('2d').drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,96,96);
+    for(const q of [.82,.7,.55]){const d=cv.toDataURL('image/jpeg',q);if(d.length<=20000)return d}
+    throw new Error('too big');
+  }finally{URL.revokeObjectURL(url)}
+}
+$('#avColors').innerHTML=AV_COLORS.map((c,i)=>`<button type="button" data-ci="${i}" style="background:${c}" aria-label="底色 ${i+1}"></button>`).join('');
+$('#avTabs').onclick=e=>{const b=e.target.closest('button');if(b){avTab=b.dataset.g;renderAvatarDlg()}};
+$('#avEmojis').onclick=e=>{const b=e.target.closest('button');if(b){avDraft.e=b.dataset.e;avDraft.img='';renderAvatarDlg()}};
+$('#avColors').onclick=e=>{const b=e.target.closest('button');if(b){avDraft.ci=+b.dataset.ci;renderAvatarDlg()}};
+$('#avFile').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{avDraft.img=await avatarFromFile(f);renderAvatarDlg()}catch(err){toast('這張圖片讀不出來，請換一張 JPG 或 PNG');logErr('avatar photo '+err.message)}
+};
+$('#avReset').onclick=()=>{avDraft.e='';avDraft.img='';renderAvatarDlg()};
+$('#avCancel').onclick=()=>$('#avatarDlg').close();
+$('#avSave').onclick=async()=>{
+  S.me.avatar=avDraftValue();save();
+  $('#avatarDlg').close();renderAccount();renderFriends();renderBoard();
+  await pushAvatar();
+  toast(S.me.id&&frAvatarOk===false?'頭像已儲存。要讓好友看到，請先在 Supabase 執行 supabase-avatars.sql':'頭像已更新');
+};
+$('#accountAvatar').onclick=openAvatarDlg;$('#frAvatarBtn').onclick=openAvatarDlg;
 const wkOf=r=>r.week_key===weekKey()?r.week_reps:0;
 const lvOf=r=>Math.floor(r.xp/100)+1;
 const agoTxt=t=>{const m=(Date.now()-new Date(t).getTime())/60000;if(!isFinite(m))return '';return m<2?'剛剛':m<60?Math.round(m)+' 分鐘前':m<1440?Math.round(m/60)+' 小時前':Math.round(m/1440)+' 天前'};
@@ -2444,20 +2646,39 @@ function renderBoard(){
   }
   const val=ex?r=>Number((r[actionField]||{})[ex])||0:{week:wkOf,total:r=>r.reps,streak:r=>r.streak,level:lvOf}[frSort],unit={week:'下',total:'下',streak:'天',level:'級'}[frSort];
   const rows=[...frRows].sort((a,b)=>val(b)-val(a)||b.reps-a.reps||String(a.name).localeCompare(String(b.name)));
+  if(rows.length<2){
+    el.innerHTML=`<div class="fr-empty"><div class="big">🏁</div><p><b>還沒有好友</b></p><p class="small mute">邀請朋友一起練，排行榜才會熱鬧起來！</p><div class="row" style="justify-content:center"><button class="btn teal" type="button" data-act="invite">分享邀請連結</button><button class="btn ghost" type="button" data-act="scan">掃描 QR Code</button></div></div>`;
+    $('#frAt').textContent='';return;
+  }
   let rank=0,prev=null;
-  el.innerHTML=rows.map((r,i)=>{
-    const v=val(r);if(v!==prev){rank=i+1;prev=v}   // 同分同名次
+  const ranked=rows.map((r,i)=>{const v=val(r);if(v!==prev){rank=i+1;prev=v}return{r,v,rank}});   // 同分同名次
+  const top=Math.max(1,ranked[0].v),av=(r,cls)=>avatarHTML(r.is_me?S.me.avatar:frAvatars[r.code],r.name,r.code,cls);
+  const del=r=>r.is_me?'':`<button class="xbtn" type="button" data-code="${esc(r.code)}" aria-label="刪除好友 ${esc(r.name)}">×</button>`;
+  /* 自己的名次＋離前一名差多少 */
+  const mi=ranked.findIndex(x=>x.r.is_me),mine=ranked[mi];let tip='';
+  if(mine){
+    const ahead=ranked.slice(0,mi).reverse().find(x=>x.v>mine.v);
+    tip=mine.rank===1?(ranked[1]&&ranked[1].v<mine.v?`你是第一名！領先第二名 <b>${mine.v-ranked[1].v}</b> ${unit} 🔥`:'你目前並列第一，再多練一點就能獨占冠軍！')
+      :ahead?`再 <b>${ahead.v-mine.v}</b> ${unit}就能超越 <b>${esc(ahead.r.name)}</b>，衝！`:'';
+  }
+  const mineHTML=mine?`<div class="fr-mine">${av(mine.r,'')}<div class="grow"><div>你目前第 <b>${mine.rank}</b> 名 / ${rows.length} 人</div>${tip?`<div class="small">${tip}</div>`:''}</div></div>`:'';
+  const pod=ranked.slice(0,3),order=pod.length===3?[pod[1],pod[0],pod[2]]:pod.length===2?[pod[1],pod[0]]:pod;
+  const podHTML=`<div class="podium" style="grid-template-columns:repeat(${order.length},1fr)">${order.map(({r,v,rank})=>`<div class="pod p${Math.min(rank,3)} ${r.is_me?'me':''}">${rank===1?'<span class="crown">👑</span>':''}${av(r,rank===1?'xl':'lg')}<b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="pv">${v}<small>${unit}</small></span><span class="step">${rank}</span>${del(r)}</div>`).join('')}</div>`;
+  const listHTML=ranked.slice(3).map(({r,v,rank})=>{
     const summary=ex?`${ex} 本週 ${Number((r.week_ex_reps||{})[ex])||0}　累計 ${Number((r.ex_reps||{})[ex])||0}`:`本週 ${wkOf(r)}　累計 ${r.reps}`;
-    return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(rank,4)}">${rank}</span><div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">${summary}　連續 ${r.streak} 天　Lv.${lvOf(r)}　${agoTxt(r.updated_at)}</span></div><span class="fv">${v}<small>${unit}</small></span>${r.is_me?'':`<button class="xbtn" type="button" data-code="${esc(r.code)}" aria-label="刪除好友 ${esc(r.name)}">×</button>`}</div>`;
+    return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(rank,4)}">${rank}</span>${av(r,'')}<div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">${summary}　連續 ${r.streak} 天　Lv.${lvOf(r)}　${agoTxt(r.updated_at)}</span><span class="meter"><i style="width:${Math.round(Math.max(0,v)/top*100)}%"></i></span></div><span class="fv">${v}<small>${unit}</small></span>${del(r)}</div>`;
   }).join('');
-  $('#frAt').textContent=rows.length<2?'還沒有好友，把你的代碼或邀請連結傳給朋友吧。':`共 ${rows.length-1} 位好友，更新於 ${hhmm(frAt)}`;
+  el.innerHTML=mineHTML+podHTML+listHTML;
+  $('#frAt').textContent=`共 ${rows.length-1} 位好友，更新於 ${hhmm(frAt)}`;
 }
 function renderFriends(){
   const ok=frCfgOk();
   $('#frNoCfg').hidden=ok;$('#frMain').hidden=!ok;
   $('#frName').value=S.me.name||$('#frName').value;
+  $('#frAvatarBtn').innerHTML=avatarHTML(S.me.avatar,S.me.name||$('#frName').value||myAvatarName(),S.me.code||myAvatarName(),'lg');
   $('#frSaveMe').textContent=S.me.id?'更新暱稱':'建立我的資料';
   $('#frMeBox').hidden=!S.me.id;$('#frMyCode').textContent=S.me.code||'—';
+  if(S.me.code)renderMyQR($('#frQR'),3);
   $('#frAddBox').hidden=false;
   $$('#frSort button').forEach(b=>b.classList.toggle('on',b.dataset.v===frSort));
   if(frPending&&ok){$('#frNote').hidden=false;$('#frNote').textContent=S.me.id?'':`你收到好友邀請（代碼 ${frPending}）。先設定暱稱，建立後會自動加入。`}
@@ -2470,6 +2691,7 @@ $('#frRefresh').onclick=friendBoard;
 seg($('#frSort'),b=>{frSort=b.dataset.v;renderBoard()});
 $('#frExercise').onchange=renderBoard;
 $('#frBoard').onclick=async e=>{
+  const act=e.target.closest('[data-act]');if(act){act.dataset.act==='scan'?startScan():$('#frInvite').click();return}
   const b=e.target.closest('[data-code]');if(!b||!confirm('確定要刪除這位好友嗎？對方的名單裡也會移除你。'))return;
   try{await rpc('lin_remove_friend',{p_id:S.me.id,p_code:b.dataset.code});toast('已刪除好友');await friendBoard()}catch(err){toast(friendly(err))}
 };
@@ -2479,10 +2701,74 @@ $('#frInvite').onclick=async()=>{
   if(navigator.share){try{await navigator.share({title:'Lin AI 好友邀請',text,url:link});return}catch(e){if(e.name==='AbortError')return}}
   try{await navigator.clipboard.writeText(text+'\n'+link);toast('已複製邀請文字和連結')}catch(e){prompt('請全選複製：',text+'\n'+link)}
 };
+/* ===== QR Code：產生自己的邀請 QR、用鏡頭或相簿圖片掃朋友的 ===== */
+const QR_GEN='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js',QR_READ='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+async function renderMyQR(el,cell){
+  const link=inviteLink();if(el.dataset.link===link)return;
+  try{await loadScript(QR_GEN);const q=window.qrcode(0,'M');q.addData(link);q.make();el.innerHTML=q.createSvgTag({cellSize:cell,margin:1,scalable:true});el.dataset.link=link}
+  catch(e){el.innerHTML='<span class="small">連上網路後才會顯示 QR Code</span>';logErr('qr gen '+e.message)}
+}
+$('#frQR').onclick=()=>{if(!S.me.code)return;$('#qrCode').textContent=S.me.code;$('#qrBig').dataset.link='';renderMyQR($('#qrBig'),8);$('#qrDlg').showModal()};
+$('#qrClose').onclick=()=>$('#qrDlg').close();
+function codeFromQR(text){
+  text=String(text||'').trim();
+  try{const u=new URL(text);const c=u.searchParams.get('add');if(c)return c.toUpperCase().replace(/[^A-Z0-9]/g,'')}catch(e){}
+  const c=text.toUpperCase().replace(/[^A-Z0-9]/g,'');return c.length===6?c:'';
+}
+let qrDetector;
+async function qrReader(){   // 有原生 BarcodeDetector 就用（Android Chrome），沒有就載入 jsQR
+  if(qrDetector!==undefined)return qrDetector;
+  try{if('BarcodeDetector' in window&&(await BarcodeDetector.getSupportedFormats()).includes('qr_code')){const d=new BarcodeDetector({formats:['qr_code']});return qrDetector=async src=>{const r=await d.detect(src);return r[0]&&r[0].rawValue}}}catch(e){}
+  await loadScript(QR_READ);
+  const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
+  return qrDetector=async src=>{
+    const w=src.videoWidth||src.naturalWidth||src.width,h=src.videoHeight||src.naturalHeight||src.height;if(!w||!h)return '';
+    const k=Math.min(1,640/Math.max(w,h));cv.width=Math.round(w*k);cv.height=Math.round(h*k);cx.drawImage(src,0,0,cv.width,cv.height);
+    const r=window.jsQR(cx.getImageData(0,0,cv.width,cv.height).data,cv.width,cv.height);return r&&r.data;
+  };
+}
+function handleScanned(text){
+  const code=codeFromQR(text);
+  if(!code){$('#scanMsg').textContent='這不是 Lin AI 的好友 QR Code，換一個試試。';return false}
+  if($('#scanDlg').open)$('#scanDlg').close();
+  if(code===S.me.code){toast('這是你自己的 QR Code 喔');return true}
+  friendAdd(code,true);return true;
+}
+const scan={stream:null,timer:0};
+function stopScan(){clearTimeout(scan.timer);if(scan.stream){scan.stream.getTracks().forEach(t=>t.stop());scan.stream=null}$('#scanVideo').srcObject=null}
+async function startScan(){
+  $('#scanMsg').textContent='正在開啟鏡頭…';$('#scanDlg').showModal();
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#scanMsg').textContent='這個瀏覽器不能開鏡頭，請改用「從相簿讀取」。';return}
+  try{
+    const read=await qrReader();
+    scan.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+    if(!$('#scanDlg').open){stopScan();return}
+    const v=$('#scanVideo');v.srcObject=scan.stream;await v.play();
+    $('#scanMsg').textContent='把朋友的 QR Code 放進框框裡。';
+    const tick=async()=>{
+      if(!scan.stream)return;
+      try{const t=await read(v);if(t&&handleScanned(t))return}catch(e){}
+      scan.timer=setTimeout(tick,180);
+    };tick();
+  }catch(e){stopScan();$('#scanMsg').textContent=e.name==='NotAllowedError'?'沒有鏡頭權限。請在瀏覽器設定允許鏡頭，或改用「從相簿讀取」。':'無法開啟鏡頭，請改用「從相簿讀取」。';logErr('scan '+e.message)}
+}
+$('#scanDlg').addEventListener('close',stopScan);
+$('#scanClose').onclick=()=>$('#scanDlg').close();
+$('#frScan').onclick=startScan;
+$('#frScanFile').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const url=URL.createObjectURL(f);
+  try{
+    const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url});
+    const t=await(await qrReader())(img);
+    if(!t||!codeFromQR(t))toast('這張圖裡找不到 Lin AI 的好友 QR Code');else handleScanned(t);
+  }catch(err){toast('讀不到這張圖片，請換一張試試');logErr('scan file '+err.message)}
+  finally{URL.revokeObjectURL(url)}
+};
 $('#frCopy').onclick=async()=>{try{await navigator.clipboard.writeText(S.me.code);toast('已複製好友代碼')}catch(e){prompt('好友代碼：',S.me.code)}};
 $('#frDelete').onclick=async()=>{
   if(!S.me.id||!confirm('確定要刪除你在伺服器上的資料嗎？你會從所有好友的排行榜消失，也要重新加好友。'))return;
-  try{await rpc('lin_delete_me',{p_id:S.me.id});S.me={id:'',code:'',name:'',friends:0};frRows=[];frLastSig='';save();toast('已刪除');renderFriends();renderBoard();renderStats()}catch(e){toast(friendly(e))}
+  try{await rpc('lin_delete_me',{p_id:S.me.id});S.me={...DEF.me,avatar:S.me.avatar};frRows=[];frLastSig='';save();toast('已刪除');renderFriends();renderBoard();renderStats()}catch(e){toast(friendly(e))}
 };
 setInterval(()=>{if(!document.hidden&&$('#tab-friends').classList.contains('active'))friendBoard()},60000);
 (function(){   // 邀請連結：https://網站/?add=ABC123

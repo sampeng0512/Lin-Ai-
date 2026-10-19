@@ -1,5 +1,5 @@
 /* Lin AI 的離線快取。改了網頁內容後，把下面的版本號加 1，使用者才會拿到新的快取。 */
-const VER = 'v9';
+const VER = 'v11';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

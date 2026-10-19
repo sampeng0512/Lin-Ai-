@@ -127,6 +127,8 @@ input[type=checkbox]{accent-color:var(--yellow); width:18px; height:18px; vertic
 .bar.hp i{background:var(--coral)}
 .nj-intro{padding:14px 16px; border-radius:18px; background:linear-gradient(135deg,rgba(61,214,208,.12),rgba(255,210,63,.08)); border:1px solid var(--line)}
 .nj-intro ul{margin:8px 0 0; padding-left:0; list-style:none; display:grid; gap:6px; line-height:1.5}
+.ps-poses{display:flex; flex-wrap:wrap; gap:6px}
+.ps-chip{font-size:.82rem; padding:4px 10px; border-radius:999px; background:var(--bg2); border:1px solid var(--line)}
 .nj-result{padding:16px; border-radius:18px; background:var(--bg2); border:1px solid var(--line); text-align:center}
 .nj-result .big{font:800 3rem/1 var(--num); color:var(--yellow)}
 .nj-result .rank{font-size:2.2rem}
@@ -408,6 +410,17 @@ select,input[type=number],input[type=password],input[type=text],input[type=email
 .fr-empty{text-align:center; padding:18px 8px}
 .fr-empty .big{font-size:2.6rem}
 @media (max-width:560px){.fr-share{grid-template-columns:1fr}.fr-qr{margin:0 auto}}
+.man-form{display:grid; grid-template-columns:2fr 1fr 1.3fr auto; gap:10px; align-items:end}
+.man-form:has(#manNameWrap:not([hidden])){grid-template-columns:1.5fr 1.5fr 1fr 1.3fr auto}
+.man-form input[type=date]{width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:9px 12px; font:inherit; color-scheme:dark}
+#manNameWrap[hidden]{display:none}
+.man-list{list-style:none; margin:0; padding:0; display:grid; gap:6px}
+.man-list li{display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:12px; background:var(--bg2)}
+.man-list .mdate{font:700 .85rem var(--num); color:var(--mute); min-width:3.2em}
+.man-list b{color:var(--yellow)}
+.man-list .grow{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.man-list .xbtn{margin-left:4px}
+@media (max-width:700px){.man-form,.man-form:has(#manNameWrap:not([hidden])){grid-template-columns:1fr 1fr}.man-form .btn{grid-column:1/-1}}
 .acc-who{min-width:0; display:flex; flex-direction:column; gap:4px; align-items:flex-start}
 .acc-email{font-weight:700; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .acc-sync{display:inline-flex; align-items:center; gap:6px; font-size:.82rem; font-weight:700; padding:3px 10px; border-radius:999px; color:var(--teal); background:rgba(61,214,208,.12)}
@@ -724,6 +737,8 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
     <button class="on" data-sub="ch">一分鐘挑戰</button>
     <button data-sub="hold">撐住挑戰</button>
     <button data-sub="ninja">🥷 健身忍者</button>
+    <button data-sub="run">🏃 障礙跑酷</button>
+    <button data-sub="pose">🧍 姿勢配對</button>
   </div>
 
   <div id="sub-ch">
@@ -815,12 +830,61 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
       </div>
     </div>
   </div>
+  <div id="sub-run" hidden>
+    <div class="grid2">
+      <div class="stack">
+        <div data-stage="run"></div>
+        <div id="rnResult" class="nj-result" hidden></div>
+      </div>
+      <div class="stack">
+        <div class="nj-intro"><h3 style="margin:0">🏃 障礙跑酷</h3><ul class="small"><li>小人會自動往前跑，你在鏡頭前<b>原地</b>控制它</li><li>📦 箱子來了 → <b>往上跳</b>跳過去</li><li>🦅 飛鳥來了 → <b>蹲下</b>躲過去，會算進深蹲次數</li><li>❤️ 有 3 條命，越跑越快，看你能跑多遠！</li></ul></div>
+        
+        <div class="facts"><div class="fact"><b id="rnBest">—</b><span>最高分</span></div><div class="fact"><b id="rnPlays">0</b><span>遊玩次數</span></div></div>
+        <p class="small mute">站離鏡頭約 2～3 公尺，<b>肩膀到膝蓋</b>都要入鏡。倒數的 3 秒請站直不動，會記下你的站姿高度。</p>
+        <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+        <div class="row"><button class="btn teal grow" id="rnCamBtn" type="button">開啟鏡頭</button><button class="btn ghost" id="rnCamOff" type="button" disabled>關閉</button></div>
+        <button class="btn block" id="rnStart" type="button">開始遊戲</button>
+        <div id="rnWarn" class="notice warn small" hidden></div>
+        <div><h4>最近的成績</h4><table id="rnLog"></table></div>
+      </div>
+    </div>
+  </div>
+  <div id="sub-pose" hidden>
+    <div class="grid2">
+      <div class="stack">
+        <div data-stage="pose"></div>
+        <div id="psResult" class="nj-result" hidden></div>
+      </div>
+      <div class="stack">
+        <div class="nj-intro"><h3 style="margin:0">🧍 姿勢配對</h3><ul class="small"><li>牆壁會從四周壓過來，在時間內<b>擺出畫面上的姿勢</b></li><li>姿勢正確撐 0.5 秒就過關，越快過關分數越高</li><li>連續過關有連過加成；撞牆 3 次遊戲結束</li><li>一共 20 關，全部過關再加 300 分，越後面時間越短！</li></ul></div>
+        <div><label class="f">會出現的姿勢</label><div class="ps-poses" id="psPoses"></div></div>
+        <div class="facts"><div class="fact"><b id="psBest">—</b><span>最高分</span></div><div class="fact"><b id="psPlays">0</b><span>遊玩次數</span></div></div>
+        <p class="small mute">站離鏡頭約 2～3 公尺，讓<b>全身</b>都入鏡，雙手張開也不會出框。</p>
+        <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+        <div class="row"><button class="btn teal grow" id="psCamBtn" type="button">開啟鏡頭</button><button class="btn ghost" id="psCamOff" type="button" disabled>關閉</button></div>
+        <button class="btn block" id="psStart" type="button">開始遊戲</button>
+        <div id="psWarn" class="notice warn small" hidden></div>
+        <div><h4>最近的成績</h4><table id="psLog"></table></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ============ 統計與成就 ============ -->
 <section class="panel" id="tab-stats">
   <div class="stack">
     <div class="facts" id="stFacts"></div>
+    <div class="card stack" id="manCard">
+      <div><h3 style="margin:0">✍️ 自訂紀錄</h3><p class="small mute" style="margin:4px 0 0">沒用鏡頭做的運動（健身房、外出、補登）可以自己記。會算進統計、熱量和每日目標，但<b>不計入好友排行</b>。</p></div>
+      <div class="man-form">
+        <div><label class="f" for="manEx">動作</label><select id="manEx"></select></div>
+        <div id="manNameWrap" hidden><label class="f" for="manName">動作名稱</label><input type="text" id="manName" maxlength="12" placeholder="例如：划船機"></div>
+        <div><label class="f" for="manN">次數</label><input type="number" id="manN" min="1" max="2000" step="1" placeholder="20"></div>
+        <div><label class="f" for="manDate">日期</label><input type="date" id="manDate"></div>
+        <button class="btn" type="button" id="manAdd">新增紀錄</button>
+      </div>
+      <ul class="man-list" id="manList"></ul>
+    </div>
     <div class="card stack">
       <div><h3 style="margin:0">各動作累計</h3><p class="small mute" style="margin:4px 0 0">依動作分類統計，總訓練量不會混在單一動作裡。</p></div>
       <div id="stExTotals"></div>
@@ -915,7 +979,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
           </div>
           <button type="button" class="fr-qr" id="frQR" aria-label="放大我的 QR Code"></button>
         </div>
-        <p class="small mute">好友只看得到你的頭像、暱稱、總次數、各動作累計與本週次數、連續天數和等級，看不到影像和訓練細節。</p>
+        <p class="small mute">排行榜<b>只計算鏡頭偵測到的次數</b>，手動輸入的自訂紀錄不會算進去。好友只看得到你的頭像、暱稱、總次數、各動作累計與本週次數、連續天數和等級，看不到影像和訓練細節。</p>
       </div>
       <div class="card stack" id="frAddBox">
         <h3 style="margin:0">加好友</h3>
@@ -1142,7 +1206,7 @@ const KEY='fitai_web_v1',AUTH_KEY='fitai_auth_v1',ACTIVE_KEY='fitai_active_user_
 let activeUserId=localStorage.getItem(ACTIVE_KEY)||'',accountSession=null;
 const stateKey=()=>activeUserId?`${KEY}:user:${activeUserId}`:KEY;
 const dirtyKey=id=>`${KEY}:dirty:${id}`;
-const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''},voiceCfg:{uri:'',rate:1,pitch:1,vol:1,every:1},body:{set:false,sex:'男',age:25,h:170,w:65,act:1.2,goal:'維持'},kx:{},kxHold0:-1,ninja:{best:{},bestCombo:0,hits:0,plays:0,secs:0,log:[]}};
+const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''},voiceCfg:{uri:'',rate:1,pitch:1,vol:1,every:1},manual:[],games:{run:{best:0,plays:0,log:[]},pose:{best:0,plays:0,log:[]}},body:{set:false,sex:'男',age:25,h:170,w:65,act:1.2,goal:'維持'},kx:{},kxHold0:-1,ninja:{best:{},bestCombo:0,hits:0,plays:0,secs:0,log:[]}};
 let S;
 try{S={...DEF,...JSON.parse(localStorage.getItem(stateKey())||'{}')}}catch(e){S={...DEF}}
 /* 讀進來的資料型別不對（舊版備份、手動改壞）時，把那一欄還原成預設值，避免整個網站壞掉 */
@@ -1153,8 +1217,18 @@ function normalizeState(o){
     const ok=t==='array'?Array.isArray(v):t==='object'?(v&&typeof v==='object'&&!Array.isArray(v)):t==='number'?Number.isFinite(v):typeof v===t;
     if(!ok)o[k]=Array.isArray(d)?[]:(typeof d==='object'?{...d}:d);
   }
-  o.cam={...DEF.cam,...o.cam};o.me={...DEF.me,...o.me};o.sb={...DEF.sb,...o.sb};o.body={...DEF.body,...o.body};o.voiceCfg={...DEF.voiceCfg,...o.voiceCfg};o.ninja={...DEF.ninja,...o.ninja};
+  o.cam={...DEF.cam,...o.cam};o.me={...DEF.me,...o.me};o.sb={...DEF.sb,...o.sb};o.body={...DEF.body,...o.body};o.voiceCfg={...DEF.voiceCfg,...o.voiceCfg};o.ninja={...JSON.parse(JSON.stringify(DEF.ninja)),...o.ninja};
+  {const g=JSON.parse(JSON.stringify(DEF.games));for(const k in g)g[k]={...g[k],...(o.games&&o.games[k])};o.games=g}
   if(!(o.kxHold0>=0))o.kxHold0=o.holdSecs||0;
+  /* ver：鏡頭偵測到的次數（好友排行只看這個）。舊資料沒有來源，用「鏡頭計數」的歷史紀錄補回 */
+  if(!o.ver||typeof o.ver!=='object'){
+    o.ver={reps:0,exs:{},days:{},dayEx:{}};
+    const dk=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    for(const h of o.history||[]){const n=h.n|0;if(!(n>0)||!h.t||/、|計時訓練/.test(h.ex||''))continue;const k=dk(new Date(h.t)),V=o.ver;
+      V.reps+=n;V.days[k]=(V.days[k]||0)+n;V.exs[h.ex]=(V.exs[h.ex]||0)+n;const de=V.dayEx[k]||(V.dayEx[k]={});de[h.ex]=(de[h.ex]||0)+n}
+  }
+  for(const f of ['exs','days','dayEx'])if(!o.ver[f]||typeof o.ver[f]!=='object')o.ver[f]={};
+  if(!Number.isFinite(o.ver.reps))o.ver.reps=0;
   return o;
 }
 S=normalizeState(S);
@@ -1189,9 +1263,17 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 const level=()=>Math.floor(S.xp/100)+1;
 const dkey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const dayN=k=>{const [y,m,d]=k.split('-').map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)};
-function addReps(n,ex){
-  if(!(n>0))return;S.reps+=n;const k=dkey(new Date());S.days[k]=(S.days[k]||0)+n;
+/* ver＝其中有幾下是鏡頭偵測到的（好友排行只算這部分）；k＝記在哪一天 */
+function addReps(n,ex,ver=0,k=dkey(new Date())){
+  if(!(n>0))return;S.reps+=n;S.days[k]=(S.days[k]||0)+n;
   if(ex){S.exs[ex]=(S.exs[ex]||0)+n;const de=S.dayEx[k]||(S.dayEx[k]={});de[ex]=(de[ex]||0)+n}
+  ver=Math.min(n,Math.max(0,ver|0));
+  if(ver){const V=S.ver;V.reps+=ver;V.days[k]=(V.days[k]||0)+ver;if(ex){V.exs[ex]=(V.exs[ex]||0)+ver;const de=V.dayEx[k]||(V.dayEx[k]={});de[ex]=(de[ex]||0)+ver}}
+}
+function subReps(n,ex,k){   // 刪除自訂紀錄時扣回去
+  const dec=(o,key)=>{o[key]=Math.max(0,(o[key]||0)-n);if(!o[key])delete o[key]};
+  S.reps=Math.max(0,S.reps-n);dec(S.days,k);
+  if(ex){dec(S.exs,ex);if(S.dayEx[k]){dec(S.dayEx[k],ex);if(!Object.keys(S.dayEx[k]).length)delete S.dayEx[k]}}
 }
 /* ===== 消耗熱量：用「修正 MET」= MET × 自己的基礎代謝（由身高、體重、年齡、性別算出）=====
    每個動作：[MET, 每下約幾秒]；大卡 = MET × BMR/86400 × 秒數 */
@@ -1205,8 +1287,8 @@ const exMapKcal=(m,reps)=>{let named=0,k=0;for(const [e,n] of Object.entries(m||
 function addKcal(k){if(!(k>0))return;const d=dkey(new Date());S.kx[d]=(S.kx[d]||0)+k}   // 撐住、健身忍者這類「按秒算」的熱量
 const kcalToday=()=>{const d=dkey(new Date());return exMapKcal(S.dayEx[d],S.days[d])+(S.kx[d]||0)};
 const kcalTotal=()=>exMapKcal(S.exs,S.reps)+Object.values(S.kx).reduce((a,b)=>a+b,0)+(S.kxHold0||0)*kcalPerSec(4);   // kxHold0：這個功能上線前就累積的撐住秒數
-function streaks(){
-  const nums=Object.keys(S.days).filter(k=>S.days[k]>0).map(dayN).sort((x,y)=>x-y);
+function streaks(days=S.days){
+  const nums=Object.keys(days).filter(k=>days[k]>0).map(dayN).sort((x,y)=>x-y);
   let longest=0,run=0,prev=null;
   for(const n of nums){run=(prev!==null&&n===prev+1)?run+1:1;longest=Math.max(longest,run);prev=n}
   const set=new Set(nums),today=dayN(dkey(new Date()));
@@ -1221,6 +1303,8 @@ const ACH=[
  {id:'timer',g:'時',n:'計時達人',d:'計時器訓練的分鐘數',t:[10,60,300],u:'分鐘',v:()=>Math.floor(S.workSecs/60)},
  {id:'stars',g:'星',n:'三星挑戰',d:'一分鐘挑戰拿到三顆星的次數',t:[1,5,20],u:'次',v:()=>S.stars3||0},
  {id:'boss',g:'忍',n:'健身忍者',d:'健身忍者累計擊中數',t:[50,300,1000],u:'個',v:()=>S.ninja.hits},
+ {id:'runner',g:'跑',n:'跑酷高手',d:'障礙跑酷最高分',t:[150,400,800],u:'分',v:()=>S.games.run.best},
+ {id:'poser',g:'姿',n:'姿勢大師',d:'姿勢配對最高分',t:[500,1500,3000],u:'分',v:()=>S.games.pose.best},
  {id:'lv',g:'升',n:'遊戲等級',d:'遊戲等級',t:[5,10,20],u:'級',v:()=>level()},
  {id:'var',g:'全',n:'全能運動員',d:'做過的不同動作數',t:[5,12,20],u:'種',v:()=>Object.keys(S.exs).length},
  {id:'water',g:'水',n:'補水達人',d:'喝水達標的天數',t:[1,7,30],u:'天',v:()=>Object.keys(S.waterHit).length},
@@ -1691,7 +1775,7 @@ cam.onStop=()=>{if(typeof hold!=='undefined'&&hold.on)holdFinish(false);$('#hCam
 $('#camSave').onclick=()=>{
   if(camCounter.count<=0)return;
   S.history.unshift({ex:camCounter.key,n:camCounter.count,t:Date.now()});S.history=S.history.slice(0,30);
-  notePR(camCounter.key,camCounter.count);addReps(camCounter.count,camCounter.key);camCounter.reset();camView.n.textContent='0';
+  notePR(camCounter.key,camCounter.count);addReps(camCounter.count,camCounter.key,camCounter.count);camCounter.reset();camView.n.textContent='0';
   $('#camSave').disabled=true;save();renderStats();renderHist();
 };
 function renderHist(){
@@ -1807,7 +1891,7 @@ function showTimerResult(sets){
   if(total>0){
     const exs=[...new Set(sets.map(x=>x.ex))];
     S.history.unshift({ex:exs.length<=2?exs.join('、'):'計時訓練',n:total,t:Date.now()});S.history=S.history.slice(0,30);
-    sets.forEach(x=>{notePR(x.ex,x.n);addReps(x.n,x.ex)});save();renderStats();renderHist();
+    sets.forEach(x=>{notePR(x.ex,x.n);addReps(x.n,x.ex,x.n)});save();renderStats();renderHist();
   }
 }
 $('#tStart').onclick=async()=>{
@@ -1879,7 +1963,7 @@ $('#chStart').onclick=async()=>{
 $('#chSubmit').onclick=()=>{
   if(!chPending)return;const p=chPending,n=Math.max(0,Math.round(+$('#chReps').value||0));
   const stars=n>=p.t*1.2?3:n>=p.t?2:n>=p.t*.7?1:0,xp=Math.round(n*2*MULT[p.d])+stars*10,key=p.ex+'|'+p.d,isBest=n>(S.best[key]||0);
-  if(isBest)S.best[key]=n;if(stars===3)S.stars3=(S.stars3||0)+1;S.xp+=xp;addReps(n,p.ex);S.log.unshift({ex:p.ex,d:p.d,t:p.t,n,s:stars});S.log=S.log.slice(0,20);
+  if(isBest)S.best[key]=n;if(stars===3)S.stars3=(S.stars3||0)+1;S.xp+=xp;addReps(n,p.ex,p.auto===null?0:Math.min(n,p.auto));S.log.unshift({ex:p.ex,d:p.d,t:p.t,n,s:stars});S.log=S.log.slice(0,20);
   save();renderStats();chPending=null;$('#chResult').hidden=true;waterNudge('挑戰完成，喝點水休息一下吧。');
   $('#chDone').hidden=false;$('#chDone').textContent=`${stars?'★'.repeat(stars):'再接再厲'}　${p.ex} ${n} 下（目標 ${p.t}），獲得 ${xp} 經驗值${isBest?'，新的個人紀錄！':''}`;
   chRefresh();
@@ -1968,7 +2052,7 @@ function njFinish(done){
   const best=N.best[nj.diff]||0,isBest=nj.score>best;
   if(isBest)N.best[nj.diff]=nj.score;N.bestCombo=Math.max(N.bestCombo,nj.maxCombo);N.hits+=nj.hits;N.plays++;N.secs+=secs;
   N.log.unshift({d:nj.diff,sc:nj.score,h:nj.hits,c:nj.maxCombo,t:Date.now()});N.log=N.log.slice(0,10);
-  S.xp+=xp;addKcal(kc);addReps(nj.low,'深蹲');save();renderStats();renderNinja();beep(1320,400);
+  S.xp+=xp;addKcal(kc);addReps(nj.low,'深蹲',nj.low);save();renderStats();renderNinja();beep(1320,400);
   const [rk,title]=njRank(nj.score),acc=Math.round(nj.hits/Math.max(1,nj.hits+nj.miss)*100);
   const r=$('#njResult');r.hidden=false;
   r.innerHTML=`<div class="rank">${rk==='S'?'🏆':rk==='A'?'🥇':rk==='B'?'🥈':'🥷'}</div><div class="small mute">${NJ_DIFF[nj.diff].n}・評價 <b style="color:var(--yellow)">${rk}</b>（${title}）</div><div class="big">${nj.score}</div><div class="small">${isBest?'🎉 新的最高分！':`這個難度最高 ${best} 分`}</div>
@@ -1990,7 +2074,211 @@ $('#njStart').onclick=()=>{
   if(!(cam.running&&cam.view===njView)){w.hidden=false;w.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
   audioInit();nj.on=true;nj.phase='count';nj.t0=performance.now();nj.lastR=0;$('#njResult').hidden=true;$('#njStart').textContent='停止';
 };
-seg($('#gSub'),b=>{if(nj.on)njFinish(false);['ch','ninja','hold'].forEach(k=>{$('#sub-'+k).hidden=b.dataset.sub!==k});if(cam.running)camStop();exitFull()});
+/* ================= 小遊戲共用工具 ================= */
+function onScreen(ctx,W,fn){ctx.save();if(isMirror()){ctx.translate(W,0);ctx.scale(-1,1)}fn();ctx.restore()}   // 用「螢幕座標」畫：鏡像畫面下文字、方向也是正的
+function gameCount(g,v,now){   // 3 秒倒數；回傳 true 表示還在倒數
+  const r=Math.ceil(3-(now-g.t0)/1000);if(r<=0)return false;
+  v.n.textContent=r;g.chip=['準備！','low'];if(r!==g.lastR){g.lastR=r;say(r,{cancel:true});beep(660,120)}return true;
+}
+function gameRecord(key,score,extra){
+  const G=S.games[key],best=G.best||0,isBest=score>best;
+  if(isBest)G.best=score;G.plays++;G.log.unshift({sc:score,t:Date.now(),...extra});G.log=G.log.slice(0,10);return{best,isBest};
+}
+function gameResultHTML(o){
+  return `<div class="rank">${o.icon}</div><div class="small mute">${o.sub}</div><div class="big">${o.score}</div><div class="small">${o.isBest?'🎉 新的最高分！':`最高 ${o.best} 分`}</div>
+  <div class="facts">${o.facts.map(([v,l])=>`<div class="fact"><b>${v}</b><span>${l}</span></div>`).join('')}</div><p class="small mute" style="margin:10px 0 0">獲得 ${o.xp} 經驗值</p>`;
+}
+function gameLogHTML(key,cols,row){
+  const L=S.games[key].log;
+  return L.length?`<tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>`+L.slice(0,6).map(l=>`<tr>${row(l).map(x=>`<td>${x}</td>`).join('')}</tr>`).join(''):'<tr><td class="mute">還沒有成績，來玩一場吧！</td></tr>';
+}
+function bodyMetrics(lm){   // 肩寬、肩中心、髖中心、軀幹長
+  if(!lm||!njVis(lm,11)||!njVis(lm,12))return null;
+  const sw=Math.max(30,dist(lm[11],lm[12])),sx=(lm[11][0]+lm[12][0])/2,sy=(lm[11][1]+lm[12][1])/2;
+  const hipOk=njVis(lm,23)&&njVis(lm,24),hx=hipOk?(lm[23][0]+lm[24][0])/2:sx,hy=hipOk?(lm[23][1]+lm[24][1])/2:null;
+  return{sw,sx,sy,hx,hy,torso:hy===null?null:Math.max(40,hy-sy)};
+}
+
+/* ================= 🏃 障礙跑酷：跳過箱子、蹲過飛鳥 ================= */
+const rn={on:false,phase:'idle',chip:['開啟鏡頭後按「開始遊戲」','']};
+const rnView=makeView($('[data-stage=run]'),()=>null,{label:()=>rn.on?'停止':'開始遊戲',click:()=>$('#rnStart').click()});
+rnView.manualHint=true;$('.u',rnView.stage).textContent='分';rnView.nm.textContent='障礙跑酷';
+rnView.chipFn=()=>rn.chip;rnView.gaugeFn=()=>rn.on&&rn.phase==='run'?rn.lives/3*100+'%':'0';
+rnView.onLm=(lm,now)=>rnFrame(lm,now);
+function rnFrame(lm,now){
+  const v=rnView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,m=bodyMetrics(lm);
+  if(!rn.on){rn.chip=[m&&m.hy?'鏡頭已就緒，按「開始遊戲」':'請退後，讓肩膀到膝蓋都入鏡',m&&m.hy?'ready':'warn'];return}
+  if(rn.phase==='count'){
+    if(m&&m.hy){rn.cal.push([m.hy,m.torso])}   // 倒數時記下站姿高度當基準
+    if(gameCount(rn,v,now))return;
+    const c=rn.cal.slice(-40);
+    Object.assign(rn,{phase:'run',start:now,last:now,base:c.length?median(c.map(x=>x[0])):null,torso:c.length?median(c.map(x=>x[1])):null,
+      lives:3,score:0,dist:0,speed:.3,obs:[],next:now+1500,cleared:0,jumps:0,ducks:0,hits:0,state:'run',flash:0,fx:[]});
+    say('開始，跑起來！',{cancel:true});beep(1320,200);
+  }
+  const dt=Math.min(.1,(now-rn.last)/1000);rn.last=now;rn.elapsed=(now-rn.start)/1000;
+  /* 身體狀態：髖部比基準高＝跳，低很多＝蹲 */
+  if(m&&m.hy){
+    if(rn.base===null){rn.base=m.hy;rn.torso=m.torso}
+    const d=(m.hy-rn.base)/rn.torso;
+    rn.state=d<-.09?'jump':d>.22?'duck':'run';
+    if(rn.state==='run')rn.base=rn.base*.98+m.hy*.02;   // 慢慢跟著修正，人前後移動也不會亂判
+    v.hintEl.hidden=true;
+  }else{rn.state='run';v.hintEl.hidden=false;v.hintEl.textContent='請讓肩膀、髖部到膝蓋都在畫面裡'}
+  if(rn.state==='jump'&&rn.prevState!=='jump')rn.airT=now;rn.prevState=rn.state;
+  const air=rn.state==='jump'||now-(rn.airT||0)<250;   // 跳起來有一點滯空時間，比較好玩
+  rn.speed=Math.min(.75,.3+rn.elapsed*.006);rn.dist+=rn.speed*dt*10;
+  if(now>=rn.next){
+    const duck=Math.random()<.45;rn.obs.push({type:duck?'duck':'jump',x:1.08,done:false,e:duck?['🦅','🐦','🛸'][Math.random()*3|0]:['📦','🪨','🌵'][Math.random()*3|0]});
+    rn.next=now+(1700+Math.random()*1100)*(.3/rn.speed)**.6;
+  }
+  const PX=.2,WIN=.06;
+  for(const o of rn.obs){
+    o.x-=rn.speed*dt;
+    const inWin=Math.abs(o.x-PX)<WIN;
+    if(!o.done&&inWin&&((o.type==='jump'&&air)||(o.type==='duck'&&rn.state==='duck'))){
+      o.done=true;rn.cleared++;if(o.type==='jump')rn.jumps++;else rn.ducks++;
+      const pts=10+Math.floor(rn.speed*20);rn.score+=pts;rn.fx.push({x:PX,text:`+${pts}`,t:now});beep(o.type==='jump'?1046:784,70);
+    }
+    if(!o.done&&o.x<PX-WIN){o.done=true;o.hit=true;rn.lives--;rn.hits++;rn.flash=now;beep(160,320);say(o.type==='jump'?'要跳！':'要蹲！',{cancel:true})}
+  }
+  rn.obs=rn.obs.filter(o=>o.x>-.1);
+  if(rn.lives<=0||rn.elapsed>=120){rnFinish(true);return}
+  /* 畫面：下方是跑道 */
+  const gy=H*.93,band=H*.42,u=H*.11;
+  onScreen(ctx,W,()=>{
+    ctx.fillStyle='rgba(10,26,32,.55)';ctx.fillRect(0,gy-band,W,band+H*.07);
+    ctx.strokeStyle='#3dd6d0';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();
+    ctx.setLineDash([u*.4,u*.6]);ctx.lineDashOffset=rn.dist*u*.25;ctx.strokeStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.moveTo(0,gy+u*.3);ctx.lineTo(W,gy+u*.3);ctx.stroke();ctx.setLineDash([]);
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    for(const o of rn.obs){
+      const x=o.x*W,y=o.type==='duck'?gy-u*1.55:gy;
+      ctx.globalAlpha=o.done&&!o.hit?.35:1;ctx.font=`${u}px sans-serif`;ctx.fillText(o.e,x,y);
+      if(!o.done&&o.x<.75){ctx.font=`900 ${u*.42}px "Noto Sans TC",sans-serif`;ctx.fillStyle=o.type==='jump'?'#ffd23f':'#3dd6d0';ctx.fillText(o.type==='jump'?'跳！':'蹲！',x,y-u*1.05)}
+      ctx.globalAlpha=1;
+    }
+    const py=air?gy-u*1.25:gy,ps=rn.state==='duck'?.6:1;
+    ctx.save();ctx.translate(PX*W,py);ctx.scale(-ps,ps);ctx.font=`${u*1.1}px sans-serif`;ctx.fillText(rn.state==='duck'?'🧎':'🏃',0,0);ctx.restore();
+    rn.fx=rn.fx.filter(f=>now-f.t<600);
+    for(const f of rn.fx){const a=(now-f.t)/600;ctx.globalAlpha=1-a;ctx.font=`900 ${u*.5}px "Noto Sans TC",sans-serif`;ctx.fillStyle='#fff';ctx.fillText(f.text,f.x*W,gy-u*2-a*u)}
+    ctx.globalAlpha=1;ctx.textAlign='right';ctx.textBaseline='top';ctx.font=`${u*.55}px sans-serif`;ctx.fillText('❤️'.repeat(rn.lives)+'🤍'.repeat(3-rn.lives),W-u*.3,u*.3);
+  });
+  if(rn.flash&&now-rn.flash<300){ctx.fillStyle=`rgba(255,107,87,${.4*(1-(now-rn.flash)/300)})`;ctx.fillRect(0,0,W,H)}
+  v.n.textContent=rn.score;rn.chip=[rn.state==='jump'?'跳！':rn.state==='duck'?'蹲下':'跑步中',rn.state==='run'?'ready':'low'];
+  const label=`${Math.floor(rn.dist)} 公尺`;if(v.nm.textContent!==label)v.nm.textContent=label;
+}
+function rnFinish(done){
+  if(!rn.on)return;
+  const ran=rn.phase==='run';rn.on=false;rn.phase='idle';rnView.hintEl.hidden=true;rnView.nm.textContent='障礙跑酷';$('#rnStart').textContent='開始遊戲';
+  if(fullStage===rnView.stage)exitFull();
+  if(!ran||rn.elapsed<3){renderRun();return}
+  const secs=Math.round(rn.elapsed),kc=secs*kcalPerSec(8),meters=Math.floor(rn.dist),score=rn.score+meters,xp=Math.round(score/8);
+  const {best,isBest}=gameRecord('run',score,{m:meters,c:rn.cleared});
+  S.xp+=xp;addKcal(kc);addReps(rn.ducks,'深蹲',rn.ducks);save();renderStats();renderRun();beep(1320,400);
+  $('#rnResult').hidden=false;
+  $('#rnResult').innerHTML=gameResultHTML({icon:meters>=300?'🏆':meters>=150?'🥇':'🏃',sub:`跑了 ${meters} 公尺${rn.lives<=0?'，3 條命用完了':''}`,score,isBest,best,xp,
+    facts:[[rn.cleared,'閃過障礙'],[rn.jumps,'跳過'],[rn.ducks,'蹲過（算深蹲）'],[Math.round(kc),'消耗大卡']]});
+  say(`跑了 ${meters} 公尺，${score} 分`,{cancel:true});
+}
+function renderRun(){
+  const G=S.games.run;$('#rnBest').textContent=G.best||'—';$('#rnPlays').textContent=G.plays;
+  $('#rnLog').innerHTML=gameLogHTML('run',['分數','距離','閃過'],l=>[`<b style="color:var(--yellow)">${l.sc}</b>`,`${l.m} m`,l.c]);
+}
+$('#rnCamBtn').onclick=async()=>{$('#rnCamBtn').disabled=true;const ok=await camStart(rnView);if(ok)$('#rnCamOff').disabled=false;else $('#rnCamBtn').disabled=false};
+$('#rnCamOff').onclick=()=>{rnFinish(false);camStop();$('#rnCamBtn').disabled=false;$('#rnCamOff').disabled=true};
+$('#rnStart').onclick=()=>{
+  if(rn.on){rnFinish(false);return}
+  const w=$('#rnWarn');w.hidden=true;
+  if(!(cam.running&&cam.view===rnView)){w.hidden=false;w.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
+  audioInit();Object.assign(rn,{on:true,phase:'count',t0:performance.now(),lastR:0,cal:[]});$('#rnResult').hidden=true;$('#rnStart').textContent='停止';
+};
+
+/* ================= 🧍 姿勢配對：牆壁壓過來之前擺出指定姿勢 ================= */
+const kneeAng=lm=>{const a=[[23,25,27],[24,26,28]].filter(t=>t.every(i=>njVis(lm,i))).map(t=>ang(lm[t[0]],lm[t[1]],lm[t[2]]));return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const POSES=[
+  {id:'up',n:'雙手舉高',e:'🙌',ok:(lm,m)=>njVis(lm,15)&&njVis(lm,16)&&njVis(lm,0)&&lm[15][1]<lm[0][1]&&lm[16][1]<lm[0][1]},
+  {id:'t',n:'T 字張開',e:'✈️',ok:(lm,m)=>njVis(lm,15)&&njVis(lm,16)&&Math.abs(lm[15][1]-m.sy)<m.sw*.45&&Math.abs(lm[16][1]-m.sy)<m.sw*.45&&Math.abs(lm[15][0]-lm[16][0])>m.sw*2.6},
+  {id:'squat',n:'深蹲',e:'🏋️',sq:true,ok:lm=>{const k=kneeAng(lm);return k!==null&&k<125}},
+  {id:'star',n:'星星跳開',e:'⭐',ok:(lm,m)=>njVis(lm,15)&&njVis(lm,16)&&njVis(lm,27)&&njVis(lm,28)&&lm[15][1]<m.sy&&lm[16][1]<m.sy&&Math.abs(lm[27][0]-lm[28][0])>m.sw*1.7},
+  {id:'flamingo',n:'金雞獨立',e:'🦩',ok:(lm,m)=>njVis(lm,27)&&njVis(lm,28)&&Math.abs(lm[27][1]-lm[28][1])>m.sw*.55},
+  {id:'left',n:'只舉左手',e:'🙋',ok:(lm,m)=>njVis(lm,15)&&njVis(lm,16)&&njVis(lm,0)&&lm[15][1]<lm[0][1]&&lm[16][1]>m.sy},
+  {id:'right',n:'只舉右手',e:'🙋‍♂️',ok:(lm,m)=>njVis(lm,15)&&njVis(lm,16)&&njVis(lm,0)&&lm[16][1]<lm[0][1]&&lm[15][1]>m.sy},
+  {id:'pray',n:'雙手合十舉高',e:'🙏',ok:(lm,m)=>njVis(lm,15)&&njVis(lm,16)&&njVis(lm,0)&&lm[15][1]<lm[0][1]&&lm[16][1]<lm[0][1]&&dist(lm[15],lm[16])<m.sw*.7},
+  {id:'hips',n:'雙手叉腰',e:'🦸',ok:(lm,m)=>[15,16,23,24,13,14].every(i=>njVis(lm,i))&&dist(lm[15],lm[23])<m.sw*.75&&dist(lm[16],lm[24])<m.sw*.75&&Math.abs(lm[13][0]-lm[14][0])>m.sw*1.5},
+  {id:'squatup',n:'深蹲＋雙手舉高',e:'🔥',sq:true,ok:(lm,m)=>POSES[0].ok(lm,m)&&POSES[2].ok(lm,m)},
+];
+const ps={on:false,phase:'idle',chip:['開啟鏡頭後按「開始遊戲」','']};
+const psView=makeView($('[data-stage=pose]'),()=>null,{label:()=>ps.on?'停止':'開始遊戲',click:()=>$('#psStart').click()});
+psView.manualHint=true;$('.u',psView.stage).textContent='分';psView.nm.textContent='姿勢配對';
+psView.chipFn=()=>ps.chip;psView.gaugeFn=()=>ps.on&&ps.phase==='run'&&ps.cur?Math.max(0,100-(performance.now()-ps.curT)/ps.limit*100)+'%':'0';
+psView.onLm=(lm,now)=>psFrame(lm,now);
+function psNext(now){
+  const pool=POSES.filter(p=>p.id!==(ps.cur&&ps.cur.id)&&(ps.round>=4||p.id!=='squatup'));
+  ps.cur=pool[Math.random()*pool.length|0];ps.curT=now;ps.holdT=0;ps.round++;
+  ps.limit=Math.max(2300,5200-ps.round*170);say(ps.cur.n,{cancel:true});
+}
+function psFrame(lm,now){
+  const v=psView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,m=bodyMetrics(lm);
+  if(!ps.on){ps.chip=[m?'鏡頭已就緒，按「開始遊戲」':'請退後，讓全身入鏡',m?'ready':'warn'];return}
+  if(ps.phase==='count'){if(gameCount(ps,v,now))return;Object.assign(ps,{phase:'run',start:now,score:0,lives:3,round:0,done:0,combo:0,maxCombo:0,squats:0,cur:null,flash:0,good:0});psNext(now);beep(1320,200)}
+  ps.elapsed=(now-ps.start)/1000;
+  const match=!!(lm&&m&&ps.cur.ok(lm,m)),left=ps.limit-(now-ps.curT);
+  if(!m){v.hintEl.hidden=false;v.hintEl.textContent='請讓全身都在畫面裡'}else v.hintEl.hidden=true;
+  if(match){if(!ps.holdT)ps.holdT=now}else ps.holdT=0;
+  const held=ps.holdT?(now-ps.holdT)/450:0;
+  if(held>=1){   // 撐住 0.45 秒就算過關
+    ps.done++;ps.combo++;ps.maxCombo=Math.max(ps.maxCombo,ps.combo);if(ps.cur.sq)ps.squats++;
+    const pts=Math.round((50+Math.max(0,left)/ps.limit*100)*(1+Math.min(ps.combo-1,8)*.1));ps.score+=pts;ps.good=now;ps.lastPts=pts;
+    beep(1046,90);setTimeout(()=>beep(1568,120),90);if(ps.combo%3===0)say(`${ps.combo} 連過！`,{cancel:true});
+    if(ps.round>=20){psFinish(true);return}psNext(now);
+  }else if(left<=0){
+    ps.lives--;ps.combo=0;ps.flash=now;beep(160,320);
+    if(ps.lives<=0){psFinish(true);return}say('撞牆了！',{cancel:true});psNext(now);
+  }
+  const p=ps.cur,tl=Math.max(0,ps.limit-(now-ps.curT))/ps.limit,u=Math.min(W,H)*.1;
+  /* 牆壁從四周壓過來，中間留一個人形洞 */
+  const wall=(1-tl)*Math.min(W,H)*.32;
+  ctx.fillStyle=`rgba(255,107,87,${.18+(1-tl)*.35})`;ctx.fillRect(0,0,wall,H);ctx.fillRect(W-wall,0,wall,H);ctx.fillRect(0,0,W,wall*.6);
+  onScreen(ctx,W,()=>{
+    ctx.fillStyle='rgba(10,26,32,.72)';ctx.beginPath();rrect(ctx,W/2-u*3.3,u*.25,u*6.6,u*1.6,u*.4);ctx.fill();
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`${u*1.05}px sans-serif`;ctx.fillText(p.e,W/2-u*2.3,u*1.05);
+    ctx.font=`900 ${u*.62}px "Noto Sans TC",sans-serif`;ctx.fillStyle=match?'#3dd6d0':'#ffffff';ctx.fillText(p.n,W/2+u*.6,u*1.05);
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(W/2-u*3,u*1.62,u*6,u*.12);ctx.fillStyle=tl>.3?'#ffd23f':'#ff6b57';ctx.fillRect(W/2-u*3,u*1.62,u*6*tl,u*.12);
+    if(held>0){ctx.strokeStyle='#3dd6d0';ctx.lineWidth=u*.14;ctx.beginPath();ctx.arc(W/2,H*.55,u*1.4,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.min(1,held));ctx.stroke()}
+    if(ps.good&&now-ps.good<600){const a=(now-ps.good)/600;ctx.globalAlpha=1-a;ctx.font=`900 ${u*.9}px "Noto Sans TC",sans-serif`;ctx.fillStyle='#3dd6d0';ctx.fillText(`+${ps.lastPts}`,W/2,H*.5-a*u);ctx.globalAlpha=1}
+    ctx.textAlign='right';ctx.textBaseline='top';ctx.font=`${u*.5}px sans-serif`;ctx.fillText('❤️'.repeat(ps.lives)+'🤍'.repeat(3-ps.lives),W-u*.3,H-u*.9);
+  });
+  if(ps.flash&&now-ps.flash<350){ctx.fillStyle=`rgba(255,107,87,${.45*(1-(now-ps.flash)/350)})`;ctx.fillRect(0,0,W,H)}
+  v.n.textContent=ps.score;ps.chip=[match?'姿勢正確，撐住！':`第 ${ps.round}/20 關`,match?'ready':'low'];
+  const label=`第 ${ps.round}/20 關${ps.combo>1?`　連過 ×${ps.combo}`:''}`;if(v.nm.textContent!==label)v.nm.textContent=label;
+}
+function psFinish(done){
+  if(!ps.on)return;
+  const ran=ps.phase==='run';ps.on=false;ps.phase='idle';psView.hintEl.hidden=true;psView.nm.textContent='姿勢配對';$('#psStart').textContent='開始遊戲';
+  if(fullStage===psView.stage)exitFull();
+  if(!ran||ps.elapsed<3){renderPose();return}
+  const all=ps.done>=20,score=ps.score+(all?300:0),secs=Math.round(ps.elapsed),kc=secs*kcalPerSec(5),xp=Math.round(score/10);
+  const {best,isBest}=gameRecord('pose',score,{n:ps.done,c:ps.maxCombo});
+  S.xp+=xp;addKcal(kc);addReps(ps.squats,'深蹲',ps.squats);save();renderStats();renderPose();beep(1320,400);
+  $('#psResult').hidden=false;
+  $('#psResult').innerHTML=gameResultHTML({icon:all?'🏆':ps.done>=12?'🥇':'🧍',sub:all?'全部 20 關通關！額外 +300 分':`過了 ${ps.done} 關`,score,isBest,best,xp,
+    facts:[[ps.done,'過關數'],[ps.maxCombo,'最多連過'],[ps.squats,'深蹲姿勢'],[Math.round(kc),'消耗大卡']]});
+  say(`遊戲結束，${score} 分`,{cancel:true});
+}
+function renderPose(){
+  const G=S.games.pose;$('#psBest').textContent=G.best||'—';$('#psPlays').textContent=G.plays;
+  $('#psPoses').innerHTML=POSES.map(p=>`<span class="ps-chip">${p.e} ${p.n}</span>`).join('');
+  $('#psLog').innerHTML=gameLogHTML('pose',['分數','過關','連過'],l=>[`<b style="color:var(--yellow)">${l.sc}</b>`,`${l.n}/20`,l.c]);
+}
+$('#psCamBtn').onclick=async()=>{$('#psCamBtn').disabled=true;const ok=await camStart(psView);if(ok)$('#psCamOff').disabled=false;else $('#psCamBtn').disabled=false};
+$('#psCamOff').onclick=()=>{psFinish(false);camStop();$('#psCamBtn').disabled=false;$('#psCamOff').disabled=true};
+$('#psStart').onclick=()=>{
+  if(ps.on){psFinish(false);return}
+  const w=$('#psWarn');w.hidden=true;
+  if(!(cam.running&&cam.view===psView)){w.hidden=false;w.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
+  audioInit();Object.assign(ps,{on:true,phase:'count',t0:performance.now(),lastR:0});$('#psResult').hidden=true;$('#psStart').textContent='停止';
+};
+seg($('#gSub'),b=>{if(nj.on)njFinish(false);if(rn.on)rnFinish(false);if(ps.on)psFinish(false);['ch','ninja','hold','run','pose'].forEach(k=>{$('#sub-'+k).hidden=b.dataset.sub!==k});if(cam.running)camStop();exitFull()});
 
 /* ================= 身體數據與菜單 ================= */
 let sex=S.body.sex,goalType=S.body.goal;
@@ -2152,7 +2440,8 @@ function lastDays(n){const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.set
 function renderStatsTab(){
   const days=lastDays(chartN),vals=days.map(x=>S.days[x.k]||0);
   const sum7=lastDays(7).reduce((a,x)=>a+(S.days[x.k]||0),0),st=streaks();
-  $('#stFacts').innerHTML=[[sum7,'近 7 天總訓練量'],[Math.round(sum7/7),'近 7 天日均訓練量'],[maxDay(),'最佳單日'],[st.cur+' 天','目前連續'],[st.longest+' 天','最長連續']]
+  const manTot=S.manual.reduce((a,m)=>a+m.n,0);
+  $('#stFacts').innerHTML=[[sum7,'近 7 天總訓練量'],[Math.round(sum7/7),'近 7 天日均訓練量'],[maxDay(),'最佳單日'],[st.cur+' 天','目前連續'],[st.longest+' 天','最長連續'],['📷 '+S.ver.reps,'鏡頭偵測（計入排行）'],['✍️ '+manTot,'自訂紀錄']]
     .map(([b,l])=>`<div class="fact"><b>${b}</b><span>${l}</span></div>`).join('');
   const mx=Math.max(10,...vals),top=mx<=20?20:mx<=50?50:Math.ceil(mx/50)*50;
   const W=700,H=250,L=34,R=6,T=16,B=34,bw=(W-L-R)/days.length,ch=H-T-B;let g='';
@@ -2168,7 +2457,7 @@ function renderStatsTab(){
   $('#stGoal').value=S.goal;$('#stGoalBar').style.width=Math.min(100,today/S.goal*100)+'%';
   $('#stGoalTxt').textContent=today>=S.goal?`今天已達標，做了 ${today} 下。`:`今天已完成 ${today} / ${S.goal} 下，還差 ${S.goal-today} 下。`;
   renderWater();
-  renderHeat();renderPR();renderExerciseTotals();
+  renderHeat();renderPR();renderExerciseTotals();renderManual();
 }
 function renderExerciseTotals(){
   const known=new Set(ORDER),groups=CATS.map(cat=>[cat,ORDER.filter(ex=>EX[ex].cat===cat)]);
@@ -2179,6 +2468,30 @@ function renderExerciseTotals(){
   $('#stExTotals').innerHTML=html+(unclassified?`<p class="small mute">未分類舊紀錄：${unclassified} 下（此部分沒有動作名稱，無法回溯分類）</p>`:'');
 }
 seg($('#stRange'),b=>{chartN=+b.dataset.n;renderStatsTab()});
+/* ===== 自訂紀錄：手動補登，不計入好友排行 ===== */
+$('#manEx').innerHTML=optsByCat(ORDER)+'<option value="__custom">其他（自己輸入名稱）</option>';
+const manDateLimits=()=>{const t=new Date(),m=new Date();m.setDate(t.getDate()-30);$('#manDate').max=dkey(t);$('#manDate').min=dkey(m);if(!$('#manDate').value)$('#manDate').value=dkey(t)};
+$('#manEx').onchange=()=>{$('#manNameWrap').hidden=$('#manEx').value!=='__custom';if(!$('#manNameWrap').hidden)$('#manName').focus()};
+function renderManual(){
+  manDateLimits();
+  const L=S.manual.slice(0,12);
+  $('#manList').innerHTML=L.length?L.map(m=>`<li><span class="mdate">${m.d.slice(5).replace('-','/')}</span><span class="grow">${esc(m.ex)}</span><b>${m.n}</b><span class="small mute">下</span><button class="xbtn" type="button" data-id="${m.id}" aria-label="刪除 ${esc(m.ex)} ${m.n} 下">×</button></li>`).join('')+(S.manual.length>12?`<li class="small mute">另外還有 ${S.manual.length-12} 筆較早的紀錄</li>`:''):'<li class="small mute">還沒有自訂紀錄。</li>';
+}
+$('#manAdd').onclick=()=>{
+  manDateLimits();
+  const custom=$('#manEx').value==='__custom',ex=(custom?$('#manName').value:$('#manEx').value).trim().slice(0,12),n=Math.round(+$('#manN').value||0),d=$('#manDate').value;
+  if(!ex){toast('請輸入動作名稱');return}
+  if(!(n>=1&&n<=2000)){toast('次數請輸入 1 到 2000');return}
+  if(!d||d>$('#manDate').max||d<$('#manDate').min){toast('只能補登最近 30 天內的紀錄');return}
+  addReps(n,ex,0,d);S.manual.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ex,n,d,t:Date.now()});S.manual=S.manual.slice(0,200);
+  save();renderStats();$('#manN').value='';$('#manName').value='';toast(`已記錄 ${ex} ${n} 下（不計入好友排行）`);
+};
+$('#manN').addEventListener('keydown',e=>{if(e.key==='Enter')$('#manAdd').click()});
+$('#manList').onclick=e=>{
+  const b=e.target.closest('[data-id]');if(!b)return;const i=S.manual.findIndex(m=>m.id===b.dataset.id);if(i<0)return;const m=S.manual[i];
+  if(!confirm(`刪除這筆紀錄：${m.d} ${m.ex} ${m.n} 下？`))return;
+  subReps(m.n,m.ex,m.d);S.manual.splice(i,1);save();renderStats();renderStatsTab();
+};
 $('#stGoal').onchange=e=>{S.goal=Math.max(10,Math.min(1000,Math.round(+e.target.value)||50));save();renderStatsTab()};
 $('#stReset').onclick=async()=>{if(!confirm('要清除所有紀錄嗎？次數、等級、成就和統計都會歸零。\n（好友排行榜上的資料不會被清掉，要刪除請到「好友排行」分頁。）'))return;noSave=true;
   try{if(accountSession){const session=await freshAccountSession();await accountDataRequest('POST',session,{...DEF});localStorage.removeItem(dirtyKey(activeUserId))}localStorage.removeItem(stateKey());location.reload()}
@@ -2724,11 +3037,11 @@ function friendly(e){
 }
 const uuid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)});
 const weekKey=()=>dkey(weekDates()[0]);
-const weekRepsNow=()=>weekDates().reduce((a,d)=>a+(S.days[dkey(d)]||0),0);
-const weekExerciseRepsNow=()=>weekDates().reduce((totals,d)=>{for(const [ex,n] of Object.entries(S.dayEx[dkey(d)]||{}))totals[ex]=(totals[ex]||0)+n;return totals},{});
-const frBasePayload=()=>({p_id:S.me.id,p_name:S.me.name,p_reps:S.reps|0,p_xp:S.xp|0,p_streak:streaks().cur|0,p_week:weekRepsNow()|0,p_week_key:weekKey()});
-const frPayload=()=>({...frBasePayload(),p_ex_reps:S.exs,p_week_ex_reps:weekExerciseRepsNow()});
-const frSig=()=>JSON.stringify([S.me.name,S.reps,S.exs,S.xp,streaks().cur,weekRepsNow(),weekExerciseRepsNow(),weekKey()]);
+const weekRepsNow=()=>weekDates().reduce((a,d)=>a+(S.ver.days[dkey(d)]||0),0);   // 好友排行只算鏡頭偵測的次數
+const weekExerciseRepsNow=()=>weekDates().reduce((totals,d)=>{for(const [ex,n] of Object.entries(S.ver.dayEx[dkey(d)]||{}))totals[ex]=(totals[ex]||0)+n;return totals},{});
+const frBasePayload=()=>({p_id:S.me.id,p_name:S.me.name,p_reps:S.ver.reps|0,p_xp:S.xp|0,p_streak:streaks(S.ver.days).cur|0,p_week:weekRepsNow()|0,p_week_key:weekKey()});
+const frPayload=()=>({...frBasePayload(),p_ex_reps:S.ver.exs,p_week_ex_reps:weekExerciseRepsNow()});
+const frSig=()=>JSON.stringify([S.me.name,S.ver.reps,S.ver.exs,S.xp,streaks(S.ver.days).cur,weekRepsNow(),weekExerciseRepsNow(),weekKey()]);
 let frPending='',frRows=[],frSort='week',frAt=0,frBusy=false,frSyncT=0,frLastSig='',frLast=0,frExerciseStatsSupported=null;
 async function friendUpsert(){
   if(frExerciseStatsSupported===false)return rpc('lin_upsert_profile',frBasePayload());
@@ -2876,8 +3189,9 @@ function renderBoard(){
     const summary=ex?`${ex} 本週 ${Number((r.week_ex_reps||{})[ex])||0}　累計 ${Number((r.ex_reps||{})[ex])||0}`:`本週 ${wkOf(r)}　累計 ${r.reps}`;
     return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(rank,4)}">${rank}</span>${av(r,'')}<div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">${summary}　連續 ${r.streak} 天　Lv.${lvOf(r)}　${agoTxt(r.updated_at)}</span><span class="meter"><i style="width:${Math.round(Math.max(0,v)/top*100)}%"></i></span></div><span class="fv">${v}<small>${unit}</small></span>${del(r)}</div>`;
   }).join('');
-  el.innerHTML=mineHTML+podHTML+listHTML;
-  $('#frAt').textContent=`共 ${rows.length-1} 位好友，更新於 ${hhmm(frAt)}`;
+  const avNote=frAvatarOk===false?'<p class="notice warn small" style="margin:0 0 12px">看不到好友的頭像：好友伺服器還沒啟用頭像功能。請到 Supabase 的 SQL Editor 執行 <b>fitai-web/supabase-avatars.sql</b>，再按「重新整理」。</p>':'';
+  el.innerHTML=avNote+mineHTML+podHTML+listHTML;
+  $('#frAt').textContent=`共 ${rows.length-1} 位好友・只計算鏡頭偵測的次數・更新於 ${hhmm(frAt)}`;
 }
 function renderFriends(){
   const ok=frCfgOk();
@@ -2895,7 +3209,7 @@ $('#frSaveMe').onclick=friendCreate;
 $('#frName').addEventListener('keydown',e=>{if(e.key==='Enter')friendCreate()});
 $('#frAdd').onclick=()=>friendAdd($('#frCode').value,false);
 $('#frCode').addEventListener('keydown',e=>{if(e.key==='Enter')friendAdd($('#frCode').value,false)});
-$('#frRefresh').onclick=friendBoard;
+$('#frRefresh').onclick=()=>{if(frAvatarOk===false)frAvatarOk=null;friendBoard()};   // 剛執行完 SQL 時，按重新整理就會重新抓頭像
 seg($('#frSort'),b=>{frSort=b.dataset.v;renderBoard()});
 $('#frExercise').onchange=renderBoard;
 $('#frBoard').onclick=async e=>{
@@ -3418,10 +3732,10 @@ if(S.waterOn&&!S.waterNext)waterSchedule();
 const idle=f=>('requestIdleCallback' in window)?requestIdleCallback(f,{timeout:1500}):setTimeout(f,60);
 renderCamCfg();renderHold();setInterval(planTick,20000);setTimeout(planTick,4000);
 await initializeAccount();
-renderMusic();showInstall();renderFacing();renderVoice();applyBody();calc();renderStats(true);renderHist();chRefresh();renderNinja();plan();
+renderMusic();showInstall();renderFacing();renderVoice();applyBody();calc();renderStats(true);renderHist();chRefresh();renderNinja();renderRun();renderPose();plan();
 renderFriends();setTimeout(handleInvite,600);
 idle(()=>{listCams();renderSched();renderFood();renderGuide();renderWeights();renderPresets();renderAch()});   // 第一次畫面先出來，其餘慢慢補
-window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,waterTick,addWater,showWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,nj,njFinish,kcalToday,kcalTotal,renderBuddy,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
+window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,waterTick,addWater,showWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,nj,njFinish,rn,rnFinish,rnView,ps,psFinish,psView,POSES,kcalToday,kcalTotal,renderBuddy,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
 </script>
 </body>
 </html>

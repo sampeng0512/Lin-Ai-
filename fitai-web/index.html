@@ -133,6 +133,11 @@ input[type=checkbox]{accent-color:var(--yellow); width:18px; height:18px; vertic
 .nj-result .big{font:800 3rem/1 var(--num); color:var(--yellow)}
 .nj-result .rank{font-size:2.2rem}
 .nj-result .facts{margin-top:12px}
+.py-board{display:flex; align-items:flex-end; gap:4px; height:110px; padding:10px 12px; border-radius:16px; background:var(--bg2); border:1px solid var(--line)}
+.py-board i{flex:1; min-height:20px; display:flex; justify-content:center; padding-top:4px; border-radius:6px 6px 2px 2px; background:rgba(255,255,255,.08); color:var(--mute); font:700 .75rem/1 var(--num); font-style:normal; transition:background .2s}
+.py-board i.done{background:var(--teal); color:#0a1a20}
+.py-board i.cur{background:var(--yellow); color:#0a1a20}
+.py-board i.fail{background:var(--coral); color:#0a1a20}
 .boss{text-align:center; padding:18px; border-radius:20px; background:var(--bg2); border:1px solid var(--line)}
 .boss .e{font-size:4.5rem; line-height:1.1}
 .boss .nm{font-weight:900; font-size:1.4rem; color:var(--yellow)}
@@ -736,6 +741,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
   <div class="seg" id="gSub" style="margin-bottom:18px">
     <button class="on" data-sub="ch">一分鐘挑戰</button>
     <button data-sub="hold">撐住挑戰</button>
+    <button data-sub="pyr">🔺 金字塔挑戰</button>
     <button data-sub="ninja">🥷 健身忍者</button>
     <button data-sub="run">🏃 障礙跑酷</button>
     <button data-sub="pose">🧍 姿勢配對</button>
@@ -865,6 +871,27 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
         <button class="btn block" id="psStart" type="button">開始遊戲</button>
         <div id="psWarn" class="notice warn small" hidden></div>
         <div><h4>最近的成績</h4><table id="psLog"></table></div>
+      </div>
+    </div>
+  </div>
+  <div id="sub-pyr" hidden>
+    <div class="grid2">
+      <div class="stack">
+        <div data-stage="pyr"></div>
+        <div class="py-board" id="pyBoard" aria-label="金字塔進度"></div>
+        <div id="pyResult" class="nj-result" hidden></div>
+      </div>
+      <div class="stack">
+        <div class="nj-intro"><h3 style="margin:0">🔺 金字塔挑戰</h3><ul class="small"><li>第 1 層做 1 下、第 2 層做 2 下……一路爬到<b>頂層</b>，再一層一層做回 1 下</li><li>每層做完自動進入休息，休息完馬上開始下一層</li><li>每層都有時間限制，<b>時間內沒做完就挑戰失敗</b></li><li>完整登頂再下山有額外經驗值，鏡頭偵測的次數都會算進紀錄</li></ul></div>
+        <div><label class="f" for="pyEx">動作</label><select id="pyEx"></select></div>
+        <div><label class="f">頂層次數</label><div class="seg" id="pyPeak"><button type="button" data-v="5" class="on">5 下</button><button type="button" data-v="8">8 下</button><button type="button" data-v="10">10 下</button></div></div>
+        <div><label class="f">每層休息</label><div class="seg" id="pyRest"><button type="button" data-v="10" class="on">10 秒</button><button type="button" data-v="15">15 秒</button><button type="button" data-v="20">20 秒</button><button type="button" data-v="30">30 秒</button></div></div>
+        <div class="facts"><div class="fact"><b id="pyTotal">0</b><span>完成可做（下）</span></div><div class="fact"><b id="pyBest">—</b><span>最多次數</span></div><div class="fact"><b id="pyFullN">0</b><span>完整登頂</span></div></div>
+        <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
+        <div class="row"><button class="btn teal grow" id="pyCamBtn" type="button">開啟鏡頭</button><button class="btn ghost" id="pyCamOff" type="button" disabled>關閉</button></div>
+        <button class="btn block" id="pyStart" type="button">開始挑戰</button>
+        <div id="pyWarn" class="notice warn small" hidden></div>
+        <div><h4>最近的成績</h4><table id="pyLog"></table></div>
       </div>
     </div>
   </div>
@@ -1194,7 +1221,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
 <script type="module">
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION='2026.10.15-v3';
+const APP_VERSION='2026.10.20-v1';
 const ERRS=[];
 const logErr=m=>{ERRS.push(new Date().toLocaleTimeString()+'  '+String(m).slice(0,220));if(ERRS.length>8)ERRS.shift()};
 addEventListener('error',e=>logErr(`${e.message} @${(e.filename||'').split('/').pop()}:${e.lineno}`));
@@ -1206,7 +1233,7 @@ const KEY='fitai_web_v1',AUTH_KEY='fitai_auth_v1',ACTIVE_KEY='fitai_active_user_
 let activeUserId=localStorage.getItem(ACTIVE_KEY)||'',accountSession=null;
 const stateKey=()=>activeUserId?`${KEY}:user:${activeUserId}`:KEY;
 const dirtyKey=id=>`${KEY}:dirty:${id}`;
-const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''},voiceCfg:{uri:'',rate:1,pitch:1,vol:1,every:1},manual:[],games:{run:{best:0,plays:0,log:[]},pose:{best:0,plays:0,log:[]}},body:{set:false,sex:'男',age:25,h:170,w:65,act:1.2,goal:'維持'},kx:{},kxHold0:-1,ninja:{best:{},bestCombo:0,hits:0,plays:0,secs:0,log:[]}};
+const DEF={history:[],xp:0,reps:0,workSecs:0,bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterOn:true,waterMin:60,waterFrom:8,waterTo:22,waterGoal:2000,waterNext:0,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'lite',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''},voiceCfg:{uri:'',rate:1,pitch:1,vol:1,every:1},manual:[],games:{run:{best:0,plays:0,log:[]},pose:{best:0,plays:0,log:[]},pyr:{best:0,plays:0,log:[]}},body:{set:false,sex:'男',age:25,h:170,w:65,act:1.2,goal:'維持'},kx:{},kxHold0:-1,ninja:{best:{},bestCombo:0,hits:0,plays:0,secs:0,log:[]},pyFull:0};
 let S;
 try{S={...DEF,...JSON.parse(localStorage.getItem(stateKey())||'{}')}}catch(e){S={...DEF}}
 /* 讀進來的資料型別不對（舊版備份、手動改壞）時，把那一欄還原成預設值，避免整個網站壞掉 */
@@ -1305,6 +1332,7 @@ const ACH=[
  {id:'boss',g:'忍',n:'健身忍者',d:'健身忍者累計擊中數',t:[50,300,1000],u:'個',v:()=>S.ninja.hits},
  {id:'runner',g:'跑',n:'跑酷高手',d:'障礙跑酷最高分',t:[150,400,800],u:'分',v:()=>S.games.run.best},
  {id:'poser',g:'姿',n:'姿勢大師',d:'姿勢配對最高分',t:[500,1500,3000],u:'分',v:()=>S.games.pose.best},
+ {id:'pyr',g:'塔',n:'金字塔登頂',d:'完整完成金字塔挑戰的次數',t:[1,5,20],u:'次',v:()=>S.pyFull||0},
  {id:'lv',g:'升',n:'遊戲等級',d:'遊戲等級',t:[5,10,20],u:'級',v:()=>level()},
  {id:'var',g:'全',n:'全能運動員',d:'做過的不同動作數',t:[5,12,20],u:'種',v:()=>Object.keys(S.exs).length},
  {id:'water',g:'水',n:'補水達人',d:'喝水達標的天數',t:[1,7,30],u:'天',v:()=>Object.keys(S.waterHit).length},
@@ -2278,7 +2306,100 @@ $('#psStart').onclick=()=>{
   if(!(cam.running&&cam.view===psView)){w.hidden=false;w.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
   audioInit();Object.assign(ps,{on:true,phase:'count',t0:performance.now(),lastR:0});$('#psResult').hidden=true;$('#psStart').textContent='停止';
 };
-seg($('#gSub'),b=>{if(nj.on)njFinish(false);if(rn.on)rnFinish(false);if(ps.on)psFinish(false);['ch','ninja','hold','run','pose'].forEach(k=>{$('#sub-'+k).hidden=b.dataset.sub!==k});if(cam.running)camStop();exitFull()});
+/* ================= 金字塔挑戰：1、2、3…做到頂層，再一層一層做回 1 下；每層有時間限制 ================= */
+const PY_EX=Object.keys(CH).filter(x=>CAMOK.has(x));
+const py={on:false,phase:'idle',ex:PY_EX[0],peak:5,rest:10,steps:[],i:0,done:0,total:0,until:0,counter:null,failAt:-1,chip:['開啟鏡頭後按「開始挑戰」','']};
+const pySteps=p=>{const a=[];for(let n=1;n<=p;n++)a.push(n);for(let n=p-1;n>=1;n--)a.push(n);return a};
+const pyLimit=n=>Math.round(6+n*Math.max(2.5,((EX_MET[py.ex]||[4,2.5])[1])*1.6));   // 每層秒數：慢的動作給多一點時間
+const pyView=makeView($('[data-stage=pyr]'),()=>py.on&&py.phase==='work'?py.counter:null,{label:()=>py.on?'停止':'開始挑戰',click:()=>$('#pyStart').click()});
+pyView.chipFn=()=>py.chip;
+pyView.gaugeFn=()=>!py.on?'0':py.phase==='work'?Math.min(100,py.counter.count/py.steps[py.i]*100)+'%':py.phase==='rest'?Math.max(0,Math.min(100,(py.until-performance.now())/(py.rest*1000)*100))+'%':'0';
+pyView.onFrame=info=>pyFrame(info,performance.now());
+function pyMini(label,r,kind){const v=pyView;v.tmini.hidden=false;v.tmini.className='tmini '+kind;v.tl.textContent=label;v.tn.textContent=r;v.miniState={label,r,kind}}
+function pyWork(now){
+  const n=py.steps[py.i];py.phase='work';py.counter.reset();py.until=now+pyLimit(n)*1000;py.lastR=0;
+  pyView.nm.textContent=`第 ${py.i+1}/${py.steps.length} 層・目標 ${n} 下`;pyView.n.textContent='0';
+  say(`第 ${py.i+1} 層，${n} 下`,{cancel:true});beep(1320,200);pyDraw();
+}
+function pyFrame(info,now){
+  const v=pyView;
+  if(!py.on){py.chip=['鏡頭已就緒，按「開始挑戰」','ready'];return}
+  if(py.phase==='count'){if(gameCount(py,v,now))return;pyWork(now);return}
+  const left=Math.max(0,Math.ceil((py.until-now)/1000));
+  if(py.phase==='rest'){
+    v.n.textContent=left;py.chip=[`休息中，下一層 ${py.steps[py.i]} 下`,''];pyMini('休息',left,'rest');
+    if(left<=3&&left>0&&left!==py.lastR){py.lastR=left;beep(660,120)}
+    if(now>=py.until)pyWork(now);
+    return;
+  }
+  const need=py.steps[py.i],c=py.counter.count;
+  py.chip=info.status==='nobody'?['請讓全身入鏡','warn']:[`還差 ${Math.max(0,need-c)} 下`,info.status==='low'?'low':'ready'];
+  pyMini(`第 ${py.i+1} 層`,left,left<=5?'danger':'work');
+  if(c>=need){
+    py.total+=need;py.done++;py.i++;
+    if(py.i>=py.steps.length){pyFinish(true);return}
+    py.phase='rest';py.until=now+py.rest*1000;py.lastR=0;v.nm.textContent=`休息・下一層 ${py.steps[py.i]} 下`;
+    say(py.i===py.peak?'登頂了！開始下山':'完成，休息一下',{cancel:true});pyDraw();return;
+  }
+  if(left<=5&&left>0&&left!==py.lastR){py.lastR=left;beep(880,120)}
+  if(now>=py.until){py.failAt=py.i;pyFinish(false)}
+}
+function pyDraw(){
+  const st=py.steps.length?py.steps:pySteps(py.peak);
+  $('#pyBoard').innerHTML=st.map((n,i)=>{
+    const cls=py.failAt===i?'fail':py.steps.length&&i<py.done?'done':py.on&&i===py.i?'cur':'';
+    return `<i class="${cls}" style="height:${Math.round(n/py.peak*100)}%" title="第 ${i+1} 層：${n} 下">${n}</i>`;
+  }).join('');
+}
+function pyFinish(full){
+  if(!py.on)return;
+  const ran=py.phase==='work'||py.phase==='rest';
+  if(py.phase==='work'&&!full)py.total+=Math.min(py.counter.count,py.steps[py.i]);   // 沒做完那層也算已做的次數
+  py.on=false;py.phase='idle';
+  const v=pyView;v.tmini.hidden=true;v.miniState=null;v.hintEl.hidden=true;v.nm.textContent=py.ex;$('#pyStart').textContent='開始挑戰';
+  if(fullStage===v.stage)exitFull();
+  pyDraw();
+  if(!ran){renderPyr();return}
+  const total=py.total,ex=py.ex,n=py.steps.length,xp=total*2+(full?50+py.peak*5:0);
+  if(total>0){
+    addReps(total,ex,total);S.xp+=xp;
+    S.history.unshift({ex,n:total,t:Date.now()});S.history=S.history.slice(0,30);renderHist();
+  }
+  if(full)S.pyFull=(S.pyFull||0)+1;
+  const {best,isBest}=gameRecord('pyr',total,{ex,p:py.peak,lv:py.done,n,f:full?1:0});
+  save();renderStats();renderPyr();beep(1320,400);
+  $('#pyResult').hidden=false;
+  $('#pyResult').innerHTML=gameResultHTML({icon:full?'🏆':py.done>=py.peak?'⛰️':'🔺',
+    sub:full?`${esc(ex)}・頂層 ${py.peak} 下，登頂再下山全部完成！`:`${esc(ex)}・完成 ${py.done}/${n} 層${py.failAt>=0?'，時間到了':''}`,
+    score:total+' 下',isBest,best,xp,facts:[[`${py.done}/${n}`,'完成層數'],[total,'總次數'],[py.peak,'頂層次數']]}).replace(/最高 (\d+) 分/,'最多 $1 下');
+  say(full?`金字塔完成，共 ${total} 下`:`挑戰結束，共 ${total} 下`,{cancel:true});
+  if(total>0)waterNudge('金字塔挑戰完成，喝點水休息一下吧。');
+}
+function renderPyr(){
+  py.ex=$('#pyEx').value;if(!py.on)pyView.nm.textContent=py.ex;
+  $('#pyTotal').textContent=py.peak*py.peak;$('#pyBest').textContent=S.games.pyr.best||'—';$('#pyFullN').textContent=S.pyFull||0;
+  $('#pyLog').innerHTML=gameLogHTML('pyr',['動作','頂層','完成','次數'],l=>[esc(l.ex),l.p,`${l.lv}/${l.n}${l.f?' 🏆':''}`,`<b style="color:var(--yellow)">${l.sc}</b>`]);
+  if(!py.on)pyDraw();
+}
+$('#pyEx').innerHTML=optsByCat(PY_EX);
+$('#pyEx').value=PY_EX.includes('深蹲')?'深蹲':PY_EX[0];
+$('#pyEx').onchange=()=>{if(!py.on)renderPyr()};
+seg($('#pyPeak'),b=>{if(py.on)return;py.peak=+b.dataset.v;py.failAt=-1;py.steps=[];renderPyr()});
+seg($('#pyRest'),b=>{py.rest=+b.dataset.v});
+$('#pyCamBtn').onclick=async()=>{$('#pyCamBtn').disabled=true;const ok=await camStart(pyView);if(ok)$('#pyCamOff').disabled=false;else $('#pyCamBtn').disabled=false};
+$('#pyCamOff').onclick=()=>camStop();
+{const prev=cam.onStop;cam.onStop=()=>{prev&&prev();if(py.on)pyFinish(false);$('#pyCamBtn').disabled=false;$('#pyCamOff').disabled=true}}
+$('#pyStart').onclick=()=>{
+  if(py.on){pyFinish(false);return}
+  const w=$('#pyWarn');w.hidden=true;
+  if(!(cam.running&&cam.view===pyView)){w.hidden=false;w.textContent='請先按「開啟鏡頭」，看到畫面和骨架後再開始。';return}
+  audioInit();py.ex=$('#pyEx').value;py.steps=pySteps(py.peak);py.counter=new RepCounter(py.ex);py.counter.relax=.1;
+  Object.assign(py,{on:true,phase:'count',t0:performance.now(),lastR:0,i:0,done:0,total:0,failAt:-1});
+  $('#pyResult').hidden=true;$('#pyStart').textContent='停止';pyDraw();
+};
+renderPyr();
+
+seg($('#gSub'),b=>{if(nj.on)njFinish(false);if(rn.on)rnFinish(false);if(ps.on)psFinish(false);if(py.on)pyFinish(false);['ch','ninja','hold','run','pose','pyr'].forEach(k=>{$('#sub-'+k).hidden=b.dataset.sub!==k});if(cam.running)camStop();exitFull()});
 
 /* ================= 身體數據與菜單 ================= */
 let sex=S.body.sex,goalType=S.body.goal;
@@ -3212,6 +3333,7 @@ $('#frCode').addEventListener('keydown',e=>{if(e.key==='Enter')friendAdd($('#frC
 $('#frRefresh').onclick=()=>{if(frAvatarOk===false)frAvatarOk=null;friendBoard()};   // 剛執行完 SQL 時，按重新整理就會重新抓頭像
 seg($('#frSort'),b=>{frSort=b.dataset.v;renderBoard()});
 $('#frExercise').onchange=renderBoard;
+
 $('#frBoard').onclick=async e=>{
   const act=e.target.closest('[data-act]');if(act){act.dataset.act==='scan'?startScan():$('#frInvite').click();return}
   const b=e.target.closest('[data-code]');if(!b||!confirm('確定要刪除這位好友嗎？對方的名單裡也會移除你。'))return;

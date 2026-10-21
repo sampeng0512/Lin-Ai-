@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a1a20">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
@@ -533,6 +533,7 @@ body[data-mode="professional"] .tab[data-tab="game"],
 body[data-mode="professional"] .tab[data-tab="ach"],
 body[data-mode="professional"] .tab[data-tab="friends"]{display:none}
 body[data-mode="game"] .tab[data-tab="timer"],
+body[data-mode="game"] .tab[data-tab="cam"],
 body[data-mode="game"] .tab[data-tab="body"],
 body[data-mode="game"] .tab[data-tab="food"],
 body[data-mode="game"] .tab[data-tab="guide"],
@@ -695,10 +696,11 @@ body[data-theme="professional"] .game-hud,body[data-theme="game"] #modeLabel{dis
 .arena-shake{animation:arenaShake .22s linear}
 @keyframes arenaShake{0%,100%{transform:translate(0,0)}25%{transform:translate(5px,-2px)}50%{transform:translate(-5px,2px)}75%{transform:translate(3px,2px)}}
 body.game-arena-open .top,body.game-arena-open .tabs,body.game-arena-open main,body.game-arena-open footer{visibility:hidden}
-body[data-theme="game"] #tab-game{display:flex;flex-direction:column;overflow:hidden;padding:8px 0 0}
-body[data-theme="game"] #tab-game>.game-lobby{flex:1}
-body[data-theme="game"] #tab-game>.game-lobby .game-cards{flex:1;align-content:stretch}
-body[data-theme="game"] #tab-game .game-card{min-height:0}
+body[data-theme="game"] #tab-game.active{display:flex;flex-direction:column;overflow:visible;padding:8px 0 0}
+body[data-theme="game"] #tab-game:not(.active){display:none}
+body[data-theme="game"] #tab-game.active>.game-lobby{flex:none}
+body[data-theme="game"] #tab-game.active>.game-lobby .game-cards{flex:none;align-content:start}
+body[data-theme="game"] #tab-game.active .game-card{min-height:64px}
 body[data-theme="game"] #gameLegacy{display:none}
 @media(max-width:420px){
   .game-lobby{gap:6px}
@@ -876,6 +878,135 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
   .movement-card,.icon-control,.cam-idle-card{transition:none}
   .stage .n.count-pop{animation:none}
 }
+:root{--app-gap:clamp(12px,3vw,16px);--card-inset:clamp(10px,3vw,16px);--card-radius:clamp(12px,3vw,20px)}
+html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+body{display:flex;flex-direction:column;align-items:center;font-size:clamp(14px,3.6vw,16px)}
+.app-shell{display:none;flex-direction:column;width:100%;max-width:480px;height:100dvh;min-height:0;margin:0 auto;overflow:hidden}
+body[data-mode] .app-shell{display:flex}
+.top{display:flex;flex:0 0 auto;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;width:100%;height:auto;max-width:none;margin:0;padding:max(12px,env(safe-area-inset-top)) clamp(10px,3vw,16px) 10px;border-bottom:1px solid var(--line)}
+.top-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0}
+.brand{flex:none;gap:8px;font-size:clamp(1.25rem,5vw,1.65rem);line-height:1;white-space:nowrap}
+.brand::before{width:8px;height:22px}
+.brand small{font-size:clamp(.68rem,2.8vw,.82rem)}
+.top-right{display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0;flex-wrap:wrap}
+#modeLabel{display:none}
+#modeHomeBtn,#voiceBtn,#accountBtn{min-width:0;min-height:34px;padding:5px 8px;font-size:clamp(.62rem,2.4vw,.74rem);white-space:nowrap}
+.top .stats,.top #gameStats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+.top .stats{display:grid}
+.top #gameStats{display:none}
+body[data-theme="game"] .top #gameStats{display:grid}
+.top .stat,.top .game-hud .fact{display:flex;min-width:0;min-height:48px;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;border:1px solid var(--line);border-radius:var(--card-radius);background:var(--glass),var(--card);text-align:center}
+.top .stat b,.top .game-hud .fact b{font-size:clamp(1rem,4vw,1.3rem);line-height:1.1;white-space:nowrap}
+.top .stat span,.top .game-hud .fact span{font-size:clamp(.56rem,2.3vw,.68rem);line-height:1.25}
+.top .stat small{display:none}
+.top .stat .sbar{max-width:80px;height:3px;margin-top:2px}
+.top .game-hud{gap:6px;margin:0}
+.top .game-hud .fact{position:relative;overflow:hidden}
+body[data-theme="game"] #stats{display:none}
+body[data-theme="professional"] #gameStats{display:none}
+main{flex:1 1 auto;width:100%;max-width:none;min-width:0;min-height:0;margin:0;padding:var(--app-gap) clamp(10px,3vw,16px) 80px;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.panel{height:auto;min-height:0;overflow:visible}
+.panel.active{display:block}
+.panel h2{font-size:clamp(1.1rem,4vw,1.4rem)}
+.card,.fact,.game-card,.movement-card,.badge,.ach,.fr{padding:var(--card-inset);border-radius:var(--card-radius)}
+.cam-picker{display:flex;height:auto;min-height:0;flex-direction:column;gap:0}
+.cam-picker>*+*{margin-top:12px}
+.step-heading h2{font-size:clamp(1.1rem,4vw,1.4rem)}
+.movement-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;flex:none;min-height:0;align-content:start}
+.movement-card{min-height:clamp(64px,18vw,82px);grid-template-columns:36px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;gap:2px 8px;padding:clamp(10px,3vw,14px)}
+.movement-icon{grid-row:1/3;font-size:clamp(1.15rem,5vw,1.5rem)}
+.movement-card strong{font-size:clamp(.78rem,3vw,.9rem)}
+.movement-card small{font-size:clamp(.58rem,2.4vw,.7rem)}
+.movement-more{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:clamp(.7rem,2.8vw,.82rem)}
+.movement-more label{flex:1 1 100%}
+.movement-more select{width:100%;min-height:44px;font-size:clamp(.76rem,3vw,.9rem)}
+.tabs{position:relative;inset:auto;z-index:5;display:flex;flex:0 0 auto;justify-content:flex-start;gap:4px;width:100%;padding:6px 8px env(safe-area-inset-bottom);overflow-x:auto;overflow-y:hidden;border-top:1px solid var(--line);border-right:0;border-bottom:0;border-left:0;border-radius:0;background:rgba(10,26,32,.96);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs .tab{display:flex;flex:1 0 54px;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:54px;min-height:48px;padding:4px 3px;border:1px solid transparent;border-radius:12px;font-size:.62rem;white-space:nowrap}
+.tabs .tab svg{width:18px;height:18px}
+.tabs .tab-label{display:none}
+.tabs .tab::after{content:attr(data-short);font-size:clamp(.56rem,2.3vw,.66rem);line-height:1}
+.tabs .tab:first-child,.tabs .tab:last-child{margin:0}
+.foot{max-width:none;margin:0;padding:16px 8px 0;font-size:clamp(.65rem,2.5vw,.76rem)}
+.fab{right:max(12px,env(safe-area-inset-right));bottom:calc(76px + env(safe-area-inset-bottom));width:48px;height:48px}
+.top-right #musicFab{position:static;display:grid;flex:none;width:34px;height:34px;min-width:34px;min-height:34px;margin:0;padding:0;border-radius:12px;box-shadow:none}
+.top-right #musicFab svg{width:20px;height:20px}
+.mpanel{right:max(10px,env(safe-area-inset-right));bottom:calc(132px + env(safe-area-inset-bottom));width:min(92vw,350px);max-height:calc(100dvh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+.bd-fab{position:static;display:inline-grid;width:48px;height:48px;flex:none;margin:0;padding:6px;border:1px solid var(--line);border-radius:50%;background:var(--card);filter:none;animation:none}
+.bd-fab .bd-svg{width:100%;height:100%}
+.buddy-coach{display:inline-grid;place-items:center;flex:none;width:42px;height:42px;padding:5px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);cursor:pointer}
+.buddy-coach .bd-svg{width:100%;height:100%}
+.coach-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.coach-heading h2{margin-bottom:0}
+.bd-bubble{position:static;max-width:none;margin:0;padding:10px 14px;border-radius:14px;background:var(--ink);color:var(--dark);box-shadow:none;animation:none}
+.bmi-fact{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.bmi-fact>b{font-size:clamp(1.3rem,6vw,1.8rem);line-height:1.05;white-space:nowrap}
+.bmi-fact>span{display:flex;align-items:center;gap:6px;font-size:.72rem;white-space:nowrap}
+.bmi-fact>span strong{display:inline-flex;align-items:center;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--teal);font-size:.66rem;line-height:1.3;white-space:nowrap}
+.food-quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.food-quick-grid .btn{display:flex;min-width:0;min-height:42px;align-items:center;justify-content:center;padding:7px 5px;border-radius:999px;font-size:clamp(.62rem,2.5vw,.75rem);line-height:1.25;white-space:normal}
+.stats-segments{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:999px;background:var(--bg2)}
+.stats-segments button{min-width:0;padding:8px 4px;font-size:clamp(.68rem,2.8vw,.82rem);white-space:nowrap}
+.stats-subpanel{display:grid;gap:12px}
+.stats-subpanel[hidden]{display:none}
+.stats-subpanel>*+*{margin-top:0}
+.guide-filters{display:flex;gap:6px;padding:2px 0 8px;overflow-x:auto;scrollbar-width:none}
+.guide-filters::-webkit-scrollbar{display:none}
+.guide-filters button{flex:0 0 auto;min-height:38px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg2);color:var(--mute);font:inherit;font-size:.78rem;font-weight:700;white-space:nowrap}
+.guide-filters button.on{border-color:var(--yellow);background:var(--yellow);color:var(--dark)}
+.guide-filters.coach-faq{flex-wrap:wrap;overflow:visible}
+.guide-filters.coach-faq button{white-space:normal}
+.coach-options{gap:8px}
+.coach-options>.grow{flex:1 1 110px;min-width:0}
+.coach-result:empty{display:none}
+.coach-result{display:grid;gap:10px}
+.coach-result-card{padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg2)}
+.coach-result-card h4{margin:0 0 6px;color:var(--teal)}
+.coach-result-card ul{margin:0;padding-left:1.2em}
+.coach-result-card li+li{margin-top:4px}
+.coach-result-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.coach-result-summary>div{padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg2)}
+.coach-result-summary b{display:block;color:var(--yellow)}
+.advanced-coach-content{margin-top:10px}
+.advanced-coach-content .chat{max-height:38vh}
+.advanced-coach-content #quick{gap:6px}
+@media(min-width:400px){
+  .food-quick-grid{gap:8px}
+}
+@media(max-width:360px){
+  .food-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.cam-session,.timer-session{height:auto;min-height:65dvh;max-height:none}
+.cam-stage-wrap{flex:1;min-height:50dvh}
+.cam-stage-wrap .stage{min-height:50dvh}
+.timer-dash{min-height:46dvh}
+.timer-setup{height:auto;overflow:visible}
+.game-lobby{height:auto;min-height:0;gap:12px}
+.game-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body[data-theme="game"] #tab-game{display:block;height:auto;overflow:visible;padding:0}
+body[data-theme="game"] #tab-game.active{display:block}
+@media(max-width:360px){
+  .top-heading{align-items:center;flex-wrap:wrap}
+  .top-right{flex:1 1 100%;justify-content:space-between}
+  .brand small{display:none}
+  .top-right{gap:3px}
+  #modeHomeBtn,#voiceBtn,#accountBtn{padding:4px 6px;font-size:.6rem}
+  body[data-primary-view="cam"] .top-right #musicFab,body[data-primary-view="timer"] .top-right #musicFab{display:grid}
+  .movement-card{grid-template-columns:30px minmax(0,1fr);gap:2px 5px}
+}
+@media(prefers-reduced-motion:reduce){
+  .panel.active{animation:none}
+  .step-view{animation:none}
+}
+body{align-items:stretch}
+.app-shell{display:none;flex-direction:column;width:100%;max-width:480px;height:100dvh;min-height:0;margin:0 auto;overflow:hidden}
+body[data-mode] .app-shell{display:flex}
+.top{flex-shrink:0}
+main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width:0;min-height:0;margin:0;padding:16px 16px 96px;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.panel{display:none;height:auto;min-height:0;overflow:visible}
+.panel.active{display:block}
+#tab-body .grid2,#tab-food .grid2{grid-template-columns:minmax(0,1fr)}
+.foot{position:static;max-width:none;margin:24px 0 0;padding:0 8px 16px;text-align:center}
 </style>
 </head>
 <body>
@@ -901,14 +1032,23 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
   <p class="small mute">隨時可以返回這裡切換運動模式。</p>
 </section>
 
+<div class="app-shell">
 <header class="top">
-  <div class="brand">Lin AI<small>健身教練</small></div>
-  <div class="top-right">
-    <span id="modeLabel"></span>
-    <button class="btn ghost small" id="modeHomeBtn" type="button">切換模式</button>
-    <button class="btn ghost small" id="voiceBtn" type="button"></button>
-    <button class="btn ghost small" id="accountBtn" type="button">登入 / 註冊</button>
-    <div class="stats" id="stats"></div>
+  <div class="top-heading">
+    <div class="brand">Lin AI<small>健身教練</small></div>
+    <div class="top-right">
+      <span id="modeLabel"></span>
+      <button class="btn ghost small" id="modeHomeBtn" type="button">切換模式</button>
+      <button class="btn ghost small" id="voiceBtn" type="button"></button>
+      <button class="fab" id="musicFab" type="button" aria-label="訓練音樂" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
+      <button class="btn ghost small" id="accountBtn" type="button">登入 / 註冊</button>
+    </div>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="game-hud" id="gameStats" aria-label="遊戲紀錄">
+    <div class="fact"><b id="headerGameCombo">0</b><span>最高連擊</span></div>
+    <div class="fact"><b id="headerGameScore">0</b><span>最佳分數</span></div>
+    <div class="fact"><b id="headerGameLevel">等級 1</b><span>遊戲等級</span></div>
   </div>
 </header>
 <dialog class="recdlg" id="accountDlg" aria-labelledby="accountTitle">
@@ -920,7 +1060,7 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
     </div>
     <form id="accountForm" class="stack" role="tabpanel" novalidate>
       <p class="small mute" id="accountHint">登入後，訓練與個人紀錄會同步到你的帳號。</p>
-      <label class="f" for="accountEmail">Email</label><input type="email" id="accountEmail" autocomplete="email" placeholder="you@example.com" required>
+      <label class="f" for="accountEmail">電子郵件</label><input type="email" id="accountEmail" autocomplete="email" placeholder="you@example.com" required>
       <label class="f" for="accountPassword">密碼</label><input type="password" id="accountPassword" autocomplete="current-password" minlength="8" required>
       <div id="accountConfirmWrap" class="stack" hidden><label class="f" for="accountPassword2">確認密碼</label><input type="password" id="accountPassword2" autocomplete="new-password" minlength="8"></div>
       <button class="btn" id="accountSubmit" type="submit">登入</button>
@@ -959,10 +1099,10 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
   </div>
 </dialog>
 <dialog class="recdlg" id="scanDlg" aria-labelledby="scanTitle">
-  <h3 id="scanTitle" style="margin-top:0">掃描好友 QR Code</h3>
+  <h3 id="scanTitle" style="margin-top:0">掃描好友 QR 碼</h3>
   <div class="stack">
     <div class="scan-box"><video id="scanVideo" playsinline muted></video><i></i></div>
-    <p class="small mute" id="scanMsg" role="status" aria-live="polite">把朋友的 QR Code 放進框框裡。</p>
+    <p class="small mute" id="scanMsg" role="status" aria-live="polite">把朋友的 QR 碼放進框框裡。</p>
     <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="scanClose" type="button">取消</button></div>
   </div>
 </dialog>
@@ -1003,19 +1143,6 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
   <button class="btn ghost small" id="wLater" type="button">10 分鐘後再提醒</button>
   <button class="x" id="wClose" type="button" aria-label="關閉提醒">×</button>
 </div>
-
-<nav class="tabs" role="tablist" id="tabs">
-  <button class="tab" role="tab" data-tab="cam" aria-selected="true">鏡頭計數</button>
-  <button class="tab" role="tab" data-tab="timer" aria-selected="false">訓練計時器</button>
-  <button class="tab" role="tab" data-tab="game" aria-selected="false">挑戰與遊戲</button>
-  <button class="tab" role="tab" data-tab="stats" aria-selected="false">統計紀錄</button>
-  <button class="tab" role="tab" data-tab="ach" aria-selected="false">成就徽章</button>
-  <button class="tab" role="tab" data-tab="friends" aria-selected="false">好友排行</button>
-  <button class="tab" role="tab" data-tab="body" aria-selected="false">身體數據與菜單</button>
-  <button class="tab" role="tab" data-tab="food" aria-selected="false">飲食紀錄</button>
-  <button class="tab" role="tab" data-tab="guide" aria-selected="false">動作教學</button>
-  <button class="tab" role="tab" data-tab="coach" aria-selected="false">AI 教練</button>
-</nav>
 
 <main>
 <!-- ============ 鏡頭計數 ============ -->
@@ -1146,21 +1273,16 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
 <!-- ============ 挑戰與遊戲 ============ -->
 <section class="panel" id="tab-game">
   <div class="game-lobby" id="gameLobby">
-    <div class="game-hud">
-      <div class="fact"><b id="gameCombo">0</b><span>最高連擊</span></div>
-      <div class="fact"><b id="gameScore">0</b><span>最佳分數</span></div>
-      <div class="fact"><b id="gameLevel">等級 1</b><span>遊戲等級</span></div>
-    </div>
-    <div class="game-lobby-head"><div><span class="eyebrow">AR 街機大廳</span><h2>選擇你的挑戰</h2><p>站好位置，動起全身，開始闖關！</p></div><span class="step-count">遊戲中心</span></div>
+    <div class="game-lobby-head"><div><span class="eyebrow">街機遊戲大廳</span><h2>選擇你的挑戰</h2><p>站好位置，動起全身，開始闖關！</p></div><span class="step-count">遊戲中心</span></div>
     <div class="game-cards" id="gameCards">
-      <button class="game-card" type="button" data-game="ch"><span class="game-card-icon">⏱️</span><span class="game-card-copy"><strong>一分鐘挑戰</strong><small>全身燃脂・計數闖關</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">GO</i></button>
-      <button class="game-card" type="button" data-game="hold"><span class="game-card-icon">🛡️</span><span class="game-card-copy"><strong>撐住挑戰</strong><small>核心穩定・耐力守關</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">GO</i></button>
-      <button class="game-card" type="button" data-game="pyr"><span class="game-card-icon">🔺</span><span class="game-card-copy"><strong>金字塔挑戰</strong><small>肌力攀登・層層突破</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">GO</i></button>
-      <button class="game-card" type="button" data-game="ninja"><span class="game-card-icon">🥷</span><span class="game-card-copy"><strong>健身忍者</strong><small>敏捷反應・雙手揮擊</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">GO</i></button>
-      <button class="game-card" type="button" data-game="run"><span class="game-card-icon">🏃</span><span class="game-card-copy"><strong>障礙跑酷</strong><small>全身移動・跳躍閃避</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">GO</i></button>
-      <button class="game-card" type="button" data-game="pose"><span class="game-card-icon">🧍</span><span class="game-card-copy"><strong>姿勢配對</strong><small>核心爆發・全身反應</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">GO</i></button>
-      <button class="game-card" type="button" data-game="rhythm"><span class="game-card-icon">🥊</span><span class="game-card-copy"><strong>全身節拍光拳</strong><small>節奏拳擊・高抬腿・深蹲</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">NEW</i></button>
-      <button class="game-card" type="button" data-game="dodge"><span class="game-card-icon">☄️</span><span class="game-card-copy"><strong>極限隕石閃避</strong><small>弓步閃避・跳躍集晶</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">NEW</i></button>
+      <button class="game-card" type="button" data-game="ch"><span class="game-card-icon">⏱️</span><span class="game-card-copy"><strong>一分鐘挑戰</strong><small>全身燃脂・計數闖關</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">開始</i></button>
+      <button class="game-card" type="button" data-game="hold"><span class="game-card-icon">🛡️</span><span class="game-card-copy"><strong>撐住挑戰</strong><small>核心穩定・耐力守關</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">開始</i></button>
+      <button class="game-card" type="button" data-game="pyr"><span class="game-card-icon">🔺</span><span class="game-card-copy"><strong>金字塔挑戰</strong><small>肌力攀登・層層突破</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">開始</i></button>
+      <button class="game-card" type="button" data-game="ninja"><span class="game-card-icon">🥷</span><span class="game-card-copy"><strong>健身忍者</strong><small>敏捷反應・雙手揮擊</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">開始</i></button>
+      <button class="game-card" type="button" data-game="run"><span class="game-card-icon">🏃</span><span class="game-card-copy"><strong>障礙跑酷</strong><small>全身移動・跳躍閃避</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">開始</i></button>
+      <button class="game-card" type="button" data-game="pose"><span class="game-card-icon">🧍</span><span class="game-card-copy"><strong>姿勢配對</strong><small>核心爆發・全身反應</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">開始</i></button>
+      <button class="game-card" type="button" data-game="rhythm"><span class="game-card-icon">🥊</span><span class="game-card-copy"><strong>全身節拍光拳</strong><small>節奏拳擊・高抬腿・深蹲</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">全新</i></button>
+      <button class="game-card" type="button" data-game="dodge"><span class="game-card-icon">☄️</span><span class="game-card-copy"><strong>極限隕石閃避</strong><small>弓步閃避・跳躍集晶</small></span><span class="game-card-score"><b>—</b>最高</span><i class="game-rank">全新</i></button>
     </div>
   </div>
   <dialog class="game-dialog" id="gameDetails">
@@ -1168,7 +1290,7 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
       <div class="game-dialog-head"><span class="game-dialog-icon" id="gameDialogIcon">🎮</span><div><h2 id="gameDialogTitle">準備開戰</h2><p id="gameDialogTags">全身挑戰</p></div><button class="icon-control" type="button" id="gameDialogClose" aria-label="關閉遊戲介紹">×</button></div>
       <div class="game-howto" id="gameDialogHowto"></div>
       <div><label class="f">選擇難度</label><div class="seg" id="gameDifficulty"><button type="button" data-diff="easy">輕鬆</button><button type="button" data-diff="normal" class="on">標準</button><button type="button" data-diff="hard">地獄</button></div></div>
-      <button class="btn game-play" type="button" id="gamePlayNow">開始遊戲　PLAY</button>
+      <button class="btn game-play" type="button" id="gamePlayNow">開始遊戲</button>
     </div>
   </dialog>
   <div class="game-arena" id="gameArena" hidden>
@@ -1184,14 +1306,9 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
     </div>
     <div class="game-arena-overlay" id="gameArenaCountdown" hidden><div><div class="game-count-number" id="gameCountNumber">3</div><div class="game-count-guide"><strong>全身站在框線內</strong><span>保持頭、手腕與膝蓋都在鏡頭範圍，倒數結束立即開始！</span></div></div></div>
     <div class="game-arena-overlay" id="gameArenaPausePanel" hidden><div class="game-result"><div class="game-result-badge">Ⅱ</div><h2>暫停一下</h2><p>調整呼吸，準備好再繼續挑戰。</p><div class="game-result-actions"><button class="btn game-play" type="button" id="gameArenaResume">繼續遊戲</button><button class="btn ghost" type="button" id="gamePauseExit">返回大廳</button></div></div></div>
-    <div class="game-arena-overlay" id="gameArenaResult" hidden><div class="game-result"><div class="game-result-badge" id="gameResultRank">A</div><h2 id="gameResultTitle">挑戰完成</h2><div class="game-result-score" id="gameResultScore">0</div><div class="game-result-metrics"><div><b id="gameResultCombo">0</b><span>最高連擊</span></div><div><b id="gameResultXp">0</b><span>獲得 XP</span></div><div><b id="gameResultKcal">0</b><span>消耗大卡</span></div></div><p id="gameResultMessage">表現出色，繼續保持！</p><div class="game-result-actions"><button class="btn game-play" type="button" id="gameReplay">再玩一局</button><button class="btn ghost" type="button" id="gameResultBack">返回大廳</button></div></div></div>
+    <div class="game-arena-overlay" id="gameArenaResult" hidden><div class="game-result"><div class="game-result-badge" id="gameResultRank">A</div><h2 id="gameResultTitle">挑戰完成</h2><div class="game-result-score" id="gameResultScore">0</div><div class="game-result-metrics"><div><b id="gameResultCombo">0</b><span>最高連擊</span></div><div><b id="gameResultXp">0</b><span>獲得經驗值</span></div><div><b id="gameResultKcal">0</b><span>消耗大卡</span></div></div><p id="gameResultMessage">表現出色，繼續保持！</p><div class="game-result-actions"><button class="btn game-play" type="button" id="gameReplay">再玩一局</button><button class="btn ghost" type="button" id="gameResultBack">返回大廳</button></div></div></div>
   </div>
   <div id="gameLegacy" hidden>
-  <div class="game-hud">
-    <div class="fact"><b id="gameCombo">0</b><span>最高連擊</span></div>
-    <div class="fact"><b id="gameScore">0</b><span>最佳分數</span></div>
-    <div class="fact"><b id="gameLevel">等級 1</b><span>遊戲等級</span></div>
-  </div>
   <div class="seg" id="gSub" style="margin-bottom:18px">
     <button class="on" data-sub="ch">一分鐘挑戰</button>
     <button data-sub="hold">撐住挑戰</button>
@@ -1356,6 +1473,12 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
 <!-- ============ 統計與成就 ============ -->
 <section class="panel" id="tab-stats">
   <div class="stack">
+    <div class="seg stats-segments" role="tablist" aria-label="紀錄分類">
+      <button class="on" type="button" role="tab" aria-selected="true" data-stats-view="training">訓練數據</button>
+      <button type="button" role="tab" aria-selected="false" data-stats-view="schedule">課表與喝水</button>
+      <button type="button" role="tab" aria-selected="false" data-stats-view="data">資料管理</button>
+    </div>
+    <div class="stats-subpanel stack" data-stats-panel="training">
     <div class="facts" id="stFacts"></div>
     <div class="card stack" id="manCard">
       <div><h3 style="margin:0">✍️ 自訂紀錄</h3><p class="small mute" style="margin:4px 0 0">沒用鏡頭做的運動（健身房、外出、補登）可以自己記。會算進統計、熱量和每日目標，但<b>不計入好友排行</b>。</p></div>
@@ -1388,6 +1511,10 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
       <div class="bar"><i id="stGoalBar"></i></div>
       <p class="small mute" id="stGoalTxt"></p>
     </div>
+    <div class="card stack" id="stHeatCard"><h3 style="margin:0">運動日曆</h3><div id="stHeat" style="overflow-x:auto"></div></div>
+    <div class="card stack"><h3 style="margin:0">個人紀錄（單組最多）</h3><div id="stPR"></div></div>
+    </div>
+    <div class="stats-subpanel stack" data-stats-panel="schedule" hidden>
     <div class="card stack" id="schedCard">
       <div class="row" style="justify-content:space-between">
         <h3 style="margin:0">我的課表與提醒</h3>
@@ -1422,21 +1549,17 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
       </div>
       <p class="small mute" id="wNote"></p>
     </div>
-    <div class="card stack" id="stHeatCard"><h3 style="margin:0">運動日曆</h3><div id="stHeat" style="overflow-x:auto"></div></div>
-    <div class="card stack"><h3 style="margin:0">個人紀錄（單組最多）</h3><div id="stPR"></div></div>
+    </div>
+    <div class="stats-subpanel stack" data-stats-panel="data" hidden>
     <div class="card stack">
       <h3 style="margin:0">備份與還原</h3>
-      <p class="small mute">紀錄只存在這個瀏覽器。換手機或電腦前，先匯出備份檔，再到新的裝置匯入。備份檔不含 API Key。</p>
+      <p class="small mute">紀錄只存在這個瀏覽器。換手機或電腦前，先匯出備份檔，再到新的裝置匯入。備份檔不含 API 金鑰。</p>
       <div class="row">
         <button class="btn teal" type="button" id="stExport">匯出備份</button>
         <label class="btn ghost" style="cursor:pointer">匯入備份<input type="file" id="stImport" accept="application/json,.json" hidden></label>
         <button class="btn ghost" type="button" id="stReset">清除所有紀錄</button>
       </div>
     </div>
-    <div class="card stack">
-      <h3 style="margin:0">診斷資訊</h3>
-      <p class="small mute">網站有問題時，按「複製診斷資訊」貼給我，我就能看出是哪裡出錯。裡面只有版本、瀏覽器和設定，沒有你的訓練紀錄。</p>
-      <div class="row"><button class="btn ghost" type="button" id="diagCopy">複製診斷資訊</button><span class="small mute" id="diagVer"></span></div>
     </div>
   </div>
 </section>
@@ -1459,9 +1582,9 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
           <div class="stack">
             <div><label class="f">我的好友代碼（給朋友，讓他加你）</label><div class="codebox" id="frMyCode">—</div></div>
             <div class="row"><button class="btn teal grow" type="button" id="frInvite">分享邀請連結</button><button class="btn ghost" type="button" id="frCopy">複製代碼</button></div>
-            <p class="small mute" style="margin:0">朋友用手機相機或 App 內的「掃描 QR Code」掃右邊的圖，就能直接加你。</p>
+            <p class="small mute" style="margin:0">朋友用手機相機或應用程式內的「掃描 QR 碼」掃右邊的圖，就能直接加你。</p>
           </div>
-          <button type="button" class="fr-qr" id="frQR" aria-label="放大我的 QR Code"></button>
+          <button type="button" class="fr-qr" id="frQR" aria-label="放大我的 QR 碼"></button>
         </div>
         <p class="small mute">排行榜<b>只計算鏡頭偵測到的次數</b>，手動輸入的自訂紀錄不會算進去。好友只看得到你的頭像、暱稱、各動作累計與本週次數、連續天數和等級，看不到影像和訓練細節。</p>
       </div>
@@ -1472,7 +1595,7 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
           <button class="btn" type="button" id="frAdd">加入</button>
         </div>
         <div class="fr-addways">
-          <button class="btn teal" type="button" id="frScan">📷 掃描 QR Code</button>
+          <button class="btn teal" type="button" id="frScan">📷 掃描 QR 碼</button>
           <label class="btn ghost" style="cursor:pointer; text-align:center">🖼️ 從相簿讀取<input type="file" id="frScanFile" accept="image/*" hidden></label>
         </div>
         <p class="small mute">加了之後，雙方都會出現在對方的排行榜裡。</p>
@@ -1500,7 +1623,7 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
 
 <!-- ============ 身體數據與菜單 ============ -->
 <section class="panel" id="tab-body">
-  <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+  <div class="grid2">
     <div class="stack">
       <h2>身體數據</h2>
       <div class="seg" id="bSex"><button class="on" data-v="男">男</button><button data-v="女">女</button></div>
@@ -1559,7 +1682,7 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
 
 <!-- ============ 飲食紀錄 ============ -->
 <section class="panel" id="tab-food">
-  <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+  <div class="grid2">
     <div class="stack">
       <h2>飲食紀錄</h2>
       <div class="card stack">
@@ -1574,7 +1697,7 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
     </div>
     <div class="stack">
       <h3>快速新增</h3>
-      <div class="row" style="gap:8px" id="fdQuick"></div>
+      <div class="food-quick-grid" id="fdQuick"></div>
       <hr class="rule" style="margin:6px 0">
       <h3>自己輸入</h3>
       <div class="row">
@@ -1593,6 +1716,14 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
   <div style="max-width:760px; margin:0 auto" class="guide">
     <h2>動作教學</h2>
     <p class="mute">每個動作的要點和常見錯誤。做動作時如果感到疼痛，請立刻停止；有傷病、慢性病或懷孕，請先諮詢醫師或物理治療師。</p>
+    <div class="guide-filters" id="guideFilters" role="group" aria-label="依訓練部位篩選">
+      <button class="on" type="button" data-guide-filter="全部">全部</button>
+      <button type="button" data-guide-filter="下肢">下肢</button>
+      <button type="button" data-guide-filter="上肢">上肢</button>
+      <button type="button" data-guide-filter="核心">核心</button>
+      <button type="button" data-guide-filter="全身有氧">全身有氧</button>
+      <button type="button" data-guide-filter="撐住類">撐住類</button>
+    </div>
     <div id="guideList"></div>
   </div>
 </section>
@@ -1600,32 +1731,67 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
 <!-- ============ AI 教練 ============ -->
 <section class="panel" id="tab-coach">
   <div style="max-width:760px; margin:0 auto" class="stack">
-    <h2>AI 教練</h2>
-    <p class="mute">跟教練說你的目標、每週能練幾天、有沒有器材，它會幫你排菜單，也能回答動作和飲食問題。</p>
-    <details id="keyBox">
-      <summary style="cursor:pointer; font-weight:700">設定 API Key</summary>
-      <div class="stack" style="margin-top:10px">
-        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
-        <label><input type="checkbox" id="keyRemember"> 記住在這台裝置</label>
-        <p class="small mute">到 console.anthropic.com 申請。金鑰只存在你的瀏覽器，對話直接從你的裝置送到 Anthropic，用量會從你的帳號扣款。不要在公用電腦勾選「記住」。</p>
+    <div class="coach-heading"><h2>AI 教練</h2><button class="buddy-coach" id="bdFab" type="button" aria-label="開啟健身夥伴" aria-expanded="false"></button></div>
+    <div class="bd-bubble" id="bdBubble" role="status" aria-live="polite" hidden></div>
+    <p class="small mute" style="margin:0">依照你的目標、時間與器材，立即產生個人化一週建議。無需網路或金鑰。</p>
+    <div class="card stack coach-builder">
+      <div class="row coach-options">
+        <div class="grow"><label class="f" for="coachGoal">訓練目標</label><select id="coachGoal"><option value="減脂">減脂</option><option value="增肌">增肌</option><option value="體能">提升體能</option></select></div>
+        <div class="grow"><label class="f" for="coachDays">每週訓練天數</label><select id="coachDays"><option value="2">2 天</option><option value="3" selected>3 天</option><option value="4">4 天</option><option value="5">5 天</option></select></div>
+        <div class="grow"><label class="f" for="coachGear">可用器材</label><select id="coachGear"><option value="徒手">徒手</option><option value="啞鈴">啞鈴或水瓶</option><option value="健身房">健身房器材</option></select></div>
+      </div>
+      <button class="btn teal block" id="coachGenerate" type="button">產生我的一週建議</button>
+      <div class="coach-result" id="coachResult" aria-live="polite"></div>
+    </div>
+    <div class="card stack">
+      <h3 style="margin:0">常見健身問題</h3>
+      <div class="guide-filters coach-faq" id="coachFaq">
+        <button type="button" data-faq="warmup">訓練前怎麼暖身？</button>
+        <button type="button" data-faq="protein">怎麼補充蛋白質？</button>
+        <button type="button" data-faq="rest">休息日需要運動嗎？</button>
+        <button type="button" data-faq="squat">深蹲怎麼做比較安全？</button>
+      </div>
+      <div class="notice" id="coachFaqAnswer" hidden></div>
+    </div>
+    <details id="advancedCoach">
+      <summary>進階設定</summary>
+      <div class="stack advanced-coach-content">
+        <details id="keyBox">
+          <summary>使用自訂 AI 金鑰</summary>
+          <div class="stack" style="margin-top:10px">
+            <input type="password" id="apiKey" placeholder="貼上 API 金鑰" autocomplete="off">
+            <label><input type="checkbox" id="keyRemember"> 記住在這台裝置</label>
+            <p class="small mute">金鑰只儲存在你的瀏覽器。使用自訂金鑰會直接連線至 AI 服務，費用由該服務帳戶收取。</p>
+          </div>
+        </details>
+        <label><input type="checkbox" id="useCtx" checked> 讓線上教練參考「身體數據」分頁填的資料</label>
+        <label><input type="checkbox" id="useLog" checked> 讓線上教練參考近 7 天訓練與飲食紀錄</label>
+        <div class="row" id="quick"></div>
+        <div class="chat" id="chat"></div>
+        <div class="row" style="align-items:flex-end">
+          <textarea id="chatIn" rows="2" class="grow" placeholder="輸入想詢問教練的問題" style="flex:1 1 240px"></textarea>
+          <button class="btn" id="chatSend">送出</button>
+        </div>
+        <button class="btn ghost" id="chatClear" hidden>清除對話</button>
       </div>
     </details>
-    <label><input type="checkbox" id="useCtx" checked> 讓教練參考「身體數據」分頁填的資料</label>
-    <label><input type="checkbox" id="useLog" checked> 讓教練參考我最近 7 天的訓練與飲食紀錄（會一起送給 Anthropic）</label>
-    <div class="row" id="quick"></div>
-    <div class="chat" id="chat"></div>
-    <div class="row" style="align-items:flex-end">
-      <textarea id="chatIn" rows="2" class="grow" placeholder="例如：我想 8 週減 3 公斤，每週練 4 天，只有徒手" style="flex:1 1 240px"></textarea>
-      <button class="btn" id="chatSend">送出</button>
-    </div>
-    <button class="btn ghost" id="chatClear" hidden>清除對話</button>
   </div>
 </section>
-</main>
 <footer class="foot" id="foot"></footer>
-
-<button class="bd-fab" id="bdFab" type="button" aria-label="我的健身夥伴" aria-expanded="false"></button>
-<div class="bd-bubble" id="bdBubble" role="status" aria-live="polite" hidden></div>
+</main>
+<nav class="tabs" role="tablist" id="tabs">
+  <button class="tab" role="tab" data-tab="cam" aria-selected="true">鏡頭計數</button>
+  <button class="tab" role="tab" data-tab="timer" aria-selected="false">訓練計時器</button>
+  <button class="tab" role="tab" data-tab="game" aria-selected="false">挑戰與遊戲</button>
+  <button class="tab" role="tab" data-tab="stats" aria-selected="false">統計紀錄</button>
+  <button class="tab" role="tab" data-tab="ach" aria-selected="false">成就徽章</button>
+  <button class="tab" role="tab" data-tab="friends" aria-selected="false">好友排行</button>
+  <button class="tab" role="tab" data-tab="body" aria-selected="false">身體數據與菜單</button>
+  <button class="tab" role="tab" data-tab="food" aria-selected="false">飲食紀錄</button>
+  <button class="tab" role="tab" data-tab="guide" aria-selected="false">動作教學</button>
+  <button class="tab" role="tab" data-tab="coach" aria-selected="false">AI 教練</button>
+</nav>
+</div>
 <div class="mpanel bd-panel" id="bdPanel" role="dialog" aria-label="我的健身夥伴" hidden>
   <div class="row" style="justify-content:space-between"><h3 style="margin:0">我的健身夥伴</h3><button class="xbtn" id="bdClose" type="button" aria-label="關閉">×</button></div>
   <p class="small mute" style="margin:4px 0 0">夥伴的高矮胖瘦會照著你的身高、體重變化。</p>
@@ -1633,14 +1799,13 @@ body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,bod
   <div id="bdInfo"></div>
   <div class="row" style="margin-top:12px"><button class="btn teal grow" id="bdEdit" type="button">更新身高體重</button><button class="btn ghost" id="bdTalk" type="button">💬 跟我聊</button></div>
 </div>
-<button class="fab" id="musicFab" type="button" aria-label="訓練音樂" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
 <div class="mpanel" id="musicPanel" role="dialog" aria-label="訓練音樂" hidden>
   <h3>訓練音樂</h3>
   <div class="stack">
     <div class="seg" id="mSrc"><button type="button" data-v="built">內建節拍</button><button type="button" data-v="mine">我的音樂</button></div>
     <div id="mBuilt" class="stack">
       <div><label class="f" for="mStyle">風格</label><select id="mStyle"></select></div>
-      <div class="slider"><label class="f" style="margin:0" for="mBpm">速度（BPM）</label><output id="mBpmO">135</output><input type="range" id="mBpm" min="60" max="180" step="1" value="135"></div>
+      <div class="slider"><label class="f" style="margin:0" for="mBpm">速度（每分鐘節拍數）</label><output id="mBpmO">135</output><input type="range" id="mBpm" min="60" max="180" step="1" value="135"></div>
       <p class="small mute">內建 12 種風格都是程式即時合成的原創節拍，沒有版權問題，可安心錄影或直播。用「節拍器」可以練深蹲、伏地挺身的節奏。</p>
     </div>
     <div id="mMine" class="stack" hidden>
@@ -1887,14 +2052,14 @@ $('#stats').onclick=e=>{const b=e.target.closest('[data-go]');if(b){const t=$(`.
 function renderStats(silent){
   const tile=(cls,tab,title,val,lbl,sub,pct)=>`<button type="button" class="stat ${cls}" data-go="${tab}" title="${title}"><b>${val}</b><span>${lbl}</span><small>${sub}</small>${pct===undefined?'':`<i class="sbar"><i style="width:${pct}%"></i></i>`}</button>`;
   $('#stats').innerHTML=
-    tile('','stats','今日訓練時間',Math.round((Number(S.workDays[dkey(new Date())])||0)/60),'今日訓練時間（分鐘）','今日累計')+
-    tile('','stats','今日消耗熱量',Math.round(kcalToday()),'今日消耗熱量（大卡）','依動作估算')+
+    tile('','stats','今日訓練時間',Math.round((Number(S.workDays[dkey(new Date())])||0)/60),'今日訓練（分）','今日累計')+
+    tile('','stats','今日消耗熱量',Math.round(kcalToday()),'今日消耗（大卡）','今日估算')+
     tile('','ach',`經驗值 ${S.xp%100} / 100`,`等級 ${level()}`,'目前等級',`${S.xp%100}/100 經驗值`,S.xp%100);
   const gameCombo=Math.max(0,Number(S.ninja.bestCombo)||0);
   const gameScore=Math.max(0,Number(S.games.run.best)||0,Number(S.games.pose.best)||0,...Object.values(S.ninja.best||{}).map(value=>Number(value)||0));
-  $('#gameCombo').textContent=gameCombo;
-  $('#gameScore').textContent=gameScore;
-  $('#gameLevel').textContent=`等級 ${level()}`;
+  $('#headerGameCombo').textContent=gameCombo;
+  $('#headerGameScore').textContent=gameScore;
+  $('#headerGameLevel').textContent=`等級 ${level()}`;
   checkDaily();renderDaily();friendSyncSoon();buddyOnStats();
   checkBadges(silent);
   if($('#tab-ach').classList.contains('active'))renderAch();
@@ -2258,6 +2423,7 @@ function transitionStep(from,to){
   const change=()=>{from.hidden=true;to.hidden=false};
   if(document.startViewTransition)document.startViewTransition(change);
   else{change();to.classList.remove('step-view');void to.offsetWidth;to.classList.add('step-view')}
+  $('main').scrollTo({top:0,behavior:'instant'});
   to.closest('.panel')?.scrollTo({top:0,behavior:'instant'});
 }
 function enterMode(mode){
@@ -2286,15 +2452,31 @@ $$('.tab').forEach(b=>b.onclick=()=>{
   $$('.tab').forEach(t=>t.setAttribute('aria-selected',t===b));
   $$('.panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+b.dataset.tab));
   b.scrollIntoView({inline:'center',block:'nearest'});
+  $('main').scrollTop=0;
   exitFull();
   if(b.dataset.tab==='stats')renderStatsTab();
   if(b.dataset.tab==='ach')renderAch();
   if(b.dataset.tab==='food')renderFood();
+  if(b.dataset.tab==='coach')renderCoachPlan();
   if(b.dataset.tab==='friends'){renderFriends();friendBoard()}
   if(cam.running||cam.starting)camStop();
   if(b.dataset.tab!=='timer'&&tRunning)tCtl.aborted=true;
 });
 const seg=(el,onPick)=>$$('button',el).forEach(b=>b.onclick=()=>{$$('button',el).forEach(x=>x.classList.toggle('on',x===b));onPick(b)});
+$$('#tab-stats [data-stats-view]').forEach(button=>button.addEventListener('click',()=>{
+  const view=button.dataset.statsView;
+  $$('#tab-stats [data-stats-view]').forEach(item=>{const selected=item===button;item.classList.toggle('on',selected);item.setAttribute('aria-selected',String(selected))});
+  $$('#tab-stats [data-stats-panel]').forEach(panel=>{panel.hidden=panel.dataset.statsPanel!==view});
+  $('main').scrollTop=0;
+}));
+let guideFilter='全部';
+$('#guideFilters').addEventListener('click',event=>{
+  const button=event.target.closest('[data-guide-filter]');
+  if(!button)return;
+  guideFilter=button.dataset.guideFilter;
+  $$('#guideFilters [data-guide-filter]').forEach(item=>{const selected=item===button;item.classList.toggle('on',selected);item.setAttribute('aria-pressed',String(selected))});
+  renderGuide();
+});
 
 /* ================= 鏡頭計數分頁 ================= */
 $('#camEx').innerHTML=optsByCat(ORDER,n=>n);
@@ -3015,14 +3197,14 @@ function gameBest(key){
 function refreshGameLobby(){
   const all=['ch','hold','pyr','ninja','run','pose','rhythm','dodge'];
   const records=all.map(gameBest),best=Math.max(0,...records);
-  $('#gameCombo').textContent=Math.max(S.ninja.bestCombo||0,...(S.games.pose.log||[]).map(x=>x.c||0),...(S.games.rhythm.log||[]).map(x=>x.c||0),...(S.games.dodge.log||[]).map(x=>x.c||0));
-  $('#gameScore').textContent=best.toLocaleString();
-  $('#gameLevel').textContent=`等級 ${Math.floor((S.xp||0)/500)+1}`;
+  $('#headerGameCombo').textContent=Math.max(S.ninja.bestCombo||0,...(S.games.pose.log||[]).map(x=>x.c||0),...(S.games.rhythm.log||[]).map(x=>x.c||0),...(S.games.dodge.log||[]).map(x=>x.c||0));
+  $('#headerGameScore').textContent=best.toLocaleString();
+  $('#headerGameLevel').textContent=`等級 ${Math.floor((S.xp||0)/500)+1}`;
   $$('#gameCards .game-card').forEach(card=>{
     const key=card.dataset.game,score=gameBest(key);
     $('.game-card-score b',card).textContent=score?score.toLocaleString():'—';
     const badge=$('.game-rank',card);
-    if(score){badge.textContent=gameRankFor(score);badge.classList.add('earned')}else if(key==='rhythm'||key==='dodge')badge.textContent='NEW';else badge.textContent='GO';
+    if(score){badge.textContent=gameRankFor(score);badge.classList.add('earned')}else if(key==='rhythm'||key==='dodge')badge.textContent='全新';else badge.textContent='開始';
   });
 }
 function setGameDifficulty(diff){
@@ -3066,7 +3248,7 @@ function syncArcadeHud(){
 function arenaCountIn(){
   const token=++gameCountdownToken,box=$('#gameArenaCountdown'),number=$('#gameCountNumber');
   box.hidden=false;
-  const steps=['3','2','1','GO!'];
+  const steps=['3','2','1','開始！'];
   steps.forEach((n,i)=>setTimeout(()=>{if(token!==gameCountdownToken||$('#gameArena').hidden)return;number.textContent=n;number.style.animation='none';void number.offsetWidth;number.style.animation='';beep(i===3?1320:660,i===3?260:130)},i*760));
   setTimeout(()=>{if(token===gameCountdownToken)box.hidden=true},steps.length*760);
 }
@@ -3299,7 +3481,7 @@ function bodyInfo(){
 }
 function calc(edited){
   const b=bodyInfo(),f=(v,l)=>`<div class="fact"><b>${v}</b><span>${l}</span></div>`;
-  $('#bOut').innerHTML=f(b.bmi.toFixed(1)+'（'+b.cat+'）','BMI')+f(Math.round(b.bmr),'基礎代謝（大卡）')+f(Math.round(b.tdee),'每日總消耗（大卡）')+
+  $('#bOut').innerHTML=`<div class="fact bmi-fact"><b>${b.bmi.toFixed(1)}</b><span><span>BMI</span><strong>${b.cat}</strong></span></div>`+f(Math.round(b.bmr),'基礎代謝（大卡）')+f(Math.round(b.tdee),'每日總消耗（大卡）')+
     f(Math.round(b.target),`建議攝取（${goalType}，大卡）`)+f(Math.round(b.w*1.6)+'–'+Math.round(b.w*2),'蛋白質（克）')+f((b.w*35/1000).toFixed(1),'每日喝水（公升）');
   const ok=b.h>=120&&b.h<=220&&b.w>=30&&b.w<=200&&b.age>=10&&b.age<=100;
   if(ok){S.body={set:S.body.set||!!edited,sex,age:b.age,h:b.h,w:b.w,act:+$('#bAct').value||1.2,goal:goalType};save();renderStats(true)}
@@ -3331,7 +3513,7 @@ const QUICK=['根據我的紀錄排下週菜單','幫我排一週訓練菜單','
 $('#quick').innerHTML=QUICK.map(q=>`<button class="btn ghost small">${q}</button>`).join('');
 $$('#quick button').forEach(b=>b.onclick=()=>ask(b.textContent));
 try{const k=localStorage.getItem('fitai_key');if(k){$('#apiKey').value=k;$('#keyRemember').checked=true}}catch(e){}
-$('#keyBox').open=!$('#apiKey').value;
+$('#keyBox').open=false;
 function md(src){
   const blocks=[];let t=esc(src).replace(/```(?:\w*\n)?([\s\S]*?)```/g,(m,c)=>{blocks.push(c);return `\u0000${blocks.length-1}\u0000`});
   const inl=s=>s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
@@ -3356,7 +3538,7 @@ async function ask(text){
   const key=$('#apiKey').value.trim();
   try{if($('#keyRemember').checked)localStorage.setItem('fitai_key',key);else localStorage.removeItem('fitai_key')}catch(e){}
   addMsg('user',esc(text));$('#chatIn').value='';$('#chatClear').hidden=false;
-  if(!key){addMsg('ai','還沒設定 API Key，所以教練暫時無法回覆。請展開上方「設定 API Key」貼上金鑰。在那之前，可以先用「身體數據與菜單」分頁的菜單產生器。');$('#keyBox').open=true;return}
+  if(!key){addMsg('ai','尚未設定自訂 API 金鑰。請至「進階設定」輸入金鑰；你也可以直接使用上方免金鑰的一週訓練建議。');$('#advancedCoach').open=true;$('#keyBox').open=true;return}
   chatHist.push({role:'user',content:text});asking=true;$('#chatSend').disabled=true;
   const wait=addMsg('ai','<span class="mute">教練思考中…</span>');
   let system=SYSTEM;
@@ -3369,12 +3551,54 @@ async function ask(text){
     if(!r.ok)throw new Error(data&&data.error&&data.error.message||('HTTP '+r.status));
     const reply=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');
     chatHist.push({role:'assistant',content:reply});wait.innerHTML=md(reply);
-  }catch(e){chatHist.pop();wait.innerHTML='連線失敗：'+esc(e.message)+'<br><span class="small mute">請檢查 API Key 是否正確、帳戶是否有額度、網路是否正常。</span>'}
+  }catch(e){chatHist.pop();wait.innerHTML='連線失敗：'+esc(e.message)+'<br><span class="small mute">請檢查 API 金鑰是否正確、帳戶是否有額度、網路是否正常。</span>'}
   asking=false;$('#chatSend').disabled=false;$('#chat').scrollTop=1e9;
 }
 $('#chatSend').onclick=()=>ask($('#chatIn').value);
 $('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();ask($('#chatIn').value)}});
 $('#chatClear').onclick=()=>{chatHist.length=0;$('#chat').innerHTML='';$('#chatClear').hidden=true};
+const coachWorkouts={
+  '下肢肌力':['深蹲','弓箭步','臀橋','髖鉸鏈'],
+  '上肢肌力':['伏地挺身','啞鈴臥推','肩推','二頭彎舉'],
+  '核心訓練':['平板支撐','捲腹','側棒式','登山者'],
+  '全身肌力':['深蹲','伏地挺身','臀橋','肩推'],
+  '全身有氧':['原地踏步','開合跳','登山者','原地跳繩']
+};
+const coachWeekPlans={
+  減脂:{2:['全身肌力','全身有氧'],3:['下肢肌力','上肢肌力','全身有氧'],4:['下肢肌力','上肢肌力','核心訓練','全身有氧'],5:['下肢肌力','上肢肌力','全身有氧','核心訓練','全身肌力']},
+  增肌:{2:['全身肌力','全身肌力'],3:['下肢肌力','上肢肌力','全身肌力'],4:['下肢肌力','上肢肌力','下肢肌力','上肢肌力'],5:['下肢肌力','上肢肌力','核心訓練','下肢肌力','上肢肌力']},
+  體能:{2:['全身肌力','全身有氧'],3:['全身肌力','核心訓練','全身有氧'],4:['下肢肌力','上肢肌力','全身有氧','核心訓練'],5:['下肢肌力','上肢肌力','全身有氧','核心訓練','全身肌力']}
+};
+function renderCoachPlan(){
+  const goal=$('#coachGoal').value,days=Number($('#coachDays').value),gear=$('#coachGear').value,b=bodyInfo();
+  const recent=lastDays(7),trainedDays=recent.filter(day=>(Number(S.days[day.k])||0)>0||(Number(S.workDays[day.k])||0)>0).length;
+  const recentReps=recent.reduce((sum,day)=>sum+(Number(S.days[day.k])||0),0);
+  const recentMinutes=Math.round(recent.reduce((sum,day)=>sum+(Number(S.workDays[day.k])||0),0)/60);
+  const plan=(coachWeekPlans[goal]||coachWeekPlans['體能'])[days]||coachWeekPlans['體能'][3];
+  const sets=goal==='增肌'?3:2,repText=goal==='增肌'?'8–12 下':'10–12 下',rest=goal==='增肌'?90:60;
+  const workoutHtml=plan.map((focus,index)=>{
+    const exercises=coachWorkouts[focus].filter(name=>gear!=='徒手'||name!=='啞鈴臥推').slice(0,4);
+    const prescription=exercises.map(name=>`<li><b>${name}</b>：${sets} 組 × ${TIMED.has(name)||['平板支撐','側棒式'].includes(name)?'30 秒':repText}</li>`).join('');
+    return `<article class="coach-result-card"><h4>第 ${index+1} 天・${focus}</h4><ul>${prescription}</ul><p class="small mute" style="margin:6px 0 0">組間休息約 ${rest} 秒</p></article>`;
+  }).join('');
+  const kcal=Math.round(goal==='減脂'?Math.max(b.bmr,b.tdee-300):goal==='增肌'?b.tdee+150:b.tdee);
+  const lastWeek=trainedDays?`近 7 天運動 ${trainedDays} 天、約 ${recentReps} 下與 ${recentMinutes} 分鐘。安排 ${days} 天訓練，其他日以休息或輕鬆散步恢復。`:'近 7 天尚無訓練紀錄，先從容易完成的強度開始，逐週增加。';
+  $('#coachResult').innerHTML=`<div class="coach-result-summary"><div><b>${goal}・每週 ${days} 天</b><span class="small mute">${gear==='徒手'?'徒手訓練':gear==='啞鈴'?'啞鈴或水瓶':'可依健身房器材替換'}</span></div><div><b>個人資料</b><span class="small mute">${b.h} 公分・${b.w} 公斤・BMI ${b.bmi.toFixed(1)}</span></div></div><div class="coach-result-card"><h4>依近期紀錄調整</h4><p style="margin:0">${lastWeek}</p></div>${workoutHtml}<div class="coach-result-card"><h4>飲食與恢復建議</h4><ul><li>每日消耗估算約 ${Math.round(b.tdee)} 大卡；依所選目標估算攝取約 ${kcal} 大卡，僅供參考，無需追求精確或過度限制。</li><li>每日蛋白質可先以約 ${Math.round(b.w*1.2)}–${Math.round(b.w*1.6)} 克作為參考，搭配均衡正餐。</li><li>每日飲水約 ${Math.round(b.w*35)} 毫升作為起點，依流汗量、氣候與身體狀況調整。</li></ul></div><p class="small mute" style="margin:0">每次先暖身 5 分鐘，結束後緩和伸展；動作疼痛或不適時請停止並尋求專業建議。</p>`;
+}
+$('#coachGenerate').onclick=renderCoachPlan;
+['#coachGoal','#coachDays','#coachGear'].forEach(selector=>$(selector).addEventListener('change',renderCoachPlan));
+$('#coachFaq').addEventListener('click',event=>{
+  const button=event.target.closest('[data-faq]');
+  if(!button)return;
+  const answers={
+    warmup:'先用 5–8 分鐘快走或原地踏步暖身，再以較輕鬆的幅度做當天動作。逐步增加強度，不必一開始就全力運動。',
+    protein:'可把蛋白質分散在各餐，選擇蛋、豆製品、魚、雞肉或乳品等食物。實際需求會因年齡與健康狀況不同；有腎臟疾病等狀況請先詢問醫療專業人員。',
+    rest:'休息日很重要。可以完全休息，或做散步、輕柔活動；若仍疲倦或有疼痛，就先讓身體恢復。',
+    squat:'雙腳約與肩同寬，膝蓋朝腳尖方向，臀部向後坐並維持軀幹穩定。只蹲到舒適、不痛的幅度；膝或髖不適時請停止。'
+  };
+  $('#coachFaqAnswer').textContent=answers[button.dataset.faq]||'請選擇一個常見問題。';
+  $('#coachFaqAnswer').hidden=false;
+});
 
 /* ================= 喝水提醒（網頁開著時有效） ================= */
 const wToday=()=>S.water[dkey(new Date())]||0;
@@ -3690,7 +3914,7 @@ function renderGuide(){
     <div><b>常見錯誤</b><ul>${g.bad.map(t=>`<li>${t}</li>`).join('')}</ul></div>
     <p class="small mute">鏡頭擺放：${g.cam}</p>
     ${EX[g.n]?`<button class="btn teal small" type="button" data-go="${g.n}">用這個動作開鏡頭計數</button>`:HOLDTIP[g.n]?`<button class="btn teal small" type="button" data-hold="${g.n}">到「撐住挑戰」練習</button>`:''}</div></details>`;
-  $('#guideList').innerHTML=cats.map(c=>{const arr=GUIDE.filter(g=>catOf(g)===c);return arr.length?`<h3 style="margin:20px 0 8px">${c}（${arr.length}）</h3>`+arr.map(item).join(''):''}).join('');
+  $('#guideList').innerHTML=cats.filter(c=>guideFilter==='全部'||c===guideFilter).map(c=>{const arr=GUIDE.filter(g=>catOf(g)===c);return arr.length?`<h3 style="margin:20px 0 8px">${c}（${arr.length}）</h3>`+arr.map(item).join(''):''}).join('');
   $$('#guideList [data-go]').forEach(b=>b.onclick=()=>{
     const n=b.dataset.go;if(![...$('#camEx').options].some(o=>o.value===n)){toast('鏡頭計數的選單裡沒有這個動作');return}
     $('#camEx').value=n;$('#camEx').dispatchEvent(new Event('change'));$('.tab[data-tab=cam]').click();
@@ -3928,9 +4152,9 @@ function writeAccountCache(id,state){localStorage.setItem(`${KEY}:user:${id}`,JS
 function accountErrorText(error){
   const message=String(error&&error.message||error);
   if(error&&error.code==='PGRST205'||/fitai_user_data|schema cache/i.test(message))return '尚未建立帳號資料表，請先在 Supabase 執行 fitai-web/supabase-accounts.sql。';
-  if(/invalid login credentials/i.test(message))return 'Email 或密碼不正確。';
+  if(/invalid login credentials/i.test(message))return '電子郵件或密碼不正確。';
   if(/email not confirmed/i.test(message))return '請先到信箱完成驗證，再登入。';
-  if(/already registered|user already exists/i.test(message))return '這個 Email 已註冊，請直接登入。';
+  if(/already registered|user already exists/i.test(message))return '這個電子郵件已註冊，請直接登入。';
   if(/password should be at least|weak password/i.test(message))return '密碼未符合 Supabase 的密碼規則。';
   return message;
 }
@@ -4010,19 +4234,19 @@ async function accountSignup(email,password){
   showAccountStatus('正在建立帳號…');
   const data=await accountAuthRequest('signup',{email,password});
   if(data.session)await activateAccount(data.session);
-  else{setAccountMode('login');showAccountStatus('驗證信已寄出，完成 Email 驗證後即可登入。')}
+  else{setAccountMode('login');showAccountStatus('驗證信已寄出，完成電子郵件驗證後即可登入。')}
 }
 $('#accountForm').onsubmit=async e=>{
   e.preventDefault();
   const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
-  if(!email||!password){showAccountStatus('請輸入 Email 和密碼。',true);return}
+  if(!email||!password){showAccountStatus('請輸入電子郵件和密碼。',true);return}
   $('#accountSubmit').disabled=true;
   try{await(accountMode==='signup'?accountSignup:accountLogin)(email,password)}catch(error){showAccountStatus(accountErrorText(error),true)}
   finally{$('#accountSubmit').disabled=false}
 };
 $('#accountRecover').onclick=async()=>{
-  const email=$('#accountEmail').value.trim();if(!email){showAccountStatus('請先輸入註冊用的 Email。',true);return}
-  try{await accountAuthRequest('recover',{email});showAccountStatus('若此 Email 已註冊，密碼重設信已寄出。')}catch(error){showAccountStatus(accountErrorText(error),true)}
+  const email=$('#accountEmail').value.trim();if(!email){showAccountStatus('請先輸入註冊用的電子郵件。',true);return}
+  try{await accountAuthRequest('recover',{email});showAccountStatus('若此電子郵件已註冊，密碼重設信已寄出。')}catch(error){showAccountStatus(accountErrorText(error),true)}
 };
 $('#accountSyncNow').onclick=async()=>{
   const btn=$('#accountSyncNow');btn.disabled=true;saveNow();
@@ -4181,7 +4405,7 @@ function renderBoard(){
   const val=['week','total'].includes(frSort)?r=>Number((r[actionField]||{})[ex])||0:{streak:r=>r.streak,level:lvOf}[frSort],unit={week:'下',total:'下',streak:'天',level:'級'}[frSort];
   const rows=[...frRows].sort((a,b)=>val(b)-val(a)||String(a.name).localeCompare(String(b.name)));
   if(rows.length<2){
-    el.innerHTML=`<div class="fr-empty"><div class="big">🏁</div><p><b>還沒有好友</b></p><p class="small mute">邀請朋友一起練，排行榜才會熱鬧起來！</p><div class="row" style="justify-content:center"><button class="btn teal" type="button" data-act="invite">分享邀請連結</button><button class="btn ghost" type="button" data-act="scan">掃描 QR Code</button></div></div>`;
+    el.innerHTML=`<div class="fr-empty"><div class="big">🏁</div><p><b>還沒有好友</b></p><p class="small mute">邀請朋友一起練，排行榜才會熱鬧起來！</p><div class="row" style="justify-content:center"><button class="btn teal" type="button" data-act="invite">分享邀請連結</button><button class="btn ghost" type="button" data-act="scan">掃描 QR 碼</button></div></div>`;
     $('#frAt').textContent='';return;
   }
   let rank=0,prev=null;
@@ -4242,7 +4466,7 @@ const QR_GEN='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js'
 async function renderMyQR(el,cell){
   const link=inviteLink();if(el.dataset.link===link)return;
   try{await loadScript(QR_GEN);const q=window.qrcode(0,'M');q.addData(link);q.make();el.innerHTML=q.createSvgTag({cellSize:cell,margin:1,scalable:true});el.dataset.link=link}
-  catch(e){el.innerHTML='<span class="small">連上網路後才會顯示 QR Code</span>';logErr('qr gen '+e.message)}
+  catch(e){el.innerHTML='<span class="small">連上網路後才會顯示 QR 碼</span>';logErr('qr gen '+e.message)}
 }
 $('#frQR').onclick=()=>{if(!S.me.code)return;$('#qrCode').textContent=S.me.code;$('#qrBig').dataset.link='';renderMyQR($('#qrBig'),8);$('#qrDlg').showModal()};
 $('#qrClose').onclick=()=>$('#qrDlg').close();
@@ -4265,9 +4489,9 @@ async function qrReader(){   // 有原生 BarcodeDetector 就用（Android Chrom
 }
 function handleScanned(text){
   const code=codeFromQR(text);
-  if(!code){$('#scanMsg').textContent='這不是 Lin AI 的好友 QR Code，換一個試試。';return false}
+  if(!code){$('#scanMsg').textContent='這不是 Lin AI 的好友 QR 碼，換一個試試。';return false}
   if($('#scanDlg').open)$('#scanDlg').close();
-  if(code===S.me.code){toast('這是你自己的 QR Code 喔');return true}
+  if(code===S.me.code){toast('這是你自己的 QR 碼喔');return true}
   friendAdd(code,true);return true;
 }
 const scan={stream:null,timer:0};
@@ -4280,7 +4504,7 @@ async function startScan(){
     scan.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
     if(!$('#scanDlg').open){stopScan();return}
     const v=$('#scanVideo');v.srcObject=scan.stream;await v.play();
-    $('#scanMsg').textContent='把朋友的 QR Code 放進框框裡。';
+    $('#scanMsg').textContent='把朋友的 QR 碼放進框框裡。';
     const tick=async()=>{
       if(!scan.stream)return;
       try{const t=await read(v);if(t&&handleScanned(t))return}catch(e){}
@@ -4297,7 +4521,7 @@ $('#frScanFile').onchange=async e=>{
   try{
     const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url});
     const t=await(await qrReader())(img);
-    if(!t||!codeFromQR(t))toast('這張圖裡找不到 Lin AI 的好友 QR Code');else handleScanned(t);
+    if(!t||!codeFromQR(t))toast('這張圖裡找不到 Lin AI 的好友 QR 碼');else handleScanned(t);
   }catch(err){toast('讀不到這張圖片，請換一張試試');logErr('scan file '+err.message)}
   finally{URL.revokeObjectURL(url)}
 };
@@ -4700,15 +4924,19 @@ let deferredInstall=null;
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function showInstall(){
-  if(isStandalone()||S.installNo){$('#installBar').hidden=true;return}
+  if(isStandalone()){if(!S.installNo){S.installNo=true;save()}$('#installBar').hidden=true;return}
+  if(S.installNo){$('#installBar').hidden=true;return}
   if(deferredInstall){$('#installTxt').textContent='把 Lin AI 安裝到手機，像 App 一樣使用，第一次載入後也能離線用。';$('#installGo').hidden=false;$('#installBar').hidden=false}
   else if(isIOS()){$('#installTxt').textContent='iPhone 安裝方法：用 Safari 打開，按下方的「分享」按鈕，選「加入主畫面」，就能像 App 一樣使用。';$('#installGo').hidden=true;$('#installBar').hidden=false}
 }
+const displayModeQuery=matchMedia('(display-mode: standalone)');
+if(displayModeQuery.addEventListener)displayModeQuery.addEventListener('change',showInstall);
+else if(displayModeQuery.addListener)displayModeQuery.addListener(showInstall);
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;showInstall()});
-window.addEventListener('appinstalled',()=>{$('#installBar').hidden=true;toast('已加到主畫面')});
+window.addEventListener('appinstalled',()=>{S.installNo=true;save();$('#installBar').hidden=true;toast('已加到主畫面')});
 $('#installGo').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null;$('#installBar').hidden=true};
 $('#installNo').onclick=()=>{S.installNo=true;save();$('#installBar').hidden=true};
-window.addEventListener('offline',()=>toast('目前離線：已載入過的功能仍可使用，AI 教練需要網路'));
+window.addEventListener('offline',()=>toast('目前離線：已載入功能與內建訓練建議仍可使用'));
 window.addEventListener('online',()=>{toast('已恢復連線');if(accountSession)syncAccountNow().catch(()=>{})});
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
   const hadController=!!navigator.serviceWorker.controller;
@@ -4716,7 +4944,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(e=>logErr('sw: '+e.message)));
 }
 $('#updateGo').onclick=()=>location.reload();
-$('#foot').textContent='Lin AI　版本 '+APP_VERSION;$('#diagVer').textContent='版本 '+APP_VERSION;
+$('#foot').textContent='Lin AI　版本 '+APP_VERSION;
 function diagText(){
   const c=S.cam;
   return ['Lin AI 診斷資訊','版本：'+APP_VERSION,'時間：'+new Date().toISOString(),'網址：'+location.origin+location.pathname,
@@ -4727,8 +4955,6 @@ function diagText(){
     '姿勢模型：'+(poseLM?'已載入':'尚未載入'),'好友伺服器：'+(typeof frCfgOk==='function'&&frCfgOk()?'已設定':'未設定'),
     '最近錯誤：'+(ERRS.length?'\n  '+ERRS.join('\n  '):'無')].join('\n');
 }
-$('#diagCopy').onclick=async()=>{try{await navigator.clipboard.writeText(diagText());toast('已複製診斷資訊')}catch(e){prompt('請全選複製：',diagText())}};
-
 const TAB_ICONS={
  cam:'<path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
  timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 3h6"/>',
@@ -4748,7 +4974,7 @@ if(S.waterOn&&!S.waterNext)waterSchedule();
 const idle=f=>('requestIdleCallback' in window)?requestIdleCallback(f,{timeout:1500}):setTimeout(f,60);
 renderCamCfg();renderHold();setInterval(planTick,20000);setTimeout(planTick,4000);
 await initializeAccount();
-renderMusic();showInstall();renderFacing();renderVoice();applyBody();calc();renderStats(true);renderHist();chRefresh();renderNinja();renderRun();renderPose();plan();
+renderMusic();showInstall();renderFacing();renderVoice();applyBody();calc();renderCoachPlan();renderStats(true);renderHist();chRefresh();renderNinja();renderRun();renderPose();plan();
 renderFriends();setTimeout(handleInvite,600);
 idle(()=>{listCams();renderSched();renderFood();renderGuide();renderWeights();renderPresets();renderAch()});   // 第一次畫面先出來，其餘慢慢補
 window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,waterTick,addWater,showWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,nj,njFinish,rn,rnFinish,rnView,ps,psFinish,psView,POSES,kcalToday,kcalTotal,renderBuddy,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};

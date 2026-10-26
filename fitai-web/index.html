@@ -1165,16 +1165,7 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
       <span class="daily-quick-copy"><strong id="dailyTxt"></strong><small id="dailySub"></small><span class="daily-quick-bar"><i id="dailyBar"></i></span><small id="dailyPlan"></small></span>
       <span class="daily-quick-arrow" aria-hidden="true">›</span>
     </button>
-    <div class="movement-grid" id="camMovementGrid" aria-label="選擇訓練動作">
-      <button class="movement-card" type="button" data-ex="深蹲"><span class="movement-icon">🏋️</span><strong>深蹲</strong><small>臀部・大腿</small></button>
-      <button class="movement-card" type="button" data-ex="伏地挺身"><span class="movement-icon">💪</span><strong>伏地挺身</strong><small>胸部・手臂</small></button>
-      <button class="movement-card" type="button" data-ex="開合跳"><span class="movement-icon">⚡</span><strong>開合跳</strong><small>全身・心肺</small></button>
-      <button class="movement-card" type="button" data-ex="高抬腿"><span class="movement-icon">🏃</span><strong>高抬腿</strong><small>核心・心肺</small></button>
-      <button class="movement-card" type="button" data-ex="弓箭步"><span class="movement-icon">🦵</span><strong>弓箭步</strong><small>臀部・腿部</small></button>
-      <button class="movement-card" type="button" data-ex="仰臥起坐"><span class="movement-icon">✨</span><strong>仰臥起坐</strong><small>腹部・核心</small></button>
-      <button class="movement-card" type="button" data-ex="肩推"><span class="movement-icon">🙌</span><strong>肩推</strong><small>肩膀・手臂</small></button>
-      <button class="movement-card" type="button" data-ex="登山者"><span class="movement-icon">⛰️</span><strong>登山者</strong><small>核心・心肺</small></button>
-    </div>
+    <div class="movement-grid" id="camMovementGrid" aria-label="選擇訓練動作"></div>
     <div class="movement-more"><label for="camEx">更多訓練動作</label><select id="camEx"></select></div>
   </div>
   <div class="step-view cam-session" id="camSession" hidden>
@@ -1250,7 +1241,7 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
             <div><label class="f">使用的鏡頭</label><div class="seg facingSeg"></div></div>
             <div class="row"><button class="btn teal grow" id="tCamBtn" type="button">開啟鏡頭</button><button class="btn ghost" id="tCamOff" type="button" disabled>關閉</button></div>
             <div id="timerCameraSetupHost" data-stage="timer"></div>
-            <p class="small mute">只在訓練階段記錄次數。伏地挺身、捲腹和仰臥起坐建議從側面拍攝。</p>
+            <p class="small mute">只在訓練階段記錄次數。伏地挺身與深蹲建議從側面拍攝。</p>
           </div>
         </div>
         <div class="card stack">
@@ -1431,7 +1422,7 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
         <div id="hResult" class="notice" hidden></div>
       </div>
       <div class="stack">
-        <div><label class="f" for="hEx">項目</label><select id="hEx"><option>平板支撐</option><option>側棒式</option><option>靠牆深蹲</option><option>臀橋停留</option></select></div>
+        <div><label class="f" for="hEx">項目</label><select id="hEx"><option>平板支撐</option><option>側棒式</option></select></div>
         <div><label class="f">目標秒數</label><div class="seg" id="hTarget"><button type="button" data-v="30" class="on">30</button><button type="button" data-v="45">45</button><button type="button" data-v="60">60</button><button type="button" data-v="90">90</button><button type="button" data-v="120">120</button></div></div>
         <div class="facts"><div class="fact"><b id="hBest">—</b><span>個人最佳（秒）</span></div></div>
         <p class="small mute" id="hTip"></p>
@@ -2002,9 +1993,8 @@ function subReps(n,ex,k){   // 刪除自訂紀錄時扣回去
 }
 /* ===== 消耗熱量：用「修正 MET」= MET × 自己的基礎代謝（由身高、體重、年齡、性別算出）=====
    每個動作：[MET, 每下約幾秒]；大卡 = MET × BMR/86400 × 秒數 */
-const EX_MET={深蹲:[5,3],伏地挺身:[3.8,3],捲腹:[2.8,3],仰臥起坐:[3.8,3],側平舉:[3.5,3],前平舉:[3.5,3],二頭彎舉:[3.5,3],肩推:[3.5,3],啞鈴臥推:[3.5,3],
- 開合跳:[8,1.2],弓箭步:[4,3],登山者:[8,1],臀橋:[3,3],高抬腿:[8,.8],深蹲跳:[8,2.5],椅子臂屈伸:[3.8,3],仰臥抬腿:[2.8,3],引體向上:[8,3.5],
- 髖鉸鏈:[3.5,3],側抬腿:[2.8,2.5],側彎:[2.5,2.5],站姿抬膝碰肘:[4,1.5],原地踏步:[3.5,1],原地跳繩:[11,.5],波比跳:[8,4]};
+const EX_MET={深蹲:[5,3],深蹲跳:[8,2.5],弓箭步:[4,3],髖鉸鏈:[3.5,3],肩推:[3.5,3],側平舉:[3.5,3],前平舉:[3.5,3],
+ 二頭彎舉:[3.5,3],引體向上:[8,3.5],伏地挺身:[3.8,3],開合跳:[8,1.2],高抬腿:[8,.8],站姿抬膝碰肘:[4,1.5]};
 const bmrOf=b=>Math.max(800,10*b.w+6.25*b.h-5*b.age+(b.sex==='男'?5:-161));
 const kcalPerSec=met=>met*bmrOf(S.body)/86400;
 const exKcal=(ex,n)=>{const [met,sec]=EX_MET[String(ex).replace(/（.*?）/g,'').trim()]||[4,2.5];return kcalPerSec(met)*sec*n};
@@ -2173,111 +2163,90 @@ const armsUp=lm=>{const t=torso(lm);if(!t)return null;
   if(!sh.length||!wr.length)return null;return (mean(sh.map(p=>p[1]))-mean(wr.map(p=>p[1])))/t};
 const kneeShoulder=(lm,s)=>{const t=torso(lm),k=P(lm,s+'_kn'),h=P(lm,s+'_sh');return t&&k&&h?dist(k,h)/t:null};
 const kneeHeight=(lm,s)=>{const t=torso(lm),k=P(lm,s+'_kn'),h=P(lm,s+'_hip');return t&&k&&h?(h[1]-k[1])/t:null};
-const EX={
- "深蹲":{en:"Squats",lo:105,hi:160,fn:lm=>mean(angles(lm,'hip','kn','an'))},
- "伏地挺身":{en:"Push-ups",lo:95,hi:150,fn:lm=>mean(angles(lm,'sh','el','wr'))},
- "捲腹":{en:"Crunches",lo:80,hi:105,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
- "仰臥起坐":{en:"Sit-ups",lo:70,hi:110,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
- "側平舉":{en:"Lateral Raises",lo:35,hi:75,fn:lm=>mean(angles(lm,'hip','sh','el'))},
- "二頭彎舉":{en:"Bicep Curls",lo:55,hi:140,fn:lm=>mean(angles(lm,'sh','el','wr'))},
- "開合跳":{en:"Jumping Jacks",lo:-.3,hi:.3,fn:armsUp},
- "弓箭步":{en:"Lunges",lo:105,hi:155,fn:lm=>{const a=angles(lm,'hip','kn','an');return a.length?Math.min(...a):null}},
- "登山者":{en:"Mountain Climbers",lo:1.0,hi:1.35,side:true,fn:kneeShoulder},
- "臀橋":{en:"Glute Bridges",lo:135,hi:160,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
- "高抬腿":{en:"High Knees",lo:-.6,hi:-.25,side:true,fn:kneeHeight},
+const REMOVED_EXERCISES=new Set(['啞鈴臥推','椅子臂屈伸','仰臥起坐','捲腹','側彎','仰臥抬腿','臀橋','臀橋停留','登山者','原地跳繩','波比跳','靠牆深蹲','側抬腿']);
+const exercises=[
+  {id:'squat',name:'深蹲',category:'下肢',targetMuscles:['股四頭肌','臀大肌','核心'],icon:'🏋️',description:'臀部・大腿',dailyTarget:40,challengeTargets:[20,35,50],trackingConfig:{metric:'angle',joints:['hip','knee','ankle'],minAngle:100,maxAngle:170,startAngle:165,peakAngle:105,cue:{type:'min',ok:100,msg:'核心收緊，再蹲低一點'},tempo:1.8}},
+  {id:'jump-squat',name:'深蹲跳',category:'下肢',targetMuscles:['股四頭肌','臀大肌','小腿'],icon:'⚡',description:'臀部・大腿・心肺',dailyTarget:20,challengeTargets:[12,20,28],trackingConfig:{metric:'angle',joints:['hip','knee','ankle'],minAngle:100,maxAngle:170,startAngle:165,peakAngle:105,peakGuard:{type:'airborneRatio',minRatio:.035},cue:{type:'min',ok:105,msg:'下蹲再深一點，再用力跳起來'},tempo:1.8}},
+  {id:'lunge',name:'弓箭步',category:'下肢',targetMuscles:['股四頭肌','臀大肌','腿後側'],icon:'🦵',description:'臀部・腿部',dailyTarget:30,challengeTargets:[15,25,35],trackingConfig:{metric:'angle',joints:['hip','knee','ankle'],minAngle:95,maxAngle:165,startAngle:160,peakAngle:100,perSide:true,cue:{type:'min',ok:100,msg:'再往下沉，前腿膝蓋接近 90 度'},tempo:1.8}},
+  {id:'hip-hinge',name:'髖鉸鏈',category:'下肢',targetMuscles:['臀大肌','腿後側','下背'],icon:'↔️',description:'臀部・腿後側',dailyTarget:25,challengeTargets:[15,25,35],trackingConfig:{metric:'angle',joints:['shoulder','hip','knee'],minAngle:105,maxAngle:170,startAngle:165,peakAngle:110,cue:{type:'min',ok:110,msg:'髖部再往後推，上身前傾更多，背保持平直'},tempo:1.8}},
+  {id:'shoulder-press',name:'肩推',category:'上肢',targetMuscles:['三角肌','肱三頭肌'],icon:'🙌',description:'肩膀・手臂',dailyTarget:25,challengeTargets:[15,25,35],trackingConfig:{metric:'angle',joints:['shoulder','elbow','wrist'],minAngle:80,maxAngle:170,startAngle:90,peakAngle:160,cue:{type:'max',ok:160,msg:'手臂推到伸直'},tempo:1.6}},
+  {id:'lateral-raise',name:'側平舉',category:'上肢',targetMuscles:['三角肌中束'],icon:'↗️',description:'肩膀',dailyTarget:30,challengeTargets:[15,25,35],trackingConfig:{metric:'angle',joints:['hip','shoulder','elbow'],minAngle:25,maxAngle:110,startAngle:35,peakAngle:90,cue:{type:'max',ok:80,msg:'手臂舉到與肩同高'},tempo:1.6}},
+  {id:'front-raise',name:'前平舉',category:'上肢',targetMuscles:['三角肌前束'],icon:'⬆️',description:'肩膀',dailyTarget:25,challengeTargets:[15,25,35],trackingConfig:{metric:'angle',joints:['hip','shoulder','wrist'],minAngle:25,maxAngle:110,startAngle:35,peakAngle:90,cue:{type:'max',ok:90,msg:'手臂舉到與肩同高'},tempo:1.6}},
+  {id:'bicep-curl',name:'二頭彎舉',category:'上肢',targetMuscles:['肱二頭肌'],icon:'💪',description:'手臂',dailyTarget:30,challengeTargets:[15,25,35],trackingConfig:{metric:'angle',joints:['shoulder','elbow','wrist'],minAngle:45,maxAngle:165,startAngle:155,peakAngle:55,cue:{type:'min',ok:50,msg:'彎舉到頂，手肘再彎緊一點'},tempo:1.6}},
+  {id:'pull-up',name:'引體向上',category:'上肢',targetMuscles:['背闊肌','肱二頭肌','前臂'],icon:'🏋️',description:'背部・手臂',dailyTarget:8,challengeTargets:[3,6,10],trackingConfig:{metric:'angle',joints:['shoulder','elbow','wrist'],minAngle:65,maxAngle:170,startAngle:160,peakAngle:75,cue:{type:'min',ok:70,msg:'再拉高一點，下巴過槓'},tempo:2}},
+  {id:'push-up',name:'伏地挺身',category:'上肢',targetMuscles:['胸大肌','肱三頭肌','核心'],icon:'🤸',description:'胸部・手臂',dailyTarget:20,challengeTargets:[8,15,25],trackingConfig:{metric:'angle',joints:['shoulder','elbow','wrist'],minAngle:85,maxAngle:165,startAngle:155,peakAngle:95,cue:{type:'min',ok:90,msg:'胸口再壓低一點，手肘彎到 90 度'},tempo:1.6}},
+  {id:'jumping-jack',name:'開合跳',category:'有氧',targetMuscles:['全身','小腿','肩膀'],icon:'⚡',description:'全身・心肺',dailyTarget:60,challengeTargets:[30,50,70],trackingConfig:{metric:'angle',joints:['elbow','shoulder','hip'],minAngle:15,maxAngle:170,startAngle:30,peakAngle:155,peakGuard:{type:'ankleSpreadRatio',minRatio:.65},cue:{type:'max',ok:150,msg:'手臂舉高過頭'},tempo:0.75}},
+  {id:'high-knees',name:'高抬腿',category:'有氧',targetMuscles:['髖屈肌','核心','心肺'],icon:'🏃',description:'核心・心肺',dailyTarget:60,challengeTargets:[40,70,100],trackingConfig:{metric:'angle',joints:['shoulder','hip','knee'],minAngle:75,maxAngle:175,startAngle:165,peakAngle:100,perSide:true,cue:{type:'min',ok:100,msg:'膝蓋抬到髖部高度'},tempo:0.75}},
+  {id:'standing-knee-to-elbow',name:'站姿抬膝碰肘',category:'有氧',targetMuscles:['腹肌','髖屈肌','核心'],icon:'🙆',description:'核心・心肺',dailyTarget:40,challengeTargets:[30,50,70],trackingConfig:{metric:'angle',joints:['shoulder','hip','knee'],minAngle:75,maxAngle:175,startAngle:165,peakAngle:95,perSide:true,peakGuard:{type:'distanceRatio',joints:['knee','elbow'],maxRatio:.65},cue:{type:'min',ok:90,msg:'膝蓋抬高，靠近手肘'},tempo:0.75}}
+];
+const JOINT_ABBR={shoulder:'sh',elbow:'el',wrist:'wr',hip:'hip',knee:'kn',ankle:'an'};
+const jointAngle=(lm,side,joints)=>{
+  const names=joints.map(j=>JOINT_ABBR[j]);
+  if(side==='_')return mean(angles(lm,...names));
+  const ix=names.map(n=>IDX[`${side}_${n}`]);
+  if(!ix.every(i=>lm[i]&&lm[i][2]>=S.cam.vis))return null;
+  if(S.cam.use3d&&lm.w&&ix.every(i=>lm.w[i]))return angN(...ix.map(i=>lm.w[i].slice(0,3)));
+  return ang(...ix.map(i=>[lm[i][0],lm[i][1]]));
 };
-/* ===== 新增動作的偵測方式 ===== */
-const vertRatio=lm=>mean(['l','r'].map(s=>{const a=P(lm,s+'_sh'),b=P(lm,s+'_hip');return a&&b?Math.abs(b[1]-a[1])/(dist(a,b)+1e-6):null}).filter(v=>v!==null));
-const tiltRatio=lm=>{const t=torso(lm),sh=['l','r'].map(s=>P(lm,s+'_sh')).filter(Boolean),hp=['l','r'].map(s=>P(lm,s+'_hip')).filter(Boolean);
-  if(!t||!sh.length||!hp.length)return null;return Math.abs(mean(sh.map(p=>p[0]))-mean(hp.map(p=>p[0])))/t};
-const kneeElbow=(lm,s)=>{const t=torso(lm),k=P(lm,s+'_kn'),e=P(lm,s+'_el');return t&&k&&e?dist(k,e)/t:null};
-const legSpread=(lm,s)=>{const t=torso(lm),a=P(lm,s+'_an'),h=P(lm,s+'_hip');return t&&a&&h?Math.abs(a[0]-h[0])/t:null};
-const jumpSig=(lm,sd,st)=>{ // 腳踝離「地面」多高（地面＝最近腳踝最低的位置，會慢慢跟著調整）
-  const t=torso(lm),ys=['l','r'].map(s=>P(lm,s+'_an')).filter(Boolean).map(p=>p[1]);if(!t||!ys.length)return null;
-  const y=mean(ys);if(st.base===undefined||y>st.base)st.base=y;else st.base+=(y-st.base)*.01;return (st.base-y)/t};
-const elbowAng=lm=>mean(angles(lm,'sh','el','wr')),hipAng=lm=>mean(angles(lm,'sh','hip','kn'));
-Object.assign(EX,{
- "深蹲跳":{en:"Jump Squats",lo:105,hi:160,fn:EX["深蹲"].fn},
- "肩推":{en:"Shoulder Press",lo:95,hi:155,fn:elbowAng},
- "椅子臂屈伸":{en:"Chair Dips",lo:100,hi:150,fn:elbowAng},
- "仰臥抬腿":{en:"Leg Raises",lo:100,hi:150,fn:hipAng},
- "前平舉":{en:"Front Raises",lo:35,hi:75,fn:lm=>mean(angles(lm,'hip','sh','wr'))},
- "引體向上":{en:"Pull-ups",lo:75,hi:150,fn:elbowAng},
- "髖鉸鏈":{en:"Hip Hinge",lo:115,hi:160,fn:hipAng},
- "側抬腿":{en:"Side Leg Raises",lo:.12,hi:.35,side:true,fn:legSpread},
- "側彎":{en:"Side Bends",lo:.08,hi:.30,fn:tiltRatio},
- "站姿抬膝碰肘":{en:"Standing Knee-to-Elbow",lo:.55,hi:.9,side:true,fn:kneeElbow},
- "原地踏步":{en:"March in Place",lo:-.6,hi:-.4,side:true,fn:kneeHeight},
- "原地跳繩":{en:"Jump Rope",lo:.03,hi:.07,fn:jumpSig},
- "波比跳":{en:"Burpees",lo:.45,hi:.8,fn:vertRatio},
- "啞鈴臥推":{en:"Dumbbell Bench Press",lo:95,hi:155,fn:elbowAng,
-   cue2:{fn:lm=>mean(angles(lm,'el','sh','hip')),ok:80,msg:'手肘張太開，收近身體一點（上臂和身體約 45–75 度）'}},
-});
-const START_HIGH=new Set(['深蹲','伏地挺身','捲腹','仰臥起坐','二頭彎舉','弓箭步','引體向上','椅子臂屈伸','仰臥抬腿','髖鉸鏈','登山者','波比跳','啞鈴臥推']);
-for(const [name,config] of Object.entries(EX))config.startHigh=START_HIGH.has(name);
-const CATMAP={"深蹲":"下肢","弓箭步":"下肢","臀橋":"下肢","髖鉸鏈":"下肢","側抬腿":"下肢",
- "伏地挺身":"上肢","啞鈴臥推":"上肢","肩推":"上肢","側平舉":"上肢","前平舉":"上肢","二頭彎舉":"上肢","椅子臂屈伸":"上肢","引體向上":"上肢",
- "捲腹":"核心","仰臥起坐":"核心","仰臥抬腿":"核心","側彎":"核心","站姿抬膝碰肘":"核心",
- "開合跳":"全身有氧","深蹲跳":"全身有氧","登山者":"全身有氧","高抬腿":"全身有氧","原地踏步":"全身有氧","原地跳繩":"全身有氧","波比跳":"全身有氧"};
-for(const [k,c] of Object.entries(CATMAP))EX[k].cat=c;
-const CATS=['下肢','上肢','核心','全身有氧'];
-const ORDER=Object.keys(CATMAP);
+const jointDistanceRatio=(lm,side,joints)=>{
+  const a=P(lm,`${side}_${JOINT_ABBR[joints[0]]}`),b=P(lm,`${side}_${JOINT_ABBR[joints[1]]}`),t=torso(lm);
+  return a&&b&&t?dist(a,b)/t:null;
+};
+const ankleSpreadRatio=lm=>{
+  const left=P(lm,'l_an'),right=P(lm,'r_an'),t=torso(lm);
+  return left&&right&&t?Math.abs(left[0]-right[0])/t:null;
+};
+const airborneRatio=(lm,store)=>{
+  const t=torso(lm),ys=['l','r'].map(s=>P(lm,`${s}_an`)).filter(Boolean).map(p=>p[1]);
+  if(!t||!ys.length)return null;
+  const y=mean(ys);
+  if(store.groundY===undefined)store.groundY=y;
+  else if(y>store.groundY)store.groundY+=(y-store.groundY)*.01;
+  return (store.groundY-y)/t;
+};
+const EX=Object.fromEntries(exercises.map(ex=>{
+  const c=ex.trackingConfig;
+  return [ex.name,{en:ex.id,cat:ex.category,lo:c.minAngle,hi:c.maxAngle,startAngle:c.startAngle,peakAngle:c.peakAngle,
+    fn:(lm,s,store)=>{if(c.peakGuard&&c.peakGuard.type==='airborneRatio')airborneRatio(lm,store);return jointAngle(lm,s,c.joints)},side:!!c.perSide,
+    startHigh:c.startAngle>c.peakAngle,peakGuard:c.peakGuard?(lm,s,store)=>{
+      if(c.peakGuard.type==='distanceRatio'){const ratio=jointDistanceRatio(lm,s,c.peakGuard.joints);return ratio!==null&&ratio<=c.peakGuard.maxRatio}
+      if(c.peakGuard.type==='ankleSpreadRatio'){const ratio=ankleSpreadRatio(lm);return ratio!==null&&ratio>=c.peakGuard.minRatio}
+      const ratio=airborneRatio(lm,store);return ratio!==null&&ratio>=c.peakGuard.minRatio
+    }:false,
+    cue:c.cue,tempo:c.tempo}];
+}));
+const CATMAP=Object.fromEntries(exercises.map(ex=>[ex.name,ex.category]));
+const CATS=[...new Set(exercises.map(ex=>ex.category))];
+const ORDER=exercises.map(ex=>ex.name);
+const CUES=Object.fromEntries(exercises.filter(ex=>ex.trackingConfig.cue).map(ex=>[ex.name,ex.trackingConfig.cue]));
+const TEMPO=Object.fromEntries(exercises.filter(ex=>ex.trackingConfig.tempo).map(ex=>[ex.name,ex.trackingConfig.tempo]));
 const optsByCat=(names,label=n=>n)=>CATS.map(c=>{const g=names.filter(n=>EX[n]&&EX[n].cat===c);return g.length?`<optgroup label="${c}">${g.map(n=>`<option value="${n}">${label(n)}</option>`).join('')}</optgroup>`:''}).join('');
-
-/* 姿勢提醒：type 'min'＝這一下動作的最低點要小於等於 ok；'max'＝最高點要大於等於 ok */
-const CUES={
- "深蹲":{type:'min',ok:100,msg:'核心收緊，再蹲低一點'},
- "伏地挺身":{type:'min',ok:90,msg:'胸口再壓低一點，手肘彎到 90 度'},
- "捲腹":{type:'min',ok:75,msg:'上半身再捲起來一點'},
- "仰臥起坐":{type:'min',ok:65,msg:'起身再高一點，胸口靠近膝蓋'},
- "側平舉":{type:'max',ok:80,msg:'手臂舉到與肩同高'},
- "二頭彎舉":{type:'min',ok:50,msg:'彎舉到頂，手肘再彎緊一點'},
- "開合跳":{type:'max',ok:.5,msg:'手臂舉高過頭'},
- "弓箭步":{type:'min',ok:100,msg:'再往下沉，前腿膝蓋接近 90 度'},
- "登山者":{type:'min',ok:.9,msg:'膝蓋再往胸口帶近一點'},
- "臀橋":{type:'max',ok:165,msg:'臀部頂高，肩、髖、膝成一直線'},
- "高抬腿":{type:'max',ok:-.15,msg:'膝蓋抬到髖部高度'},
-};
-Object.assign(CUES,{
- "深蹲跳":{type:'min',ok:105,msg:'下蹲再深一點，再用力跳起來'},
- "肩推":{type:'max',ok:160,msg:'手臂推到伸直'},
- "啞鈴臥推":{type:'max',ok:160,msg:'手臂推到伸直，但不要鎖死手肘'},
- "椅子臂屈伸":{type:'min',ok:95,msg:'身體往下沉，手肘彎到 90 度'},
- "仰臥抬腿":{type:'min',ok:100,msg:'腿抬高一點，接近與地面垂直'},
- "前平舉":{type:'max',ok:80,msg:'手臂舉到與肩同高'},
- "引體向上":{type:'min',ok:70,msg:'再拉高一點，下巴過槓'},
- "髖鉸鏈":{type:'min',ok:110,msg:'髖部再往後推，上身前傾更多，背保持平直'},
- "側抬腿":{type:'max',ok:.4,msg:'腿再往外抬高一點，身體不要歪'},
- "側彎":{type:'max',ok:.3,msg:'身體再往側邊彎一點'},
- "站姿抬膝碰肘":{type:'min',ok:.6,msg:'膝蓋抬高，靠近手肘'},
-});
-for(const [k,q] of Object.entries(CUES))EX[k].cue=q;
-/* 節奏提醒：兩下之間的最短時間（秒）。開合跳、登山者、高抬腿是有氧，不檢查。 */
-const TEMPO={"深蹲":1.8,"伏地挺身":1.6,"二頭彎舉":1.6,"弓箭步":1.8,"側平舉":1.6,"臀橋":1.6,"捲腹":1.4,"仰臥起坐":1.6};
-Object.assign(TEMPO,{"啞鈴臥推":1.6,"肩推":1.6,"椅子臂屈伸":1.6,"仰臥抬腿":1.8,"前平舉":1.6,"引體向上":2.0,"髖鉸鏈":1.8});
-for(const [k,v] of Object.entries(TEMPO))EX[k].tempo=v;
 
 class RepCounter{
   constructor(key){this.key=key;this.cfg=EX[key];this.relax=.06;this.reset()}
   reset(){this.count=0;this.cueTotal=0;this.cueBad=0;this.hist=[];this.cycles=[];this.tempoFast=0;this.store={};this.trk={};this.lastRepAt=0;
-    (this.cfg.side?['l','r']:['_']).forEach(s=>this.trk[s]={phase:'seek-start',lastCount:0,v:null,cmin:0,cmax:0,c2:-Infinity})}
-  lost(){Object.values(this.trk).forEach(t=>{t.v=null;t.phase='seek-start';t.cmin=0;t.cmax=0;t.c2=-Infinity})}
+    (this.cfg.side?['l','r']:['_']).forEach(s=>this.trk[s]={phase:'seek-start',lastCount:0,v:null,cmin:0,cmax:0,c2:-Infinity,peakValid:false})}
+  lost(){this.store={};Object.values(this.trk).forEach(t=>{t.v=null;t.phase='seek-start';t.cmin=0;t.cmax=0;t.c2=-Infinity;t.peakValid=false})}
   _eval(ext){const q=this.cfg.cue;if(!q)return null;const bad=q.type==='min'?ext>q.ok:ext<q.ok;
     this.cueTotal++;if(bad)this.cueBad++;this.hist=[...this.hist,bad?1:0].slice(-3);return {bad,msg:q.msg}}
   _eval2(ext){const q=this.cfg.cue2,bad=ext>q.ok;this.cueTotal++;if(bad)this.cueBad++;this.hist=[...this.hist,bad?1:0].slice(-3);return {bad,msg:q.msg}}
   update(lm,now){
-    const c=this.cfg,gap=(c.hi-c.lo)*this.relax,lo=c.lo+gap,hi=c.hi-gap,edge=(hi-lo)*.025,startLimit=c.startHigh?hi-edge:lo+edge,peakLimit=c.startHigh?lo+edge:hi-edge,vals=[],ev=[],cooldown=Math.max(450,(c.tempo||.75)*650);
+    const c=this.cfg,gap=(c.hi-c.lo)*this.relax,angleGap=Math.abs(c.startAngle-c.peakAngle)*this.relax,lo=c.lo+gap,hi=c.hi-gap,
+      startLimit=c.startHigh?c.startAngle-angleGap:c.startAngle+angleGap,peakLimit=c.startHigh?c.peakAngle+angleGap:c.peakAngle-angleGap,
+      vals=[],ev=[],cooldown=Math.max(450,(c.tempo||.75)*650);
     for(const [s,t] of Object.entries(this.trk)){
       const raw=c.fn(lm,s,this.store);
       if(raw===null){t.v=null;t.phase='seek-start';continue}
       t.v=t.v===null?raw:t.v+(raw-t.v)*.32;const v=t.v;vals.push(v);
       const v2=c.cue2?c.cue2.fn(lm,s,this.store):null;
-      if(t.phase==='seek-start'&&(c.startHigh?v>=startLimit:v<=startLimit)){t.phase='seek-peak';t.cmin=v;t.cmax=v;t.c2=-Infinity}
+      if(t.phase==='seek-start'&&(c.startHigh?v>=startLimit:v<=startLimit)){t.phase='seek-peak';t.cmin=v;t.cmax=v;t.c2=-Infinity;t.peakValid=false}
       if(t.phase!=='seek-start'){t.cmin=Math.min(t.cmin,v);t.cmax=Math.max(t.cmax,v);if(v2!==null)t.c2=Math.max(t.c2,v2)}
-      if(t.phase==='seek-peak'&&(c.startHigh?v<=peakLimit:v>=peakLimit))t.phase='seek-return';
+      if(t.phase==='seek-peak'&&(c.startHigh?v<=peakLimit:v>=peakLimit)){t.phase='seek-return';t.peakValid=!c.peakGuard||c.peakGuard(lm,s,this.store)}
+      if(t.phase==='seek-return'&&c.peakGuard&&c.peakGuard(lm,s,this.store))t.peakValid=true;
       if(t.phase==='seek-return'&&(c.startHigh?v>=startLimit:v<=startLimit)&&now-this.lastRepAt>=cooldown){
-        this.count++;t.phase='seek-peak';this.lastRepAt=now;
-        for(const other of Object.values(this.trk))if(other!==t&&other.phase==='seek-return')other.phase='seek-peak';
+        if(!t.peakValid){t.phase='seek-peak';t.cmin=v;t.cmax=v;t.c2=-Infinity;continue}
+        this.count++;t.phase='seek-peak';t.peakValid=false;this.lastRepAt=now;
+        for(const other of Object.values(this.trk))if(other!==t&&other.phase==='seek-return'){other.phase='seek-peak';other.peakValid=false}
         const cyc=t.lastCount?(now-t.lastCount)/1000:null;t.lastCount=now;
         if(c.tempo&&cyc!==null){this.cycles=[...this.cycles,cyc].slice(-6);if(cyc<c.tempo){this.tempoFast++;ev.push({kind:'tempo',bad:true,msg:'動作再放慢一些，保持穩定節奏'})}else this.tempoFast=0}
         if(c.cue2&&isFinite(t.c2))ev.push(this._eval2(t.c2));
@@ -2561,6 +2530,7 @@ $('#guideFilters').addEventListener('click',event=>{
 
 /* ================= 鏡頭計數分頁 ================= */
 $('#camEx').innerHTML=optsByCat(ORDER,n=>n);
+$('#camMovementGrid').innerHTML=exercises.map(ex=>`<button class="movement-card" type="button" data-ex="${esc(ex.name)}"><span class="movement-icon">${ex.icon}</span><strong>${esc(ex.name)}</strong><small>${esc(ex.targetMuscles.slice(0,2).join('・'))}</small></button>`).join('');
 let camCounter=new RepCounter(ORDER[0]);
 const camView=makeView($('[data-stage=cam]'),()=>camCounter);
 camView.nm.textContent=ORDER[0];
@@ -2687,7 +2657,7 @@ const MODES={
 };
 let tMode='hiit';const tCtl={aborted:false};let tRunning=false;
 $('#tModes').innerHTML=Object.entries(MODES).map(([k,m])=>`<button data-k="${k}" class="${k===tMode?'on':''}">${m.name}</button>`).join('');
-$('#tPickList').innerHTML=ORDER.map(n=>`<label><input type="checkbox" value="${n}" ${['開合跳','深蹲','伏地挺身','登山者'].includes(n)?'checked':''}> ${n}</label>`).join('');
+$('#tPickList').innerHTML=ORDER.map(n=>`<label><input type="checkbox" value="${n}" ${['開合跳','深蹲','伏地挺身','高抬腿'].includes(n)?'checked':''}> ${n}</label>`).join('');
 function tParams(){const p={};$$('#tParams input').forEach(i=>p[i.dataset.k]=+i.value);return p}
 function tBuild(){
   const m=MODES[tMode],picks=$$('#tPickList input:checked').map(i=>i.value);
@@ -2769,8 +2739,7 @@ $('#timerBack').onclick=()=>{
 };
 
 /* ================= 一分鐘挑戰 ================= */
-const CH={"開合跳":[30,50,70],"仰臥起坐":[15,25,35],"深蹲":[20,35,50],"伏地挺身":[8,15,25],"高抬腿":[40,70,100],"登山者":[30,50,70],"波比跳":[6,10,15],
- "深蹲跳":[15,25,35],"啞鈴臥推":[10,18,26],"肩推":[15,25,35],"椅子臂屈伸":[10,20,30],"仰臥抬腿":[10,20,30],"前平舉":[15,25,35],"引體向上":[3,6,10],"髖鉸鏈":[15,25,35],"側抬腿":[20,30,40],"側彎":[25,40,55],"站姿抬膝碰肘":[30,50,70],"原地踏步":[60,90,120],"原地跳繩":[60,100,140]};
+const CH=Object.fromEntries(exercises.map(ex=>[ex.name,ex.challengeTargets]));
 const CAMOK=new Set(Object.keys(EX));
 const DN=['低','中','高'],MULT=[1,1.5,2];
 let chDiff=0,chCounter=null,chPending=null;const chCtl={aborted:false};let chRunning=false;
@@ -3567,9 +3536,9 @@ function calc(edited){
   const ok=b.h>=120&&b.h<=220&&b.w>=30&&b.w<=200&&b.age>=10&&b.age<=100;
   if(ok){S.body={set:S.body.set||!!edited,sex,age:b.age,h:b.h,w:b.w,act:+$('#bAct').value||1.2,goal:goalType};save();renderStats(true)}
 }
-const GROUPS={"下肢":["深蹲","弓箭步","臀橋","髖鉸鏈","側抬腿","深蹲跳"],"上肢核心":["伏地挺身","肩推（可用水瓶）","二頭彎舉（可用水瓶）","側平舉（可用水瓶）","椅子臂屈伸","捲腹","仰臥抬腿"],"有氧燃脂":["開合跳","登山者","高抬腿","原地跳繩","波比跳"],"全身":["深蹲","伏地挺身","登山者","捲腹","波比跳","髖鉸鏈"]};
+const GROUPS={"下肢":["深蹲","深蹲跳","弓箭步","髖鉸鏈"],"上肢核心":["伏地挺身","肩推","二頭彎舉","側平舉","前平舉","引體向上"],"有氧燃脂":["開合跳","高抬腿","站姿抬膝碰肘"],"全身":["深蹲","弓箭步","伏地挺身","肩推","高抬腿","髖鉸鏈"]};
 const CNT={新手:4,中階:5,進階:6};
-const TIMED=new Set(["開合跳","登山者","高抬腿","原地跳繩","原地踏步"]);
+const TIMED=new Set(["開合跳","高抬腿","站姿抬膝碰肘"]);
 const SPLITS={2:["全身","有氧燃脂"],3:["下肢","上肢核心","有氧燃脂"],4:["下肢","上肢核心","有氧燃脂","全身"],5:["下肢","上肢核心","有氧燃脂","全身","有氧燃脂"]};
 const LEVELS={新手:[3,10,60,30],中階:[4,12,45,40],進階:[5,15,30,45]};
 const EXTRA={減脂:'收操：做一輪 4 分鐘 Tabata（到「訓練計時器」選 Tabata）。',增肌:'動作放慢，下放 3 秒；每組做到接近力竭前 1–2 下。',提升體能:'組間心率稍微恢復再開始下一組，逐週增加 1–2 下。'};
@@ -3587,7 +3556,7 @@ const SYSTEM=`你是「Lin AI」的專業健身教練，使用繁體中文（台
 規則：
 - 資訊不足以排菜單時，先簡短詢問最多 3 個關鍵問題（目標、每週可練天數、程度/器材/傷病）；資訊夠了就直接給完整菜單。
 - 菜單請用表格或條列：每天重點、動作、組數×次數（或秒數）、組間休息，並提醒暖身與收操，以及如何逐週進步。
-- 動作優先使用本系統支援的：深蹲、深蹲跳、弓箭步、臀橋、髖鉸鏈、側抬腿、伏地挺身、肩推、側平舉、前平舉、二頭彎舉、椅子臂屈伸、引體向上、捲腹、仰臥起坐、仰臥抬腿、側彎、站姿抬膝碰肘、開合跳、登山者、高抬腿、原地踏步、原地跳繩、波比跳，以及撐住類的平板支撐、側棒式、靠牆深蹲、臀橋停留，也可加入其他徒手或啞鈴動作。
+- 動作優先使用本系統的 AI 核心動作：深蹲、深蹲跳、弓箭步、髖鉸鏈、肩推、側平舉、前平舉、二頭彎舉、引體向上、伏地挺身、開合跳、高抬腿、站姿抬膝碰肘；如需安排其他訓練，請清楚標示為非 AI 計數動作。
 - 安全第一：不推薦極端節食或過低熱量；有疼痛、傷病、慢性病、懷孕等情況，請建議先諮詢醫師或物理治療師。你不是醫師。
 - 回答簡潔、鼓勵但誠實。`;
 const QUICK=['根據我的紀錄排下週菜單','幫我排一週訓練菜單','居家 30 分鐘減脂菜單','訓練前後該怎麼吃？','深蹲姿勢要注意什麼？'];
@@ -3639,11 +3608,11 @@ $('#chatSend').onclick=()=>ask($('#chatIn').value);
 $('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();ask($('#chatIn').value)}});
 $('#chatClear').onclick=()=>{chatHist.length=0;$('#chat').innerHTML='';$('#chatClear').hidden=true};
 const coachWorkouts={
-  '下肢肌力':['深蹲','弓箭步','臀橋','髖鉸鏈'],
-  '上肢肌力':['伏地挺身','啞鈴臥推','肩推','二頭彎舉'],
-  '核心訓練':['平板支撐','捲腹','側棒式','登山者'],
-  '全身肌力':['深蹲','伏地挺身','臀橋','肩推'],
-  '全身有氧':['原地踏步','開合跳','登山者','原地跳繩']
+  '下肢肌力':['深蹲','深蹲跳','弓箭步','髖鉸鏈'],
+  '上肢肌力':['伏地挺身','肩推','二頭彎舉','引體向上'],
+  '核心訓練':['站姿抬膝碰肘','高抬腿','開合跳'],
+  '全身肌力':['深蹲','弓箭步','伏地挺身','肩推'],
+  '全身有氧':['開合跳','高抬腿','站姿抬膝碰肘']
 };
 const coachWeekPlans={
   減脂:{2:['全身肌力','全身有氧'],3:['下肢肌力','上肢肌力','全身有氧'],4:['下肢肌力','上肢肌力','核心訓練','全身有氧'],5:['下肢肌力','上肢肌力','全身有氧','核心訓練','全身肌力']},
@@ -3658,7 +3627,7 @@ function renderCoachPlan(){
   const plan=(coachWeekPlans[goal]||coachWeekPlans['體能'])[days]||coachWeekPlans['體能'][3];
   const sets=goal==='增肌'?3:2,repText=goal==='增肌'?'8–12 下':'10–12 下',rest=goal==='增肌'?90:60;
   const workoutHtml=plan.map((focus,index)=>{
-    const exercises=coachWorkouts[focus].filter(name=>gear!=='徒手'||name!=='啞鈴臥推').slice(0,4);
+    const exercises=coachWorkouts[focus].slice(0,4);
     const prescription=exercises.map(name=>`<li><b>${name}</b>：${sets} 組 × ${TIMED.has(name)||['平板支撐','側棒式'].includes(name)?'30 秒':repText}</li>`).join('');
     return `<article class="coach-result-card"><h4>第 ${index+1} 天・${focus}</h4><ul>${prescription}</ul><p class="small mute" style="margin:6px 0 0">組間休息約 ${rest} 秒</p></article>`;
   }).join('');
@@ -3906,7 +3875,7 @@ function lastDays(n){const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.set
 function renderStatsTab(){
   const exerciseSelect=$('#stExercise');
   if(!exerciseSelect.options.length){
-    const extra=Object.keys(S.exs).filter(ex=>!ORDER.includes(ex)).sort((a,b)=>a.localeCompare(b));
+    const extra=Object.keys(S.exs).filter(ex=>!ORDER.includes(ex)&&!REMOVED_EXERCISES.has(ex)).sort((a,b)=>a.localeCompare(b));
     exerciseSelect.innerHTML=optsByCat(ORDER)+extra.map(ex=>`<option value="${esc(ex)}">${esc(ex)}</option>`).join('');
   }
   if(![...exerciseSelect.options].some(option=>option.value===S.statsEx))S.statsEx=ORDER[0];
@@ -3936,7 +3905,7 @@ function renderStatsTab(){
 }
 function renderExerciseTotals(){
   const known=new Set(ORDER),groups=CATS.map(cat=>[cat,ORDER.filter(ex=>EX[ex].cat===cat)]);
-  const unlisted=Object.keys(S.exs).filter(ex=>!known.has(ex)).sort((a,b)=>a.localeCompare(b));
+  const unlisted=Object.keys(S.exs).filter(ex=>!known.has(ex)&&!REMOVED_EXERCISES.has(ex)).sort((a,b)=>a.localeCompare(b));
   if(unlisted.length)groups.push(['其他動作',unlisted]);
   const html=groups.map(([cat,exercises])=>`<div><h4>${esc(cat)}</h4><table><tbody>${exercises.map(ex=>`<tr><td>${esc(ex)}</td><td style="text-align:right"><b style="color:var(--yellow)">${Math.max(0,Number(S.exs[ex])||0)}</b> 下</td></tr>`).join('')}</tbody></table></div>`).join('');
   const knownTotal=Object.values(S.exs).reduce((sum,n)=>sum+(Number(n)||0),0),unclassified=Math.max(0,(Number(S.reps)||0)-knownTotal);
@@ -3975,8 +3944,7 @@ $('#stReset').onclick=async()=>{if(!confirm('要清除所有紀錄嗎？次數�
 };
 
 /* ================= 每日挑戰 ================= */
-const DAILY_T={"深蹲":40,"伏地挺身":20,"捲腹":30,"側平舉":30,"二頭彎舉":30,"開合跳":60,"弓箭步":30,"登山者":50,"臀橋":30,"高抬腿":60,
- "仰臥起坐":25,"深蹲跳":20,"啞鈴臥推":20,"肩推":25,"椅子臂屈伸":20,"仰臥抬腿":20,"前平舉":25,"引體向上":8,"髖鉸鏈":25,"側抬腿":30,"側彎":40,"站姿抬膝碰肘":40,"原地踏步":100,"原地跳繩":150,"波比跳":15};
+const DAILY_T=Object.fromEntries(exercises.map(ex=>[ex.name,ex.dailyTarget]));
 function dailyTask(){const k=dkey(new Date()),ex=ORDER[dayN(k)%ORDER.length];return {ex,target:DAILY_T[ex],key:k}}
 const dailyProg=t=>(S.dayEx[t.key]||{})[t.ex]||0;
 function checkDaily(){
@@ -4119,33 +4087,20 @@ $('#mpSave').onclick=()=>{
 const GUIDE=[
  {n:'深蹲',m:'股四頭肌、臀大肌、核心',tips:['雙腳與肩同寬，腳尖微微朝外','臀部往後坐，膝蓋和腳尖同方向','蹲到大腿接近水平，起身時腳跟踩穩地面'],bad:['膝蓋往內夾','腳跟離地、上半身過度前傾'],cam:'正面或斜 45 度，全身入鏡'},
  {n:'伏地挺身',m:'胸大肌、肱三頭肌、核心',tips:['從頭到腳維持一直線，核心收緊','手肘約 45 度向後，不要完全往外開','胸口接近地面再推起；力量不夠可先做跪姿'],bad:['塌腰或臀部翹太高','只做半程，沒壓到底'],cam:'從側面拍'},
- {n:'捲腹',m:'腹直肌',tips:['下背貼地，下巴微收','用腹部把肩胛捲離地面，不是用手拉','吐氣上捲、吸氣慢慢放下'],bad:['雙手拉脖子','用甩的借力'],cam:'從側面拍'},
- {n:'仰臥起坐',m:'腹肌、髖屈肌',tips:['躺下膝蓋彎曲、腳底踩地','雙手交叉放胸前，不要拉脖子','起身到胸口靠近膝蓋，再慢慢放下'],bad:['用慣性彈起來','頸部往前拉'],cam:'從側面拍，膝蓋彎曲躺下'},
  {n:'側平舉',m:'三角肌中束',tips:['手肘微彎，手臂舉到與肩同高','肩膀放鬆，不要聳肩','用輕重量（裝水的水瓶就可以）'],bad:['甩動借力','舉過肩膀太高'],cam:'正面'},
  {n:'二頭彎舉',m:'肱二頭肌',tips:['手肘貼近身體固定','彎舉到頂端稍微停一下','慢慢放下，不要直接掉下去'],bad:['身體後仰借力','手肘前後晃動'],cam:'正面或側面'},
  {n:'開合跳',m:'全身有氧、小腿、肩膀',tips:['跳起時雙腳打開，雙手舉過頭','落地時膝蓋微彎緩衝','保持穩定的節奏'],bad:['手沒有舉到頭上','落地太重'],cam:'正面'},
  {n:'弓箭步',m:'股四頭肌、臀大肌、腿後側',tips:['跨一大步，上半身挺直','前腿膝蓋約 90 度，後膝接近地面','用前腳跟推地回到起始位置'],bad:['步伐太小','重心前傾、膝蓋壓力過大'],cam:'側面或正面'},
- {n:'登山者',m:'核心、肩膀、髖屈肌',tips:['雙手在肩膀正下方撐地，身體成一直線','膝蓋輪流往胸口帶','臀部不要翹太高'],bad:['臀部翹起','手臂撐不住時姿勢變形'],cam:'從側面拍'},
- {n:'臀橋',m:'臀大肌、腿後側',tips:['仰躺、膝蓋彎曲、腳跟踩地','用臀部把髖推高到肩、髖、膝成一直線','頂端夾緊臀部停 1 秒'],bad:['用下背過度拱起代償','腳離臀部太遠或太近'],cam:'從側面拍'},
  {n:'高抬腿',m:'髖屈肌、核心、有氧',tips:['原地快速交替抬膝到髖部高度','上半身挺直','用前腳掌輕快落地'],bad:['身體往後仰','膝蓋抬得太低'],cam:'正面'},
- {n:'波比跳',m:'全身',tips:['蹲下雙手撐地，腳向後伸成伏地挺身姿勢','收腿回來再向上跳起','體能不足時，可以拿掉伏地挺身或跳躍'],bad:['塌腰','落地太重'],cam:'從側面拍。從趴下（撐地）站起來算一下；沒有真的趴低就不會算'},
  {n:'深蹲跳',m:'股四頭肌、臀大肌、小腿、心肺',tips:['先蹲到大腿接近水平，再用力往上跳','落地時膝蓋微彎緩衝，膝蓋和腳尖同方向','每下之間穩定呼吸'],bad:['落地時膝蓋往內夾','落地太僵硬、太大聲'],cam:'正面或側面。衝擊較大，膝蓋不舒服時請改做一般深蹲'},
- {n:'側抬腿',m:'臀中肌、髖外展肌',tips:['站穩，上半身挺直','單腳往側邊抬到約 30–45 度，不要靠身體歪斜','慢慢放下，可以扶牆'],bad:['身體往另一邊歪','甩腿借力'],cam:'正面'},
  {n:'髖鉸鏈',m:'臀大肌、腿後側、下背（硬舉動作）',tips:['雙腳與髖同寬，膝蓋微彎','把屁股往後推，上身前傾，背保持平直','感到大腿後側拉伸後，用臀部發力站直'],bad:['圓背','膝蓋彎太多，變成蹲而不是鉸鏈'],cam:'從側面拍'},
- {n:'啞鈴臥推',m:'胸大肌、肱三頭肌、三角肌前束',tips:['躺在穩固的長椅，雙腳踩地，肩胛收緊貼住椅面','手肘不要張太開，上臂和身體大約 45–75 度','下放到手肘約 90 度，再推到手臂伸直但不要鎖死'],bad:['手肘張到 90 度（肩膀壓力大）','用彈的借力、屁股離開椅面'],cam:'從側面或頭頂方向拍；3D 角度模式下比較準。沒有啞鈴可以用裝水的水瓶'},
  {n:'肩推',m:'三角肌、肱三頭肌',tips:['雙手拿水瓶或啞鈴在肩膀高度，手肘約 90 度','核心收緊，往正上方推到手臂伸直','慢慢放下'],bad:['下背過度反弓','手腕往後折'],cam:'正面'},
  {n:'前平舉',m:'三角肌前束',tips:['手臂微彎，往前舉到與肩同高','身體不要後仰','用輕重量（裝水的水瓶就可以）'],bad:['甩動借力','聳肩'],cam:'從側面拍'},
- {n:'椅子臂屈伸',m:'肱三頭肌、胸、前三角肌',tips:['雙手撐在穩固的椅子或床邊，臀部離開椅面','手肘往後彎到約 90 度，再撐起來','肩膀遠離耳朵'],bad:['手肘往外開','身體離椅子太遠，肩膀壓力大'],cam:'從側面拍。肩膀不舒服時請避免'},
  {n:'引體向上',m:'背闊肌、肱二頭肌、前臂',tips:['雙手略比肩寬握槓，先讓肩胛下沉','把胸口拉向橫槓，下巴過槓','慢慢放下到手臂接近伸直'],bad:['用擺盪借力','只做半程'],cam:'正面或側面。需要單槓，沒有的話請略過'},
- {n:'仰臥抬腿',m:'下腹、髖屈肌',tips:['仰躺，下背貼地，手放身體兩側','雙腿伸直（或微彎）抬到接近與地面垂直','慢慢放下，但不要碰到地面'],bad:['下背拱起','甩腿'],cam:'從側面拍'},
- {n:'側彎',m:'腹斜肌',tips:['雙腳與肩同寬站穩','往側邊慢慢彎，再回正','身體保持在同一個平面，不要前後轉'],bad:['身體前傾或旋轉','用甩的'],cam:'正面'},
  {n:'站姿抬膝碰肘',m:'腹肌、髖屈肌',tips:['站直，一手放頭旁','抬起同側膝蓋，用手肘靠近膝蓋，同時側邊收緊','左右交替'],bad:['駝背','只動手肘、核心沒用力'],cam:'正面'},
  {n:'原地踏步',m:'有氧、髖屈肌',tips:['抬膝大約到大腿接近水平的一半','手臂自然擺動','步伐輕快穩定，很適合暖身'],bad:['低頭彎腰','腳步太重'],cam:'正面'},
- {n:'原地跳繩',m:'小腿、心肺（徒手，不用繩子）',tips:['想像握著繩子，手腕小幅轉動','用前腳掌輕跳，離地約 2–3 公分','膝蓋微彎緩衝'],bad:['跳太高','落地太重'],cam:'正面或側面。這個動作偵測比較不穩，算是實驗功能'},
  {n:'平板支撐',cat:'撐住類',m:'核心、肩膀',tips:['前臂或手掌撐地，手肘在肩膀正下方','從頭到腳成一直線，收緊腹部和臀部','自然呼吸，不要憋氣'],bad:['塌腰','臀部翹太高'],cam:'從側面拍'},
  {n:'側棒式',cat:'撐住類',m:'腹斜肌、臀中肌',tips:['側躺，前臂撐地，手肘在肩膀正下方','把髖部抬起，讓身體成一直線','兩腳疊放或前後錯開'],bad:['髖部下沉','身體往前或往後轉'],cam:'從正面或背面拍，讓身體橫向入鏡'},
- {n:'靠牆深蹲',cat:'撐住類',m:'股四頭肌',tips:['背靠牆，雙腳往前走到膝蓋約 90 度','大腿接近水平，腳跟踩穩','手放身體兩側，不要撐在大腿上'],bad:['蹲太高偷懶','膝蓋往內夾'],cam:'從側面拍'},
- {n:'臀橋停留',cat:'撐住類',m:'臀大肌、腿後側',tips:['仰躺，膝蓋彎曲，腳跟踩地','把臀部頂高到肩、髖、膝成一直線後撐住','夾緊臀部，自然呼吸'],bad:['下背過度拱起','臀部慢慢掉下來'],cam:'從側面拍'},
 ];
 function renderGuide(){
   const cats=[...CATS,'撐住類'],catOf=g=>g.cat||(EX[g.n]&&EX[g.n].cat)||'其他';
@@ -4185,8 +4140,8 @@ $('#stImport').onchange=e=>{
   r.readAsText(f);e.target.value='';
 };
 
-/* ================= 撐住挑戰（平板支撐、靠牆深蹲） ================= */
-const HOLDTIP={"側棒式":'從正面或背面拍，讓身體橫向入鏡，肩膀、髖部、腳踝都要看得到。側躺，前臂撐地，髖部抬起讓身體成一直線。',"臀橋停留":'從側面拍，讓肩膀、髖部、膝蓋入鏡。仰躺膝蓋彎曲，把臀部頂高到肩、髖、膝成一直線，然後撐住。',"平板支撐":'從側面拍，讓肩膀、髖部、腳踝都入鏡。身體成一直線，臀部不要塌下去也不要翹太高。前臂或手掌撐地都可以。',"靠牆深蹲":'從側面拍，背靠牆，大腿接近水平、膝蓋約 90 度，讓髖部、膝蓋、腳踝都入鏡。'};
+/* ================= 撐住挑戰（平板支撐、側棒式） ================= */
+const HOLDTIP={"側棒式":'從正面或背面拍，讓身體橫向入鏡，肩膀、髖部、腳踝都要看得到。側躺，前臂撐地，髖部抬起讓身體成一直線。',"平板支撐":'從側面拍，讓肩膀、髖部、腳踝都入鏡。身體成一直線，臀部不要塌下去也不要翹太高。前臂或手掌撐地都可以。'};
 const hold={on:false,phase:'idle',t0:0,last:0,good:0,total:0,lastTen:0,badSince:0,lastR:0,sayAt:0,ex:'平板支撐',target:30,chip:['鏡頭已就緒，按「開始」','ready']};
 function holdCheck(ex,lm){
   if(ex==='平板支撐'||ex==='側棒式'){
@@ -4200,7 +4155,6 @@ function holdCheck(ex,lm){
     if(dev<-.07)return {ok:false,msg:sideP?'髖部太高，往下放一點，讓身體成一直線':'臀部太高，往下壓一點，讓身體成一直線'};
     return {ok:true};
   }
-  if(ex==='臀橋停留'){const g=mean(angles(lm,'sh','hip','kn'));if(g===null)return {ok:false,msg:'請從側面拍，讓肩膀、髖部、膝蓋都入鏡'};if(g<158)return {ok:false,msg:'臀部頂高，讓肩、髖、膝成一直線'};return {ok:true}}
   const a=mean(angles(lm,'hip','kn','an'));
   if(a===null)return {ok:false,msg:'請從側面拍，讓髖部、膝蓋、腳踝都入鏡'};
   if(a>115)return {ok:false,msg:'再往下坐一點，大腿接近水平'};

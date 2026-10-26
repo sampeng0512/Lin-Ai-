@@ -4518,8 +4518,9 @@ async function friendBoard(){
   if(!S.me.id||!frCfgOk()||frBusy){renderBoard();return}
   frBusy=true;$('#frNote').hidden=true;
   try{
-    let rows=await rpc('lin_get_board',{p_id:S.me.id})||[];
-    if(!rows.length){await friendSync(true);rows=await rpc('lin_get_board',{p_id:S.me.id})||[]}   // 伺服器上的資料不見了（例如重設過）就補回去
+    const boardArgs={p_id:S.me.id,p_exercise_id:null,p_action_name:null,p_period:'weekly'};
+    let rows=await rpc('lin_get_board',boardArgs)||[];
+    if(!rows.length){await friendSync(true);rows=await rpc('lin_get_board',boardArgs)||[]}   // 伺服器上的資料不見了（例如重設過）就補回去
     frRows=rows;frAt=Date.now();const n=Math.max(0,rows.length-1);
     await friendAvatars(rows);
     if(n!==S.me.friends){S.me.friends=n;save();renderStats()}

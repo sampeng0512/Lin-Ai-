@@ -193,7 +193,9 @@ th{color:var(--mute); font-weight:600}
 .guide details{background:var(--bg2); border:1px solid var(--line); border-radius:14px; padding:4px 16px; margin-bottom:10px}
 .guide summary{cursor:pointer; font-weight:800; padding:12px 0}
 .guide ul{margin:.3em 0 .6em 1.2em; padding:0}
-.guide-video{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}
+.guide-video{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.guide-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+@supports not (aspect-ratio:16/9){.guide-video{height:0;padding-bottom:56.25%}}
 .chip2{display:inline-flex; align-items:center; gap:4px; background:var(--bg2); border:1px solid var(--line); border-radius:999px; padding:4px 6px 4px 14px; font-weight:700}
 .chip2 button{appearance:none; border:0; background:none; color:var(--ink); font:inherit; cursor:pointer}
 .chip2 .x{color:var(--mute); padding:0 6px; font-size:1.1rem}
@@ -228,6 +230,9 @@ th{color:var(--mute); font-weight:600}
 @keyframes blink{50%{opacity:.2}}
 @media(prefers-reduced-motion:reduce){.stage .recbtn.on i{animation:none}}
 .stage.full .recbtn{top:calc(12px + env(safe-area-inset-top)); right:calc(62px + env(safe-area-inset-right))}
+.stage .rstbtn{position:absolute; top:64px; right:62px; z-index:3; min-height:44px; padding:0 14px; border-radius:14px; border:1px solid var(--line); background:rgba(10,26,32,.72); color:var(--ink); cursor:pointer; font:700 .85rem "Noto Sans TC",sans-serif; backdrop-filter:blur(6px)}
+.stage .rstbtn[hidden]{display:none}
+.stage.full .rstbtn{top:calc(64px + env(safe-area-inset-top)); right:calc(62px + env(safe-area-inset-right))}
 dialog.recdlg{border:0; border-radius:20px; padding:18px; background:var(--card); color:var(--ink); width:min(92vw,560px)}
 dialog.recdlg::backdrop{background:rgba(0,0,0,.72)}
 #installBar{max-width:1068px; margin:0 auto 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
@@ -2324,6 +2329,7 @@ const STAGE_HTML=`<div class="stage"><video class="v" playsinline muted></video>
 <div class="cue" hidden></div><div class="hint" hidden></div><div class="dbg" hidden></div><div class="chip">鏡頭未開啟</div><div class="gauge"><i></i></div>
 <button class="fsbtn" type="button" aria-label="全螢幕"></button>
 <button class="recbtn" type="button" aria-label="開始錄影"><i></i><span>錄影</span></button>
+<button class="rstbtn" type="button" aria-label="次數歸零（不儲存）" hidden>↺ 歸零</button>
 <div class="tmini" hidden><span class="tl"></span><span class="tn"></span></div>
 <button class="btn fsgo" type="button" hidden></button>
 <div class="msg" hidden></div></div>`;
@@ -2565,10 +2571,15 @@ $('#guideFilters').addEventListener('click',event=>{
 
 /* ================= 鏡頭計數分頁 ================= */
 $('#camEx').innerHTML=optsByCat(ORDER,n=>n);
-$('#camMovementGrid').innerHTML=exercises.map(ex=>`<button class="movement-card" type="button" data-ex="${esc(ex.name)}"><span class="movement-icon">${ex.icon}</span><strong>${esc(ex.name)}</strong><small>${esc(ex.targetMuscles.slice(0,2).join('・'))}</small></button>`).join('');
 let camCounter=new RepCounter(ORDER[0]);
 const camView=makeView($('[data-stage=cam]'),()=>camCounter);
 camView.nm.textContent=ORDER[0];
+const camRst=$('.rstbtn',camView.stage);camRst.hidden=false;
+camRst.onclick=()=>{   // 只歸零不儲存；要記錄請按「儲存這組並歸零」
+  if(camCounter.count===0)return;
+  camCounter.reset();camView.n.textContent='0';$('#camSave').disabled=true;$('#camFormV').textContent='—';$('#camTempoV').textContent='—';
+  toast('次數已歸零（這組沒有儲存）');
+};
 let camStandard='normal';
 const setCamBtns=on=>{$('#camStart').disabled=on;$('#camStop').disabled=!on;$('#camSave').disabled=!on&&camCounter.count===0};
 $('#camEx').onchange=e=>{camCounter=new RepCounter(e.target.value);camCounter.relax=camStandard==='strict'?.14:.06;camView.nm.textContent=e.target.value;camView.n.textContent='0';$('#camCurrent').textContent=e.target.value};
@@ -4191,8 +4202,8 @@ function renderGuide(){
   const cats=[...new Set([...CATS,'核心','撐住類'])],catOf=g=>g.cat||(EX[g.n]&&EX[g.n].cat)||'其他';
   const item=g=>`<details><summary>${g.n}　<span class="small mute" style="font-weight:500">${g.m}</span></summary><div class="stack" style="padding-bottom:14px">
     <div><b>動作要點</b><ul>${g.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>
-    ${g.video?`<iframe class="guide-video" src="https://www.youtube.com/embed/${g.video}?rel=0&modestbranding=1" title="${g.n} 動作示範影片" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`:''}
     <div><b>常見錯誤</b><ul>${g.bad.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    ${g.video?`<div class="guide-video"><iframe src="https://www.youtube.com/embed/${g.video}?rel=0&modestbranding=1" title="${g.n} 動作示範影片" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`:''}
     <p class="small mute">鏡頭擺放：${g.cam}</p>
     ${EX[g.n]?`<button class="btn teal small" type="button" data-go="${g.n}">用這個動作開鏡頭計數</button>`:HOLDTIP[g.n]?`<button class="btn teal small" type="button" data-hold="${g.n}">到「撐住挑戰」練習</button>`:''}</div></details>`;
   $('#guideList').innerHTML=cats.filter(c=>guideFilter==='全部'||c===guideFilter).map(c=>{const arr=GUIDE.filter(g=>catOf(g)===c);return arr.length?`<h3 style="margin:20px 0 8px">${c}（${arr.length}）</h3>`+arr.map(item).join(''):''}).join('');

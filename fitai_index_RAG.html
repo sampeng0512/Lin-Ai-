@@ -193,7 +193,9 @@ th{color:var(--mute); font-weight:600}
 .guide details{background:var(--bg2); border:1px solid var(--line); border-radius:14px; padding:4px 16px; margin-bottom:10px}
 .guide summary{cursor:pointer; font-weight:800; padding:12px 0}
 .guide ul{margin:.3em 0 .6em 1.2em; padding:0}
-.guide-video{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}
+.guide-video{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.guide-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+@supports not (aspect-ratio:16/9){.guide-video{height:0;padding-bottom:56.25%}}
 .chip2{display:inline-flex; align-items:center; gap:4px; background:var(--bg2); border:1px solid var(--line); border-radius:999px; padding:4px 6px 4px 14px; font-weight:700}
 .chip2 button{appearance:none; border:0; background:none; color:var(--ink); font:inherit; cursor:pointer}
 .chip2 .x{color:var(--mute); padding:0 6px; font-size:1.1rem}
@@ -2565,7 +2567,6 @@ $('#guideFilters').addEventListener('click',event=>{
 
 /* ================= 鏡頭計數分頁 ================= */
 $('#camEx').innerHTML=optsByCat(ORDER,n=>n);
-$('#camMovementGrid').innerHTML=exercises.map(ex=>`<button class="movement-card" type="button" data-ex="${esc(ex.name)}"><span class="movement-icon">${ex.icon}</span><strong>${esc(ex.name)}</strong><small>${esc(ex.targetMuscles.slice(0,2).join('・'))}</small></button>`).join('');
 let camCounter=new RepCounter(ORDER[0]);
 const camView=makeView($('[data-stage=cam]'),()=>camCounter);
 camView.nm.textContent=ORDER[0];
@@ -4191,8 +4192,8 @@ function renderGuide(){
   const cats=[...new Set([...CATS,'核心','撐住類'])],catOf=g=>g.cat||(EX[g.n]&&EX[g.n].cat)||'其他';
   const item=g=>`<details><summary>${g.n}　<span class="small mute" style="font-weight:500">${g.m}</span></summary><div class="stack" style="padding-bottom:14px">
     <div><b>動作要點</b><ul>${g.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>
-    ${g.video?`<iframe class="guide-video" src="https://www.youtube.com/embed/${g.video}?rel=0&modestbranding=1" title="${g.n} 動作示範影片" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`:''}
     <div><b>常見錯誤</b><ul>${g.bad.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+    ${g.video?`<div class="guide-video"><iframe src="https://www.youtube.com/embed/${g.video}?rel=0&modestbranding=1" title="${g.n} 動作示範影片" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`:''}
     <p class="small mute">鏡頭擺放：${g.cam}</p>
     ${EX[g.n]?`<button class="btn teal small" type="button" data-go="${g.n}">用這個動作開鏡頭計數</button>`:HOLDTIP[g.n]?`<button class="btn teal small" type="button" data-hold="${g.n}">到「撐住挑戰」練習</button>`:''}</div></details>`;
   $('#guideList').innerHTML=cats.filter(c=>guideFilter==='全部'||c===guideFilter).map(c=>{const arr=GUIDE.filter(g=>catOf(g)===c);return arr.length?`<h3 style="margin:20px 0 8px">${c}（${arr.length}）</h3>`+arr.map(item).join(''):''}).join('');

@@ -3631,7 +3631,7 @@ const chatHist=[];let asking=false;
 function addMsg(role,html){const d=document.createElement('div');d.className='msgb '+(role==='user'?'me':'ai');d.innerHTML=html;$('#chat').appendChild(d);$('#chat').scrollTop=1e9;return d}
 const API_BASE_URL=['localhost','127.0.0.1'].includes(location.hostname)
   ? 'http://127.0.0.1:8000'
-  : 'https://YOUR_CLOUD_BACKEND_URL';
+  : 'https://lin-ai-xszz.onrender.com';
 const RAG_API_URL=`${API_BASE_URL}/ask`;
 async function ask(text){
   text=(text||'').trim();

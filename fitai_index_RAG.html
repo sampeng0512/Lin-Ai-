@@ -1825,16 +1825,11 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
     <details id="advancedCoach">
       <summary>進階設定</summary>
       <div class="stack advanced-coach-content">
-        <details id="keyBox">
-          <summary>使用自訂 AI 金鑰</summary>
-          <div class="stack" style="margin-top:10px">
-            <input type="password" id="apiKey" placeholder="貼上 API 金鑰" autocomplete="off">
-            <label><input type="checkbox" id="keyRemember"> 記住在這台裝置</label>
-            <p class="small mute">金鑰只儲存在你的瀏覽器。使用自訂金鑰會直接連線至 AI 服務，費用由該服務帳戶收取。</p>
-          </div>
-        </details>
-        <label><input type="checkbox" id="useCtx" checked> 讓線上教練參考「身體數據」分頁填的資料</label>
-        <label><input type="checkbox" id="useLog" checked> 讓線上教練參考近 7 天訓練與飲食紀錄</label>
+        <div class="notice" id="ragNotice">
+          <b>WHO 有氧運動知識庫測試模式</b>
+          <p class="small">目前 AI 問答會連線至本機 Python RAG 後端，使用 WHO 18～64 歲成年人有氧運動的 12 筆知識回答。請先啟動 backend 伺服器。這個測試模式尚未使用個人身體數據、飲食或訓練紀錄。</p>
+          <p class="small mute">API Key 僅存放在後端 .env，請勿輸入或放入網頁。</p>
+        </div>
         <div class="row" id="quick"></div>
         <div class="chat" id="chat"></div>
         <div class="row" style="align-items:flex-end">
@@ -3595,11 +3590,9 @@ const SYSTEM=`你是「Lin AI」的專業健身教練，使用繁體中文（台
 - 動作優先使用本系統支援的：深蹲、深蹲跳、弓箭步、臀橋、側抬腿、伏地挺身、肩推、側平舉、前平舉、二頭彎舉、引體向上、啞鈴臥推、啞鈴上斜臥推、啞鈴俯身划船、啞鈴反向飛鳥、啞鈴羅馬尼亞硬舉、捲腹、仰臥起坐、仰臥抬腿、側彎、站姿抬膝碰肘、開合跳、高抬腿、原地踏步、原地跳繩、波比跳，以及撐住類的平板支撐、側棒式、靠牆深蹲、臀橋停留，也可加入其他徒手或啞鈴動作。
 - 安全第一：不推薦極端節食或過低熱量；有疼痛、傷病、慢性病、懷孕等情況，請建議先諮詢醫師或物理治療師。你不是醫師。
 - 回答簡潔、鼓勵但誠實。`;
-const QUICK=['根據我的紀錄排下週菜單','幫我排一週訓練菜單','居家 30 分鐘減脂菜單','訓練前後該怎麼吃？','深蹲姿勢要注意什麼？'];
+const QUICK=['成年人每週需要多少分鐘中等強度有氧？','WHO 是否規定一週運動幾天？','高強度有氧每週建議多久？','每週五天各做30分鐘有氧可以嗎？','沒有運動習慣的人如何開始？'];
 $('#quick').innerHTML=QUICK.map(q=>`<button class="btn ghost small">${q}</button>`).join('');
 $$('#quick button').forEach(b=>b.onclick=()=>ask(b.textContent));
-try{const k=localStorage.getItem('fitai_key');if(k){$('#apiKey').value=k;$('#keyRemember').checked=true}}catch(e){}
-$('#keyBox').open=false;
 function md(src){
   const blocks=[];let t=esc(src).replace(/```(?:\w*\n)?([\s\S]*?)```/g,(m,c)=>{blocks.push(c);return `\u0000${blocks.length-1}\u0000`});
   const inl=s=>s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
@@ -3619,26 +3612,65 @@ function md(src){
 }
 const chatHist=[];let asking=false;
 function addMsg(role,html){const d=document.createElement('div');d.className='msgb '+(role==='user'?'me':'ai');d.innerHTML=html;$('#chat').appendChild(d);$('#chat').scrollTop=1e9;return d}
+// 本機開發用 RAG 後端。部署到網路時需換成可連線的 HTTPS 後端。
+const RAG_API_URL='http://127.0.0.1:8000/ask';
 async function ask(text){
-  text=(text||'').trim();if(!text||asking)return;
-  const key=$('#apiKey').value.trim();
-  try{if($('#keyRemember').checked)localStorage.setItem('fitai_key',key);else localStorage.removeItem('fitai_key')}catch(e){}
-  addMsg('user',esc(text));$('#chatIn').value='';$('#chatClear').hidden=false;
-  if(!key){addMsg('ai','尚未設定自訂 API 金鑰。請至「進階設定」輸入金鑰；你也可以直接使用上方免金鑰的一週訓練建議。');$('#advancedCoach').open=true;$('#keyBox').open=true;return}
-  chatHist.push({role:'user',content:text});asking=true;$('#chatSend').disabled=true;
-  const wait=addMsg('ai','<span class="mute">教練思考中…</span>');
-  let system=SYSTEM;
-  if($('#useLog').checked)system+='\n\n'+trainSummary();
-  if($('#useCtx').checked){const b=bodyInfo();system+=`\n\n使用者資料：${sex}性、${b.age} 歲、身高 ${b.h} cm、體重 ${b.w} kg、目標 ${goalType}、BMI ${b.bmi.toFixed(1)}、建議熱量約 ${Math.round(b.target)} 大卡；${S.statsEx}累計 ${Number(S.exs[S.statsEx])||0} 下。`}
+  text=(text||'').trim();
+  if(!text||asking)return;
+  addMsg('user',esc(text));
+  $('#chatIn').value='';
+  $('#chatClear').hidden=false;
+  chatHist.push({role:'user',content:text});
+  asking=true;
+  $('#chatSend').disabled=true;
+  const wait=addMsg('ai','<span class="mute">正在查詢 WHO 知識庫…</span>');
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:1800,system,messages:chatHist.slice(-20)})});
+    const r=await fetch(RAG_API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:text})
+    });
     const data=await r.json();
-    if(!r.ok)throw new Error(data&&data.error&&data.error.message||('HTTP '+r.status));
-    const reply=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');
-    chatHist.push({role:'assistant',content:reply});wait.innerHTML=md(reply);
-  }catch(e){chatHist.pop();wait.innerHTML='連線失敗：'+esc(e.message)+'<br><span class="small mute">請檢查 API 金鑰是否正確、帳戶是否有額度、網路是否正常。</span>'}
-  asking=false;$('#chatSend').disabled=false;$('#chat').scrollTop=1e9;
+    if(!r.ok)throw new Error(data?.detail||('HTTP '+r.status));
+    const reply=typeof data.answer==='string'?data.answer:'後端未傳回回答。';
+    chatHist.push({role:'assistant',content:reply});
+    wait.innerHTML=md(reply);
+    if(Array.isArray(data.sources)&&data.sources.length){
+      const refs=document.createElement('div');
+      refs.className='small mute';
+      refs.style.marginTop='10px';
+      const heading=document.createElement('b');
+      heading.textContent='檢索來源：';
+      refs.appendChild(heading);
+      const seen=new Set();
+      for(const source of data.sources){
+        const id=String(source.id||'');
+        if(seen.has(id))continue;
+        seen.add(id);
+        const line=document.createElement('div');
+        line.appendChild(document.createTextNode(id+' · '+String(source.title||'WHO 指南')+' '));
+        if(typeof source.url==='string' && /^https:\/\//i.test(source.url)){
+          const link=document.createElement('a');
+          link.href=source.url;
+          link.target='_blank';
+          link.rel='noopener noreferrer';
+          link.textContent='官方來源';
+          link.style.color='var(--teal)';
+          line.appendChild(link);
+        }
+        refs.appendChild(line);
+      }
+      wait.appendChild(refs);
+    }
+  }catch(e){
+    chatHist.pop();
+    wait.innerHTML='RAG 後端連線失敗：'+esc(String(e.message||e))+
+      '<br><span class="small mute">請確認 VS Code 終端機已啟動 uvicorn，並開啟 http://127.0.0.1:8000/health 檢查狀態。</span>';
+  }finally{
+    asking=false;
+    $('#chatSend').disabled=false;
+    $('#chat').scrollTop=1e9;
+  }
 }
 $('#chatSend').onclick=()=>ask($('#chatIn').value);
 $('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();ask($('#chatIn').value)}});

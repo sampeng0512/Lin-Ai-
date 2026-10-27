@@ -5188,7 +5188,9 @@ window.addEventListener('online',()=>{toast('已恢復連線');if(accountSession
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
   const hadController=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadController)$('#updateBar').hidden=false});   // 新版程式接手了，提醒使用者重新整理
-  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(e=>logErr('sw: '+e.message)));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{})});   // App 從背景切回來時也檢查新版
+  }).catch(e=>logErr('sw: '+e.message)));
 }
 $('#updateGo').onclick=()=>location.reload();
 $('#foot').textContent='Lin AI　版本 '+APP_VERSION;

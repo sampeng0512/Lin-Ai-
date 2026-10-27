@@ -1832,8 +1832,8 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
       <summary>進階設定</summary>
       <div class="stack advanced-coach-content">
         <div class="notice" id="ragNotice">
-          <b>WHO 有氧運動知識庫測試模式</b>
-          <p class="small">目前 AI 問答會連線至本機 Python RAG 後端，使用 WHO 18～64 歲成年人有氧運動的 12 筆知識回答。請先啟動 backend 伺服器。這個測試模式尚未使用個人身體數據、飲食或訓練紀錄。</p>
+          <b>WHO 有氧運動知識庫</b>
+          <p class="small">教練會查詢 WHO 18～64 歲成年人有氧運動知識。此服務不會使用個人身體資料、飲食或訓練紀錄；本機開發連線至本機後端，正式網站需設定已部署的 HTTPS 後端網址。</p>
           <p class="small mute">API Key 僅存放在後端 .env，請勿輸入或放入網頁。</p>
         </div>
         <div class="row" id="quick"></div>
@@ -3629,8 +3629,10 @@ function md(src){
 }
 const chatHist=[];let asking=false;
 function addMsg(role,html){const d=document.createElement('div');d.className='msgb '+(role==='user'?'me':'ai');d.innerHTML=html;$('#chat').appendChild(d);$('#chat').scrollTop=1e9;return d}
-// 本機開發用 RAG 後端。部署到網路時需換成可連線的 HTTPS 後端。
-const RAG_API_URL='http://127.0.0.1:8000/ask';
+const API_BASE_URL=['localhost','127.0.0.1'].includes(location.hostname)
+  ? 'http://127.0.0.1:8000'
+  : 'https://YOUR_CLOUD_BACKEND_URL';
+const RAG_API_URL=`${API_BASE_URL}/ask`;
 async function ask(text){
   text=(text||'').trim();
   if(!text||asking)return;
@@ -3682,9 +3684,12 @@ async function ask(text){
   }catch(e){
     chatHist.pop();
     const message=String(e.message||e);
-    wait.innerHTML=e instanceof TypeError
+    wait.innerHTML=e instanceof TypeError&&API_BASE_URL.startsWith('http://127.0.0.1')
       ? '無法連線到 RAG 後端：'+esc(message)+
         '<br><span class="small mute">請在專案根目錄的 PowerShell 執行 <code>.\fitai-web\backend\start.ps1</code>，再開啟 http://127.0.0.1:8000/health 檢查狀態。</span>'
+      : e instanceof TypeError
+        ? '無法連線到教練服務：'+esc(message)+
+          '<br><span class="small mute">請確認 API_BASE_URL 已設定為可公開連線的 HTTPS 後端網址，並確認後端允許此網站網域的 CORS 請求。</span>'
       : '教練服務回應錯誤：'+esc(message)+
         '<br><span class="small mute">請確認 backend\\.env 的 OPENAI_API_KEY 設定，以及後端終端機的錯誤訊息。</span>';
   }finally{

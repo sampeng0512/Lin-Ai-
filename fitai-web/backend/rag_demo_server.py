@@ -21,6 +21,11 @@ load_dotenv(dotenv_path=ROOT / ".env")
 
 API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+CORS_ALLOW_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv("CORS_ALLOW_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 # ===== 2. 載入 WHO 知識庫 =====
 
@@ -41,11 +46,16 @@ if not isinstance(knowledge, list):
 
 app = FastAPI(title="WHO 成人有氧 RAG 後端")
 
-# 目前只供本機專題展示
+# Allow local development and Netlify deployments; configure custom production
+# domains through the comma-separated CORS_ALLOW_ORIGINS environment variable.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=CORS_ALLOW_ORIGINS,
+    allow_origin_regex=(
+        r"^https?://(?:localhost|127\.0\.0\.1)(?::\d+)?$"
+        r"|^https://(?:[a-z0-9-]+\.)*netlify\.app$"
+    ),
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -189,4 +199,3 @@ def ask(body: AskBody):
             for r in hits
         ]
     }
-

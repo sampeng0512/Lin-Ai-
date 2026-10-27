@@ -230,6 +230,9 @@ th{color:var(--mute); font-weight:600}
 @keyframes blink{50%{opacity:.2}}
 @media(prefers-reduced-motion:reduce){.stage .recbtn.on i{animation:none}}
 .stage.full .recbtn{top:calc(12px + env(safe-area-inset-top)); right:calc(62px + env(safe-area-inset-right))}
+.stage .rstbtn{position:absolute; top:64px; right:62px; z-index:3; min-height:44px; padding:0 14px; border-radius:14px; border:1px solid var(--line); background:rgba(10,26,32,.72); color:var(--ink); cursor:pointer; font:700 .85rem "Noto Sans TC",sans-serif; backdrop-filter:blur(6px)}
+.stage .rstbtn[hidden]{display:none}
+.stage.full .rstbtn{top:calc(64px + env(safe-area-inset-top)); right:calc(62px + env(safe-area-inset-right))}
 dialog.recdlg{border:0; border-radius:20px; padding:18px; background:var(--card); color:var(--ink); width:min(92vw,560px)}
 dialog.recdlg::backdrop{background:rgba(0,0,0,.72)}
 #installBar{max-width:1068px; margin:0 auto 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
@@ -2326,6 +2329,7 @@ const STAGE_HTML=`<div class="stage"><video class="v" playsinline muted></video>
 <div class="cue" hidden></div><div class="hint" hidden></div><div class="dbg" hidden></div><div class="chip">鏡頭未開啟</div><div class="gauge"><i></i></div>
 <button class="fsbtn" type="button" aria-label="全螢幕"></button>
 <button class="recbtn" type="button" aria-label="開始錄影"><i></i><span>錄影</span></button>
+<button class="rstbtn" type="button" aria-label="次數歸零（不儲存）" hidden>↺ 歸零</button>
 <div class="tmini" hidden><span class="tl"></span><span class="tn"></span></div>
 <button class="btn fsgo" type="button" hidden></button>
 <div class="msg" hidden></div></div>`;
@@ -2570,6 +2574,12 @@ $('#camEx').innerHTML=optsByCat(ORDER,n=>n);
 let camCounter=new RepCounter(ORDER[0]);
 const camView=makeView($('[data-stage=cam]'),()=>camCounter);
 camView.nm.textContent=ORDER[0];
+const camRst=$('.rstbtn',camView.stage);camRst.hidden=false;
+camRst.onclick=()=>{   // 只歸零不儲存；要記錄請按「儲存這組並歸零」
+  if(camCounter.count===0)return;
+  camCounter.reset();camView.n.textContent='0';$('#camSave').disabled=true;$('#camFormV').textContent='—';$('#camTempoV').textContent='—';
+  toast('次數已歸零（這組沒有儲存）');
+};
 let camStandard='normal';
 const setCamBtns=on=>{$('#camStart').disabled=on;$('#camStop').disabled=!on;$('#camSave').disabled=!on&&camCounter.count===0};
 $('#camEx').onchange=e=>{camCounter=new RepCounter(e.target.value);camCounter.relax=camStandard==='strict'?.14:.06;camView.nm.textContent=e.target.value;camView.n.textContent='0';$('#camCurrent').textContent=e.target.value};

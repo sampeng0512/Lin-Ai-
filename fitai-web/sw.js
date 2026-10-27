@@ -24,14 +24,31 @@ self.addEventListener('fetch', e => {
   const u = new URL(r.url);
   if (u.hostname === 'api.anthropic.com') return;           // AI 對話不快取
 
-  // 網頁本體：有網路就拿最新的，沒網路才用快取
-  if (r.mode === 'navigate' || u.pathname.endsWith('/index.html') || u.pathname.endsWith('/')) {
+  // HTML、CSS、JS：先重新驗證網路版本，離線時才回退到快取
+  const isNavigation = r.mode === 'navigate';
+  const isCode = isNavigation || ['document', 'style', 'script'].includes(r.destination) ||
+    /\.(?:html?|css|m?js)$/i.test(u.pathname);
+  if (isCode) {
     e.respondWith(
-      fetch(r).then(res => {
-        const copy = res.clone();
-        caches.open('core-' + VER).then(c => c.put(r, copy));
+      fetch(r, { cache: 'no-cache' }).then(async res => {
+        if (res.ok || res.type === 'opaque') {
+          try {
+            const cache = await caches.open('core-' + VER);
+            await cache.put(r, res.clone());
+          } catch (error) {
+            console.warn('Unable to cache updated code:', error);
+          }
+        }
         return res;
-      }).catch(() => caches.match(r).then(m => m || caches.match('./index.html')))
+      }).catch(async error => {
+        const cached = await caches.match(r);
+        if (cached) return cached;
+        if (isNavigation) {
+          const fallback = await caches.match('./index.html');
+          if (fallback) return fallback;
+        }
+        throw error;
+      })
     );
     return;
   }

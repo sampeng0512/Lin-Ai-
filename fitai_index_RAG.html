@@ -3681,8 +3681,12 @@ async function ask(text){
     }
   }catch(e){
     chatHist.pop();
-    wait.innerHTML='RAG 後端連線失敗：'+esc(String(e.message||e))+
-      '<br><span class="small mute">請確認 VS Code 終端機已啟動 uvicorn，並開啟 http://127.0.0.1:8000/health 檢查狀態。</span>';
+    const message=String(e.message||e);
+    wait.innerHTML=e instanceof TypeError
+      ? '無法連線到 RAG 後端：'+esc(message)+
+        '<br><span class="small mute">請在專案根目錄的 PowerShell 執行 <code>.\fitai-web\backend\start.ps1</code>，再開啟 http://127.0.0.1:8000/health 檢查狀態。</span>'
+      : '教練服務回應錯誤：'+esc(message)+
+        '<br><span class="small mute">請確認 backend\\.env 的 OPENAI_API_KEY 設定，以及後端終端機的錯誤訊息。</span>';
   }finally{
     asking=false;
     $('#chatSend').disabled=false;

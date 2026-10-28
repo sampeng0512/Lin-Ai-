@@ -3630,10 +3630,12 @@ function md(src){
 const chatHist=[];let asking=false;
 function addMsg(role,html){const d=document.createElement('div');d.className='msgb '+(role==='user'?'me':'ai');d.innerHTML=html;$('#chat').appendChild(d);$('#chat').scrollTop=1e9;return d}
 // 本機開發用 RAG 後端。部署到網路時需換成可連線的 HTTPS 後端。
-const RAG_API_URL='http://127.0.0.1:8000/ask';
+const RAG_API_URL='https://fitai-rag.onrender.com/ask';
 async function ask(text){
   text=(text||'').trim();
   if(!text||asking)return;
+  const teamToken = window.prompt('請輸入組員存取密碼');
+  if (!teamToken) return;
   addMsg('user',esc(text));
   $('#chatIn').value='';
   $('#chatClear').hidden=false;
@@ -3644,7 +3646,10 @@ async function ask(text){
   try{
     const r=await fetch(RAG_API_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+  'Content-Type':'application/json',
+  'X-Team-Token':teamToken
+},
       body:JSON.stringify({question:text})
     });
     const data=await r.json();

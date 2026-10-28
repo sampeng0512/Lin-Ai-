@@ -7,7 +7,8 @@ import re
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
+import hmac
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
@@ -106,7 +107,28 @@ def health():
 # ===== 6. RAG 問答 =====
 
 @app.post("/ask")
-def ask(body: AskBody):
+def ask(
+    body: AskBody,
+    x_team_token: str = Header(default="")
+):
+    expected_token = os.getenv("TEAM_ACCESS_TOKEN", "")
+
+    if not expected_token:
+        raise HTTPException(
+            status_code=503,
+            detail="後端尚未設定組員存取密碼"
+        )
+
+    if not hmac.compare_digest(
+        x_team_token.encode("utf-8"),
+        expected_token.encode("utf-8")
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="組員存取密碼錯誤"
+        )
+
+    #接回下面原本的程式
 
     question = body.question.strip()
 
@@ -168,7 +190,10 @@ def ask(body: AskBody):
 
     except Exception as exc:
         # 不將可能包含敏感資訊的原始錯誤回傳給前端
-        print("OpenAI API 呼叫失敗，請檢查後端日誌")
+        print("錯誤類型：", type(exc).__name__, flush=True)
+        print("HTTP 狀態碼：", getattr(exc, "status_code", None), flush=True)
+        print("錯誤代碼：", getattr(exc, "code", None), flush=True)
+
         raise HTTPException(
             status_code=502,
             detail=(

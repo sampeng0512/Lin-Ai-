@@ -1,0 +1,4 @@
+   [[redirects]]
+     from = "/"
+     to = "/fitai_index_RAG.html"
+     status = 200

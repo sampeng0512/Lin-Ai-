@@ -4462,11 +4462,11 @@ $$('#fdQuick button').forEach(b=>b.onclick=()=>{const f=FOODS[+b.dataset.i];addF
 $('#fdAdd').onclick=()=>{if(addFood($('#fdName').value,$('#fdKcal').value,$('#fdP').value)){$('#fdName').value='';$('#fdKcal').value='';$('#fdP').value=''}};
 
 /* ================= 好友排行（Supabase，選用） ================= */
-/* 站長把 Supabase 的 Project URL 和 anon / publishable key 填在這兩行，部署後所有朋友就能用。
+/* 站長把 Supabase 的 Project URL 和 Legacy anon key 填在這兩行，部署後所有朋友就能用。
    這兩個值本來就是設計成可以公開的（資料表有鎖，只能呼叫 supabase-setup.sql 建立的函式）。 */
 const FRIEND_CFG={
   url: "https://cgswbvtkayfboskqorxs.supabase.co",
-  key: "sb_publishable_S7SG4GyAHoXnbpmtFDePqA_gtppDEbC"
+  key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnc3didnRrYXlmYm9za3FvcnhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NjcwOTQsImV4cCI6MjEwNzU0MzA5NH0.0cB6uYxp-mw6_CE_RxjD-tdEtqayxbRMkp1HLXIvz5w"
 };const sbCfg=()=>({url:String(FRIEND_CFG.url||'').trim().replace(/\/+$/,''),key:String(FRIEND_CFG.key||'').trim()});
 function frCfgOk(){const c=sbCfg();return /^https?:\/\//.test(c.url)&&c.key.length>20}
 async function rpc(fn,args){

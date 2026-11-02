@@ -4471,7 +4471,7 @@ const FRIEND_CFG={
 function frCfgOk(){const c=sbCfg();return /^https?:\/\//.test(c.url)&&c.key.length>20}
 async function rpc(fn,args){
   const {url,key}=sbCfg();if(!url||!key)throw new Error('NOCFG');
-  const h={'content-type':'application/json',apikey:key};if(key.startsWith('eyJ'))h.authorization='Bearer '+key;
+  const h={'content-type':'application/json',apikey:key,Authorization:'Bearer '+key};
   let r;try{r=await fetch(`${url}/rest/v1/rpc/${fn}`,{method:'POST',headers:h,body:JSON.stringify(args)})}catch(e){throw new Error('NETWORK')}
   const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(e){}
   if(!r.ok){const err=new Error((data&&(data.message||data.error||data.hint))||('HTTP '+r.status));err.status=r.status;err.code=data&&data.code;throw err}
@@ -4487,12 +4487,12 @@ function saveAccountSession(raw){
 function clearAccountSession(){accountSession=null;localStorage.removeItem(AUTH_KEY)}
 async function accountAuthRequest(path,payload,token){
   const {url,key}=sbCfg();if(!url||!key)throw new Error('帳號服務尚未設定。');
-  let response;try{response=await fetch(`${url}/auth/v1/${path}`,{method:'POST',headers:{'content-type':'application/json',apikey:key,...(token?{authorization:`Bearer ${token}`}:{})},body:JSON.stringify(payload||{})})}catch(e){throw new Error('目前無法連線到帳號服務。')}
+  let response;try{response=await fetch(`${url}/auth/v1/${path}`,{method:'POST',headers:{'content-type':'application/json',apikey:key,Authorization:`Bearer ${token||key}`},body:JSON.stringify(payload||{})})}catch(e){throw new Error('目前無法連線到帳號服務。')}
   const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
   if(!response.ok){const err=new Error(data&&(data.msg||data.message||data.error_description||data.error)||`帳號服務錯誤（${response.status}）`);err.status=response.status;err.code=data&&(data.code||data.error_code);throw err}
   return data;
 }
-function accountRestHeaders(session,extra={}){const {key}=sbCfg();return {apikey:key,authorization:`Bearer ${session.access_token}`,'content-type':'application/json',...extra}}
+function accountRestHeaders(session,extra={}){const {key}=sbCfg();return {apikey:key,Authorization:`Bearer ${session.access_token}`,'content-type':'application/json',...extra}}
 async function accountDataRequest(method,session,state){
   const {url}=sbCfg(),id=session.user.id;
   const path=method==='GET'?`?select=state&user_id=eq.${encodeURIComponent(id)}&limit=1`:'?on_conflict=user_id';

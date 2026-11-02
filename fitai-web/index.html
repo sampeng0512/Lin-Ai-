@@ -1842,8 +1842,8 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
       <summary>AI 教練問答</summary>
       <div class="stack advanced-coach-content">
         <div class="notice" id="ragNotice">
-          <b>WHO 有氧運動知識庫測試模式</b>
-          <p class="small">目前 AI 問答會連線至本機 Python RAG 後端，使用 WHO 18～64 歲成年人有氧運動的 12 筆知識回答。請先啟動 backend 伺服器。這個測試模式尚未使用個人身體數據、飲食或訓練紀錄。</p>
+          <b>WHO 有氧運動知識庫</b>
+          <p class="small">教練會查詢 WHO 18～64 歲成年人有氧運動知識。此服務不會使用個人身體資料、飲食或訓練紀錄；本機開發連線至本機後端，正式網站需設定已部署的 HTTPS 後端網址。</p>
           <p class="small mute">API Key 僅存放在後端 .env，請勿輸入或放入網頁。</p>
         </div>
         <div class="row" id="quick"></div>
@@ -3680,8 +3680,10 @@ function md(src){
 }
 const chatHist=[];let asking=false;
 function addMsg(role,html){const d=document.createElement('div');d.className='msgb '+(role==='user'?'me':'ai');d.innerHTML=html;$('#chat').appendChild(d);$('#chat').scrollTop=1e9;return d}
-// 本機開發用 RAG 後端。部署到網路時需換成可連線的 HTTPS 後端。
-const RAG_API_URL='https://fitai-rag.onrender.com/ask';
+const API_BASE_URL=['localhost','127.0.0.1'].includes(location.hostname)
+  ? 'http://127.0.0.1:8000'
+  : 'https://lin-ai-xszz.onrender.com';
+const RAG_API_URL=`${API_BASE_URL}/ask`;
 async function ask(text){
   text=(text||'').trim();
   if(!text||asking)return;
@@ -3737,8 +3739,15 @@ async function ask(text){
     }
   }catch(e){
     chatHist.pop();
-    wait.innerHTML='RAG 後端連線失敗：'+esc(String(e.message||e))+
-      '<br><span class="small mute">請確認 VS Code 終端機已啟動 uvicorn，並開啟 http://127.0.0.1:8000/health 檢查狀態。</span>';
+    const message=String(e.message||e);
+    wait.innerHTML=e instanceof TypeError&&API_BASE_URL.startsWith('http://127.0.0.1')
+      ? '無法連線到 RAG 後端：'+esc(message)+
+        '<br><span class="small mute">請在專案根目錄的 PowerShell 執行 <code>.\fitai-web\backend\start.ps1</code>，再開啟 http://127.0.0.1:8000/health 檢查狀態。</span>'
+      : e instanceof TypeError
+        ? '無法連線到教練服務：'+esc(message)+
+          '<br><span class="small mute">請確認 API_BASE_URL 已設定為可公開連線的 HTTPS 後端網址，並確認後端允許此網站網域的 CORS 請求。</span>'
+      : '教練服務回應錯誤：'+esc(message)+
+        '<br><span class="small mute">請確認 backend\\.env 的 OPENAI_API_KEY 設定，以及後端終端機的錯誤訊息。</span>';
   }finally{
     asking=false;
     $('#chatSend').disabled=false;
@@ -4453,16 +4462,16 @@ $$('#fdQuick button').forEach(b=>b.onclick=()=>{const f=FOODS[+b.dataset.i];addF
 $('#fdAdd').onclick=()=>{if(addFood($('#fdName').value,$('#fdKcal').value,$('#fdP').value)){$('#fdName').value='';$('#fdKcal').value='';$('#fdP').value=''}};
 
 /* ================= 好友排行（Supabase，選用） ================= */
-/* 站長把 Supabase 的 Project URL 和 anon / publishable key 填在這兩行，部署後所有朋友就能用。
+/* 站長把 Supabase 的 Project URL 和 Legacy anon key 填在這兩行，部署後所有朋友就能用。
    這兩個值本來就是設計成可以公開的（資料表有鎖，只能呼叫 supabase-setup.sql 建立的函式）。 */
 const FRIEND_CFG={
   url: "https://cgswbvtkayfboskqorxs.supabase.co",
-  key: "sb_publishable_S7SG4GyAHoXnbpmtFDePqA_gtppDEbC"
+  key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnc3didnRrYXlmYm9za3FvcnhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NjcwOTQsImV4cCI6MjEwNzU0MzA5NH0.0cB6uYxp-mw6_CE_RxjD-tdEtqayxbRMkp1HLXIvz5w"
 };const sbCfg=()=>({url:String(FRIEND_CFG.url||'').trim().replace(/\/+$/,''),key:String(FRIEND_CFG.key||'').trim()});
 function frCfgOk(){const c=sbCfg();return /^https?:\/\//.test(c.url)&&c.key.length>20}
 async function rpc(fn,args){
   const {url,key}=sbCfg();if(!url||!key)throw new Error('NOCFG');
-  const h={'content-type':'application/json',apikey:key};if(key.startsWith('eyJ'))h.authorization='Bearer '+key;
+  const h={'content-type':'application/json',apikey:key,Authorization:'Bearer '+key};
   let r;try{r=await fetch(`${url}/rest/v1/rpc/${fn}`,{method:'POST',headers:h,body:JSON.stringify(args)})}catch(e){throw new Error('NETWORK')}
   const txt=await r.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(e){}
   if(!r.ok){const err=new Error((data&&(data.message||data.error||data.hint))||('HTTP '+r.status));err.status=r.status;err.code=data&&data.code;throw err}
@@ -4478,12 +4487,12 @@ function saveAccountSession(raw){
 function clearAccountSession(){accountSession=null;localStorage.removeItem(AUTH_KEY)}
 async function accountAuthRequest(path,payload,token){
   const {url,key}=sbCfg();if(!url||!key)throw new Error('帳號服務尚未設定。');
-  let response;try{response=await fetch(`${url}/auth/v1/${path}`,{method:'POST',headers:{'content-type':'application/json',apikey:key,...(token?{authorization:`Bearer ${token}`}:{})},body:JSON.stringify(payload||{})})}catch(e){throw new Error('目前無法連線到帳號服務。')}
+  let response;try{response=await fetch(`${url}/auth/v1/${path}`,{method:'POST',headers:{'content-type':'application/json',apikey:key,Authorization:`Bearer ${token||key}`},body:JSON.stringify(payload||{})})}catch(e){throw new Error('目前無法連線到帳號服務。')}
   const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
   if(!response.ok){const err=new Error(data&&(data.msg||data.message||data.error_description||data.error)||`帳號服務錯誤（${response.status}）`);err.status=response.status;err.code=data&&(data.code||data.error_code);throw err}
   return data;
 }
-function accountRestHeaders(session,extra={}){const {key}=sbCfg();return {apikey:key,authorization:`Bearer ${session.access_token}`,'content-type':'application/json',...extra}}
+function accountRestHeaders(session,extra={}){const {key}=sbCfg();return {apikey:key,Authorization:`Bearer ${session.access_token}`,'content-type':'application/json',...extra}}
 async function accountDataRequest(method,session,state){
   const {url}=sbCfg(),id=session.user.id;
   const path=method==='GET'?`?select=state&user_id=eq.${encodeURIComponent(id)}&limit=1`:'?on_conflict=user_id';

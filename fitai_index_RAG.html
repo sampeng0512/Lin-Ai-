@@ -151,14 +151,19 @@ th{color:var(--mute); font-weight:600}
 .notice{border-left:4px solid var(--teal); padding:8px 14px; background:rgba(61,214,208,.08); border-radius:0 10px 10px 0}
 .notice.warn{border-color:var(--coral); background:rgba(255,107,87,.08)}
 
+#frSaveMe{white-space:nowrap; min-width:116px}
+#frName{max-width:280px}
+
 /* 教練聊天 */
 .chat{display:flex; flex-direction:column; gap:12px; min-height:200px; max-height:58vh; overflow-y:auto; padding:4px 2px}
-.msgb{max-width:92%; padding:10px 14px; border-radius:16px; word-wrap:break-word}
+.msgb{max-width:92%; padding:10px 14px; border-radius:16px; overflow-wrap:anywhere; word-break:break-word; white-space:normal}
 .msgb.me{align-self:flex-end; background:var(--yellow); color:var(--dark); border-bottom-right-radius:4px}
 .msgb.ai{align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:4px}
-.msgb.ai pre{overflow:auto; background:var(--bg2); padding:10px; border-radius:8px}
+.msgb.ai pre{overflow:auto; background:var(--bg2); padding:10px; border-radius:8px; white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere}
 .msgb.ai h3,.msgb.ai h4{margin-top:.6em}
 .msgb.ai ul,.msgb.ai ol{margin:.3em 0 .3em 1.2em; padding:0}
+.msgb.ai code{white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere}
+.msgb.ai p,.msgb.ai li,.msgb.ai td,.msgb.ai th{overflow-wrap:anywhere; word-break:break-word}
 .msgb.ai table{display:block; overflow-x:auto}
 .top{flex-wrap:wrap}
 .top-right{display:flex; align-items:center; gap:18px}
@@ -1647,35 +1652,40 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
     <div id="frMain" class="stack" hidden>
       <div class="notice" id="frNote" hidden></div>
       <div class="card stack">
-        <h3 style="margin:0">我的資料</h3>
         <div class="row" style="align-items:flex-end">
           <button type="button" class="av-btn" id="frAvatarBtn" aria-label="更換頭像" title="更換頭像"></button>
-          <div class="grow"><label class="f" for="frName">暱稱（最多 12 個字）</label><input type="text" id="frName" maxlength="12" placeholder="例如：小林"></div>
-          <button class="btn" type="button" id="frSaveMe">建立我的資料</button>
+          <div class="grow"><label class="f" for="frName">暱稱</label><input type="text" id="frName" maxlength="12" placeholder="例如：小林"></div>
+          <button class="btn" type="button" id="frSaveMe">儲存</button>
         </div>
-        <div id="frMeBox" class="fr-share" hidden>
-          <div class="stack">
-            <div><label class="f">我的好友代碼（給朋友，讓他加你）</label><div class="codebox" id="frMyCode">—</div></div>
-            <div class="row"><button class="btn teal grow" type="button" id="frInvite">分享邀請連結</button><button class="btn ghost" type="button" id="frCopy">複製代碼</button></div>
-            <p class="small mute" style="margin:0">朋友用手機相機或應用程式內的「掃描 QR 碼」掃右邊的圖，就能直接加你。</p>
+        <div id="frInfo" class="notice" hidden>
+          <div class="small mute" style="display:block; margin-bottom:6px">我的資訊</div>
+          <div class="row" style="align-items:center; gap:10px; margin:0">
+            <div class="grow"><div class="small mute">暱稱</div><b id="frInfoName">—</b></div>
+            <div style="text-align:right"><div class="small mute">好友代碼</div><b id="frInfoCode" style="letter-spacing:.18em; font:800 1rem/1.2 var(--num)">—</b></div>
           </div>
-          <button type="button" class="fr-qr" id="frQR" aria-label="放大我的 QR 碼"></button>
         </div>
-        <p class="small mute">排行榜<b>只計算鏡頭偵測到的次數</b>，手動輸入的自訂紀錄不會算進去。好友只看得到你的頭像、暱稱、各動作累計與本週次數、連續天數和等級，看不到影像和訓練細節。</p>
+        <div id="frMeBox" class="fr-share" hidden></div>
       </div>
       <div class="card stack" id="frAddBox">
-        <h3 style="margin:0">加好友</h3>
-        <div class="row" style="align-items:flex-end">
-          <div class="grow"><label class="f" for="frCode">對方的 6 碼好友代碼</label><input type="text" id="frCode" maxlength="8" placeholder="例如：K7M2QX" autocapitalize="characters" autocomplete="off"></div>
-          <button class="btn" type="button" id="frAdd">加入</button>
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <h3 style="margin:0">加好友</h3>
+          <button class="btn ghost small" type="button" id="frScan">掃描 QR</button>
         </div>
-        <div class="fr-addways">
-          <button class="btn teal" type="button" id="frScan">📷 掃描 QR 碼</button>
-          <label class="btn ghost" style="cursor:pointer; text-align:center">🖼️ 從相簿讀取<input type="file" id="frScanFile" accept="image/*" hidden></label>
+        <div class="row" style="align-items:center; gap:12px">
+          <div id="frQR" class="fr-qr" title="點擊開啟大 QR" aria-label="我的好友 QR 碼" style="width:120px; height:120px; flex:none"></div>
+          <div class="grow">
+            <label class="f" for="frCode">輸入對方 6 碼好友代碼</label>
+            <div class="row" style="align-items:flex-end">
+              <input class="grow" type="text" id="frCode" maxlength="8" placeholder="例如：K7M2QX" autocapitalize="characters" autocomplete="off">
+              <button class="btn" type="button" id="frAdd">加入</button>
+            </div>
+            <div class="row" style="margin-top:8px; justify-content:flex-end">
+              <label class="btn ghost small" style="cursor:pointer">從相簿讀取<input type="file" id="frScanFile" accept="image/*" hidden></label>
+            </div>
+          </div>
         </div>
-        <p class="small mute">加了之後，雙方都會出現在對方的排行榜裡。</p>
       </div>
-      <div class="card stack">
+      <div class="card stack" hidden>
         <div class="row" style="justify-content:space-between">
           <h3 style="margin:0">排行榜</h3>
           <button class="btn ghost small" type="button" id="frRefresh">重新整理</button>
@@ -1687,7 +1697,7 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
         <div id="frBoard"></div>
         <p class="small mute" id="frAt"></p>
       </div>
-      <details>
+      <details hidden>
         <summary style="cursor:pointer; font-weight:700">隱私與刪除資料</summary>
         <p class="small mute" style="margin:8px 0">你的暱稱和統計數字會存在好友伺服器，只有你的好友看得到。你可以隨時刪除，刪除後排行榜上就不會再有你。</p>
         <button class="btn ghost small" type="button" id="frDelete">刪除我在伺服器上的資料</button>
@@ -2050,11 +2060,12 @@ const TIERN=['','銅','銀','金'],TIERC=['#93aeb3','#cd7f32','#c8d1da','#ffd23f
 const achState=a=>{const v=a.v(),tier=a.t.filter(x=>v>=x).length;return {v,tier,next:a.t[tier]}};
 /* 一般提示：馬上顯示，新的蓋掉舊的（才不會看到過期的訊息）。成就、每日挑戰這類「不能漏掉」的提示用 toast(文字, true)，會排隊一則一則顯示。 */
 const toastQ=[];let toastShowing=false,toastT=0;
-function showToast(t,ms){const el=$('#toast');clearTimeout(toastT);el.textContent=t;el.hidden=false;toastShowing=true;toastT=setTimeout(nextToast,ms)}
+function showToast(t,ms){const el=$('#toast');const safe=sanitizeDisplayText(t,'發生錯誤，請稍後再試。');clearTimeout(toastT);el.textContent=safe;el.hidden=false;toastShowing=true;toastT=setTimeout(nextToast,ms)}
 function nextToast(){const t=toastQ.shift();if(!t){toastShowing=false;$('#toast').hidden=true;return}showToast(t,3200)}
 function toast(t,queued){
-  if(queued){toastQ.push(t);if(!toastShowing)nextToast();return}   // 排隊的提示：等目前顯示的那則結束再出現
-  showToast(t,3200);                                              // 一般提示：馬上顯示；排隊中的提示不會被丟掉，會接在後面
+  const safe=sanitizeDisplayText(t,'發生錯誤，請稍後再試。');
+  if(queued){toastQ.push(safe);if(!toastShowing)nextToast();return}   // 排隊的提示：等目前顯示的那則結束再出現
+  showToast(safe,3200);                                              // 一般提示：馬上顯示；排隊中的提示不會被丟掉，會接在後面
 }
 function checkBadges(silent){
   let changed=false;
@@ -3622,8 +3633,36 @@ const SYSTEM=`你是「Lin AI」的專業健身教練，使用繁體中文（台
 const QUICK=['成年人每週需要多少分鐘中等強度有氧？','WHO 是否規定一週運動幾天？','高強度有氧每週建議多久？','每週五天各做30分鐘有氧可以嗎？','沒有運動習慣的人如何開始？'];
 $('#quick').innerHTML=QUICK.map(q=>`<button class="btn ghost small">${q}</button>`).join('');
 $$('#quick button').forEach(b=>b.onclick=()=>ask(b.textContent));
+function sanitizeDisplayText(text, fallback='資料同步失敗，請稍後再試。'){
+  const raw = String(text ?? '');
+  if(!raw.trim())return fallback;
+  const s = raw.replace(/\s+/g,' ').trim();
+  const sqlLike = /(could not choose the best candidate function|best candidate function|public\.[A-Za-z0-9_]+\(|\bSELECT\b.*\bFROM\b|\bINSERT\b.*\bINTO\b|\bUPDATE\b.*\bSET\b|\bDELETE\b.*\bFROM\b|\bCREATE\b.*\bFUNCTION\b|SQL.*function|rpc\s*\(|postgresql|supabase.*function|function between:|\b[a-zA-Z_]+\s*\([^)]*\)[\s\S]*\b[a-zA-Z_]+\s*\([^)]*\))/i.test(s);
+  const functionDump = /(\b[A-Za-z_][A-Za-z0-9_]*\s*\([^)]*\)\s*;?\s*){2,}/.test(s);
+  const longGarble = s.length > 220 && /[A-Za-z_]{3,}/.test(s) && /[();=,\[\]{}<>]/.test(s);
+  const gibberish = /(?:\b(?:p_[A-Za-z0-9_]+|lin_[A-Za-z0-9_]+)\s*\([^)]*\)\s*\)|\b[A-Za-z0-9_]+\s*:\s*\b(?:true|false|null|undefined)\b)/.test(s) && /[()]/.test(s);
+  if(sqlLike || functionDump || longGarble || gibberish) return fallback;
+  return s;
+}
+function sanitizeAiReply(src){
+  if(typeof src !== 'string') return '';
+  let text = src.replace(/```[\s\S]*?```/g,' ').replace(/`[^`]+`/g,' ');
+  const lines=[];
+  for(const raw of text.split(/\n+/)){
+    const line=raw.trim();
+    if(!line) continue;
+    if(/(could not choose the best candidate function|public\.[A-Za-z0-9_]+\(|\bSELECT\b.*\bFROM\b|\bINSERT\b.*\bINTO\b|\bUPDATE\b.*\bSET\b|\bDELETE\b.*\bFROM\b|\bCREATE\b.*\bFUNCTION\b|\bfunction\s+\w+\s*\()/i.test(line)) continue;
+    const looksCodeLike = /(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|FROM|WHERE|JOIN|VALUES|WITH|CASE|WHEN|END|public\.|function\s+\w+|const\s+\w+|let\s+\w+|class\s+\w+|=>|->|::)\b|[A-Za-z_]+\.[A-Za-z_]+\(|\b[a-zA-Z_]+\s*\([^)]*\))/i.test(line);
+    const isLongNoise = line.length > 180 && (/[A-Za-z]/.test(line) && /[;(){}\[\]=,]/.test(line) || (line.split(/\s+/).filter(Boolean).length > 25 && /[A-Za-z]/.test(line)));
+    const isSqlDump = /(?:\b(?:SELECT|UPDATE|INSERT|DELETE|CREATE|ALTER|DROP|FROM|WHERE|JOIN|LEFT|RIGHT|UNION|VALUES|RETURNING|WITH)\b)/i.test(line) && (line.length > 32 || /[;()]/.test(line));
+    if(looksCodeLike || isLongNoise || isSqlDump) continue;
+    lines.push(line);
+  }
+  let cleaned = lines.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  return sanitizeDisplayText(cleaned || src, '我先整理這段內容，請重新提問。');
+}
 function md(src){
-  const blocks=[];let t=esc(src).replace(/```(?:\w*\n)?([\s\S]*?)```/g,(m,c)=>{blocks.push(c);return `\u0000${blocks.length-1}\u0000`});
+  const blocks=[];let t=esc(sanitizeAiReply(src)).replace(/```(?:\w*\n)?([\s\S]*?)```/g,(m,c)=>{blocks.push(c);return `\u0000${blocks.length-1}\u0000`});
   const inl=s=>s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
   const out=[];let list=null,table=null;
   const flush=()=>{if(list){out.push(`<${list.t}>${list.i.join('')}</${list.t}>`);list=null}if(table){const rows=table.filter(r=>!/^\|?\s*:?-{2,}/.test(r));
@@ -4572,16 +4611,18 @@ $('#accountLogout').onclick=async()=>{
   clearAccountSession();localStorage.removeItem(ACTIVE_KEY);activeUserId='';location.reload();
 };
 function friendly(e){
-  const m=String(e&&e.message||e);
+  const raw=String(e&&e.message||e||'');
+  const m=sanitizeDisplayText(raw,'資料同步失敗，請稍後再試。');
   if(m==='NOCFG')return '好友伺服器還沒設定';
   if(m==='NETWORK')return '連不上伺服器，請檢查網路，或網址有沒有填對';
-  if(e.code==='PGRST202'||(e.status===404&&/function|rpc/i.test(m)))return '伺服器還沒建立好：請先在 Supabase 的 SQL Editor 執行 supabase-setup.sql';
-  if(e.status===401||e.status===403||/invalid api key|jwt/i.test(m))return '金鑰不正確，請重新貼上 anon / publishable key';
+  if(e&&e.code==='PGRST202'||(e&&e.status===404&&/function|rpc/i.test(m)))return '伺服器還沒建立好：請先在 Supabase 的 SQL Editor 執行 supabase-setup.sql';
+  if(e&&e.status===401||e&&e.status===403||/invalid api key|jwt/i.test(m))return '金鑰不正確，請重新貼上 anon / publishable key';
   if(/not found/i.test(m))return '找不到這個好友代碼，請確認有沒有輸入錯';
   if(/^self$/.test(m))return '不能加自己為好友';
   if(/profile required/i.test(m))return '請先建立你的資料';
   if(/name required/i.test(m))return '請輸入暱稱';
   if(/too many/i.test(m))return '好友人數已達上限（100 位）';
+  if(/資料同步失敗|發生錯誤/i.test(m))return '資料同步失敗，請稍後再試。';
   return '發生錯誤：'+m;
 }
 const uuid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16)});
@@ -4618,7 +4659,7 @@ async function friendCreate(){
   try{
     const code=await friendUpsert();S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
     if(S.me.avatar)pushAvatar();
-    toast(isNew?`已建立，你的好友代碼是 ${code}`:'已更新暱稱');
+    toast(isNew?`已建立，你的好友代碼是 ${code}`:'已儲存暱稱');
     if(frPending){const c=frPending;frPending='';await friendAdd(c,false)}
     await friendBoard();
   }catch(e){if(isNew){S.me.id='';S.me.name=''}else S.me.name=old;toast(friendly(e))}
@@ -4745,15 +4786,22 @@ function renderBoard(){
 }
 function renderFriends(){
   const ok=frCfgOk();
-  $('#frNoCfg').hidden=ok;$('#frMain').hidden=!ok;
+  $('#frNoCfg').hidden=true;
+  $('#frMain').hidden=false;
   $('#frName').value=S.me.name||$('#frName').value;
   $('#frAvatarBtn').innerHTML=avatarHTML(S.me.avatar,S.me.name||$('#frName').value||myAvatarName(),S.me.code||myAvatarName(),'lg');
-  $('#frSaveMe').textContent=S.me.id?'更新暱稱':'建立我的資料';
-  $('#frMeBox').hidden=!S.me.id;$('#frMyCode').textContent=S.me.code||'—';
+  $('#frSaveMe').textContent=S.me.id?'儲存':'儲存暱稱';
+  $('#frInfo').hidden=!S.me.name && !S.me.code;
+  $('#frInfoName').textContent=S.me.name||$('#frName').value||'尚未設定';
+  $('#frInfoCode').textContent=S.me.code||'—';
+  $('#frMeBox').hidden=true;$('#frMyCode').textContent=S.me.code||'—';
   if(S.me.code)renderMyQR($('#frQR'),3);
-  $('#frAddBox').hidden=false;
+  $('#frAddBox').hidden=!ok;
+  const boardCard=$('#frBoard')&&$('#frBoard').closest('.card');
+  if(boardCard)boardCard.hidden=true;
   $$('#frSort button').forEach(b=>b.classList.toggle('on',b.dataset.v===frSort));
   if(frPending&&ok){$('#frNote').hidden=false;$('#frNote').textContent=S.me.id?'':`你收到好友邀請（代碼 ${frPending}）。先設定暱稱，建立後會自動加入。`}
+  else{$('#frNote').hidden=true;$('#frNote').textContent='';}
 }
 $('#frSaveMe').onclick=friendCreate;
 $('#frName').addEventListener('keydown',e=>{if(e.key==='Enter')friendCreate()});

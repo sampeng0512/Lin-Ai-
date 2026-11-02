@@ -4546,6 +4546,7 @@ function accountErrorText(error){
   if(/invalid login credentials/i.test(message))return '電子郵件或密碼不正確。';
   if(/email not confirmed/i.test(message))return '請先到信箱完成驗證，再登入。';
   if(/already registered|user already exists/i.test(message))return '這個電子郵件已註冊，請直接登入。';
+  if(/email address not authorized/i.test(message))return 'Supabase 預設郵件服務只寄給專案團隊成員，無法寄給一般 Gmail。請在 Supabase 設定自訂 SMTP 後再重寄。';
   if(/email rate limit exceeded|over_email_send_rate_limit|too many requests/i.test(message))return '郵件發送次數過多，請稍等幾分鐘再試。';
   if(/password should be at least|weak password/i.test(message))return '密碼未符合 Supabase 的密碼規則。';
   return message;

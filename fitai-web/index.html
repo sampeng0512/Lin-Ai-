@@ -1672,7 +1672,7 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
           <button class="btn ghost small" type="button" id="frScan">掃描 QR</button>
         </div>
         <div class="row" style="align-items:center; gap:12px">
-          <div id="frQR" class="fr-qr" title="點擊開啟大 QR" aria-label="我的好友 QR 碼" style="width:120px; height:120px; flex:none"></div>
+          <div id="frQR" class="fr-qr" title="點擊開啟大 QR" aria-label="我的好友 QR 碼" style="width:120px; height:120px; flex:none"><span class="small">儲存暱稱後產生好友 QR</span></div>
           <div class="grow">
             <label class="f" for="frCode">輸入對方 6 碼好友代碼</label>
             <div class="row" style="align-items:flex-end">
@@ -2571,7 +2571,11 @@ $$('.tab').forEach(b=>b.onclick=()=>{
   if(b.dataset.tab==='food')renderFood();
   if(b.dataset.tab==='runk')rkRender();
   if(b.dataset.tab==='coach')renderCoachPlan();
-  if(b.dataset.tab==='friends'){renderFriends();friendBoard()}
+  if(b.dataset.tab==='friends'){
+    renderFriends();
+    if(S.me.name&&!S.me.code)ensureFriendCode().then(ok=>{if(ok)friendBoard()});
+    else friendBoard();
+  }
   if(cam.running||cam.starting)camStop();
   if(b.dataset.tab!=='timer'&&tRunning)tCtl.aborted=true;
 });
@@ -4644,7 +4648,7 @@ const weekExerciseRepsNow=()=>weekDates().reduce((totals,d)=>{for(const [ex,n] o
 const frBasePayload=()=>({p_id:S.me.id,p_name:S.me.name,p_reps:S.ver.reps|0,p_xp:S.xp|0,p_streak:streaks(S.ver.days).cur|0,p_week:weekRepsNow()|0,p_week_key:weekKey()});
 const frPayload=()=>({...frBasePayload(),p_ex_reps:S.ver.exs,p_week_ex_reps:weekExerciseRepsNow()});
 const frSig=()=>JSON.stringify([S.me.name,S.ver.reps,S.ver.exs,S.xp,streaks(S.ver.days).cur,weekRepsNow(),weekExerciseRepsNow(),weekKey()]);
-let frPending='',frRows=[],frSort='week',frAt=0,frBusy=false,frSyncT=0,frLastSig='',frLast=0,frExerciseStatsSupported=null;
+let frPending='',frRows=[],frSort='week',frAt=0,frBusy=false,frSyncT=0,frLastSig='',frLast=0,frExerciseStatsSupported=null,frCodeBusy=false;
 async function friendUpsert(){
   if(frExerciseStatsSupported===false)return rpc('lin_upsert_profile',frBasePayload());
   try{const code=await rpc('lin_upsert_profile',frPayload());frExerciseStatsSupported=true;return code}
@@ -4654,28 +4658,67 @@ async function friendUpsert(){
     return rpc('lin_upsert_profile',frBasePayload());
   }
 }
+function validFriendCode(value){
+  if(typeof value==='string'&&/^[A-Z0-9]{6}$/i.test(value.trim()))return value.trim().toUpperCase();
+  if(Array.isArray(value)&&value.length===1)return validFriendCode(value[0]);
+  if(value&&typeof value==='object')return validFriendCode(value.code||value.lin_upsert_profile);
+  return '';
+}
+async function resolveFriendCode(result){
+  const direct=validFriendCode(result);
+  if(direct)return direct;
+  const rows=await rpc('lin_get_board',{p_id:S.me.id,p_exercise_id:null,p_action_name:null,p_period:'weekly'});
+  const mine=Array.isArray(rows)&&rows.find(row=>row.is_me||row.id===S.me.id);
+  const recovered=validFriendCode(mine&&mine.code);
+  if(recovered)return recovered;
+  throw new Error('暱稱已送出，但伺服器沒有回傳好友代碼。請再按一次「儲存」重試。');
+}
 async function friendSync(force){
   if(!S.me.id||!frCfgOk())return;
   const sig=frSig();if(!force&&sig===frLastSig)return;
   const wait=15000-(Date.now()-frLast);
   if(!force&&wait>0){clearTimeout(frSyncT);frSyncT=setTimeout(()=>friendSync(false),wait+50);return}   // 太頻繁就延後，不要丟掉這次更新
   frLast=Date.now();
-  try{const code=await friendUpsert();frLastSig=sig;if(code&&code!==S.me.code){S.me.code=code;save();renderFriends()}}
+  try{const result=await friendUpsert(),code=await resolveFriendCode(result);frLastSig=sig;if(code!==S.me.code){S.me.code=code;save();renderFriends()}}
   catch(e){logErr('friendSync '+e.message)}
 }
 function friendSyncSoon(){if(!S.me.id||!frCfgOk()||frSig()===frLastSig)return;clearTimeout(frSyncT);frSyncT=setTimeout(()=>friendSync(false),8000)}
 async function friendCreate(){
+  if(frCodeBusy)return;
   const name=$('#frName').value.trim().slice(0,12);
   if(!name){toast('請輸入暱稱（最多 12 個字）');return}
+  frCodeBusy=true;$('#frSaveMe').disabled=true;
   const isNew=!S.me.id,old=S.me.name;if(isNew)S.me.id=uuid();S.me.name=name;
   try{
-    const code=await friendUpsert();S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
+    const result=await friendUpsert(),code=await resolveFriendCode(result);
+    S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
     if(S.me.avatar)pushAvatar();
-    toast(isNew?`已建立，你的好友代碼是 ${code}`:'已儲存暱稱');
+    toast(isNew?`已建立，你的好友代碼是 ${S.me.code}`:'已儲存暱稱');
     if(frPending){const c=frPending;frPending='';await friendAdd(c,false)}
     await friendBoard();
-  }catch(e){if(isNew){S.me.id='';S.me.name=''}else S.me.name=old;toast(friendly(e))}
-  renderFriends();
+  }catch(e){if(!isNew)S.me.name=old;save();toast(friendly(e))}
+  finally{frCodeBusy=false;$('#frSaveMe').disabled=false;renderFriends()}
+}
+async function ensureFriendCode(){
+  if(!frCfgOk()||!S.me.name||S.me.code||frCodeBusy)return !!S.me.code;
+  frCodeBusy=true;
+  const isNew=!S.me.id;
+  if(isNew)S.me.id=uuid();
+  const note=$('#frNote'),button=$('#frSaveMe');
+  button.disabled=true;renderFriends();
+  note.hidden=false;note.textContent='正在建立好友代碼…';
+  try{
+    const result=await friendUpsert(),code=await resolveFriendCode(result);
+    S.me.code=code;frLastSig=frSig();frLast=Date.now();save();
+    renderFriends();
+    toast(`好友代碼已準備好：${S.me.code}`);
+    return true;
+  }catch(e){
+    save();note.hidden=false;note.textContent=friendly(e);logErr('ensureFriendCode '+e.message);
+    return false;
+  }finally{
+    frCodeBusy=false;button.disabled=false;
+  }
 }
 async function friendAdd(code,confirmFirst){
   code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
@@ -4806,8 +4849,9 @@ function renderFriends(){
   $('#frInfo').hidden=!S.me.name && !S.me.code;
   $('#frInfoName').textContent=S.me.name||$('#frName').value||'尚未設定';
   $('#frInfoCode').textContent=S.me.code||'—';
-  $('#frMeBox').hidden=true;$('#frMyCode').textContent=S.me.code||'—';
+  $('#frMeBox').hidden=true;
   if(S.me.code)renderMyQR($('#frQR'),3);
+  else{$('#frQR').dataset.link='';$('#frQR').innerHTML=`<span class="small">${S.me.name?(frCodeBusy?'正在準備好友 QR…':'好友代碼尚未建立，按「儲存」重試'):'儲存暱稱後產生好友 QR'}</span>`}
   $('#frAddBox').hidden=!ok;
   const boardCard=$('#frBoard')&&$('#frBoard').closest('.card');
   if(boardCard)boardCard.hidden=true;
@@ -4824,24 +4868,28 @@ seg($('#frSort'),b=>{frSort=b.dataset.v;renderBoard()});
 $('#frExercise').onchange=renderBoard;
 
 $('#frBoard').onclick=async e=>{
-  const act=e.target.closest('[data-act]');if(act){act.dataset.act==='scan'?startScan():$('#frInvite').click();return}
+  const act=e.target.closest('[data-act]');if(act){act.dataset.act==='scan'?startScan():shareInvite();return}
   const b=e.target.closest('[data-code]');if(!b||!confirm('確定要刪除這位好友嗎？對方的名單裡也會移除你。'))return;
   try{await rpc('lin_remove_friend',{p_id:S.me.id,p_code:b.dataset.code});toast('已刪除好友');await friendBoard()}catch(err){toast(friendly(err))}
 };
-const inviteLink=()=>`${location.origin}${location.pathname}?add=${S.me.code}`;
-$('#frInvite').onclick=async()=>{
+const inviteLink=()=>{
+  const base=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'https://lin-ai-coach.netlify.app/':`${location.origin}${location.pathname}`;
+  return `${base}?add=${S.me.code}`;
+};
+async function shareInvite(){
   const link=inviteLink(),text=`來跟我一起用 Lin AI 健身，加我好友！我的好友代碼：${S.me.code}`;
   if(navigator.share){try{await navigator.share({title:'Lin AI 好友邀請',text,url:link});return}catch(e){if(e.name==='AbortError')return}}
   try{await navigator.clipboard.writeText(text+'\n'+link);toast('已複製邀請文字和連結')}catch(e){prompt('請全選複製：',text+'\n'+link)}
-};
+}
+const frInviteButton=$('#frInvite');if(frInviteButton)frInviteButton.onclick=shareInvite;
 /* ===== QR Code：產生自己的邀請 QR、用鏡頭或相簿圖片掃朋友的 ===== */
 const QR_GEN='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js',QR_READ='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
 async function renderMyQR(el,cell){
   const link=inviteLink();if(el.dataset.link===link)return;
   try{await loadScript(QR_GEN);const q=window.qrcode(0,'M');q.addData(link);q.make();el.innerHTML=q.createSvgTag({cellSize:cell,margin:1,scalable:true});el.dataset.link=link}
-  catch(e){el.innerHTML='<span class="small">連上網路後才會顯示 QR 碼</span>';logErr('qr gen '+e.message)}
+  catch(e){el.innerHTML=`<span class="small">QR 載入失敗，請檢查網路。<br>好友代碼：${esc(S.me.code)}</span>`;logErr('qr gen '+e.message)}
 }
-$('#frQR').onclick=()=>{if(!S.me.code)return;$('#qrCode').textContent=S.me.code;$('#qrBig').dataset.link='';renderMyQR($('#qrBig'),8);$('#qrDlg').showModal()};
+$('#frQR').onclick=()=>{if(!S.me.code){toast('好友代碼還在準備中，請稍後再試');return}$('#qrCode').textContent=S.me.code;$('#qrBig').dataset.link='';renderMyQR($('#qrBig'),8);$('#qrDlg').showModal()};
 $('#qrClose').onclick=()=>$('#qrDlg').close();
 function codeFromQR(text){
   text=String(text||'').trim();
@@ -4898,8 +4946,8 @@ $('#frScanFile').onchange=async e=>{
   }catch(err){toast('讀不到這張圖片，請換一張試試');logErr('scan file '+err.message)}
   finally{URL.revokeObjectURL(url)}
 };
-$('#frCopy').onclick=async()=>{try{await navigator.clipboard.writeText(S.me.code);toast('已複製好友代碼')}catch(e){prompt('好友代碼：',S.me.code)}};
-$('#frDelete').onclick=async()=>{
+const frCopyButton=$('#frCopy');if(frCopyButton)frCopyButton.onclick=async()=>{try{await navigator.clipboard.writeText(S.me.code);toast('已複製好友代碼')}catch(e){prompt('好友代碼：',S.me.code)}};
+const frDeleteButton=$('#frDelete');if(frDeleteButton)frDeleteButton.onclick=async()=>{
   if(!S.me.id||!confirm('確定要刪除你在伺服器上的資料嗎？你會從所有好友的排行榜消失，也要重新加好友。'))return;
   try{await rpc('lin_delete_me',{p_id:S.me.id});S.me={...DEF.me,avatar:S.me.avatar};frRows=[];frLastSig='';save();toast('已刪除');renderFriends();renderBoard();renderStats()}catch(e){toast(friendly(e))}
 };
@@ -5351,7 +5399,7 @@ const idle=f=>('requestIdleCallback' in window)?requestIdleCallback(f,{timeout:1
 renderCamCfg();renderHold();setInterval(planTick,20000);setTimeout(planTick,4000);
 await initializeAccount();
 renderMusic();showInstall();renderFacing();renderVoice();applyBody();calc();renderCoachPlan();renderStats(true);renderHist();chRefresh();renderNinja();renderRun();renderPose();rkRender();rkRecover();plan();
-renderFriends();setTimeout(handleInvite,600);
+renderFriends();if(S.me.name&&!S.me.code)ensureFriendCode();setTimeout(handleInvite,600);
 idle(()=>{listCams();renderSched();renderFood();renderGuide();renderWeights();renderPresets();renderAch()});   // 第一次畫面先出來，其餘慢慢補
 window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,waterTick,addWater,showWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,nj,njFinish,rn,rnFinish,rnView,ps,psFinish,psView,POSES,kcalToday,kcalTotal,renderBuddy,rk,rkRender,runMet,runKcal,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
 </script>

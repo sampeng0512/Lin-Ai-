@@ -4616,7 +4616,10 @@ function friendly(e){
   if(m==='NOCFG')return '好友伺服器還沒設定';
   if(m==='NETWORK')return '連不上伺服器，請檢查網路，或網址有沒有填對';
   if(e&&e.code==='PGRST202'||(e&&e.status===404&&/function|rpc/i.test(m)))return '伺服器還沒建立好：請先在 Supabase 的 SQL Editor 執行 supabase-setup.sql';
-  if(e&&e.status===401||e&&e.status===403||/invalid api key|jwt/i.test(m))return '金鑰不正確，請重新貼上 anon / publishable key';
+  if(e&&e.code==='42501')return 'Supabase 好友資料庫權限尚未修好：請在 SQL Editor 執行 supabase/migrations/20261102213000_fix_friend_rpc_security.sql，再重新整理';
+  if((e&&(e.status===401||e.status===403))&&/invalid api key|invalid jwt|jwt expired|invalid claim/i.test(raw))return 'Supabase 金鑰或登入憑證無效，請確認目前使用的 anon / publishable key';
+  if(e&&(e.status===401||e.status===403))return '伺服器拒絕這項操作，請檢查 Supabase 好友資料庫函式與權限設定';
+  if(/invalid api key|invalid jwt|jwt expired|invalid claim/i.test(raw))return 'Supabase 金鑰或登入憑證無效，請確認目前使用的 anon / publishable key';
   if(/not found/i.test(m))return '找不到這個好友代碼，請確認有沒有輸入錯';
   if(/^self$/.test(m))return '不能加自己為好友';
   if(/profile required/i.test(m))return '請先建立你的資料';

@@ -1084,6 +1084,7 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
       <div id="accountConfirmWrap" class="stack" hidden><label class="f" for="accountPassword2">確認密碼</label><input type="password" id="accountPassword2" autocomplete="new-password" minlength="8"></div>
       <button class="btn" id="accountSubmit" type="submit">登入</button>
       <button class="acc-link" id="accountRecover" type="button">忘記密碼？</button>
+      <button class="acc-link" id="accountResend" type="button" hidden>重寄確認信</button>
     </form>
   </div>
   <div id="accountSignedIn" hidden>
@@ -4545,6 +4546,7 @@ function accountErrorText(error){
   if(/invalid login credentials/i.test(message))return '電子郵件或密碼不正確。';
   if(/email not confirmed/i.test(message))return '請先到信箱完成驗證，再登入。';
   if(/already registered|user already exists/i.test(message))return '這個電子郵件已註冊，請直接登入。';
+  if(/email rate limit exceeded|over_email_send_rate_limit|too many requests/i.test(message))return '郵件發送次數過多，請稍等幾分鐘再試。';
   if(/password should be at least|weak password/i.test(message))return '密碼未符合 Supabase 的密碼規則。';
   return message;
 }
@@ -4607,6 +4609,7 @@ function setAccountMode(mode){
   for(const b of document.querySelectorAll('.acc-tabs button'))b.setAttribute('aria-selected',String(b.dataset.mode===mode));
   $('#accountHint').textContent=signup?'建立新帳號，密碼至少 8 個字元。註冊後可能需要先到信箱完成驗證。':'登入後，訓練與個人紀錄會同步到你的帳號。';
   $('#accountConfirmWrap').hidden=!signup;$('#accountRecover').hidden=signup;
+  $('#accountResend').hidden=true;
   $('#accountPassword').autocomplete=signup?'new-password':'current-password';
   $('#accountSubmit').textContent=signup?'建立帳號':'登入';$('#accountSubmit').classList.toggle('teal',signup);
   $('#accountPassword2').value='';showAccountStatus('');
@@ -4624,19 +4627,26 @@ async function accountSignup(email,password){
   showAccountStatus('正在建立帳號…');
   const data=await accountAuthRequest('signup',{email,password});
   if(data.session)await activateAccount(data.session);
-  else{setAccountMode('login');showAccountStatus('驗證信已寄出，完成電子郵件驗證後即可登入。')}
+  else{setAccountMode('login');$('#accountResend').hidden=false;showAccountStatus('確認信已寄出。請查看收件匣、垃圾郵件或促銷內容；預設信件通常是確認連結，不一定是數字驗證碼。')}
 }
 $('#accountForm').onsubmit=async e=>{
   e.preventDefault();
   const email=$('#accountEmail').value.trim(),password=$('#accountPassword').value;
   if(!email||!password){showAccountStatus('請輸入電子郵件和密碼。',true);return}
   $('#accountSubmit').disabled=true;
-  try{await(accountMode==='signup'?accountSignup:accountLogin)(email,password)}catch(error){showAccountStatus(accountErrorText(error),true)}
+  try{await(accountMode==='signup'?accountSignup:accountLogin)(email,password)}catch(error){if(/email not confirmed/i.test(String(error&&error.message||error)))$('#accountResend').hidden=false;showAccountStatus(accountErrorText(error),true)}
   finally{$('#accountSubmit').disabled=false}
 };
 $('#accountRecover').onclick=async()=>{
   const email=$('#accountEmail').value.trim();if(!email){showAccountStatus('請先輸入註冊用的電子郵件。',true);return}
   try{await accountAuthRequest('recover',{email});showAccountStatus('若此電子郵件已註冊，密碼重設信已寄出。')}catch(error){showAccountStatus(accountErrorText(error),true)}
+};
+$('#accountResend').onclick=async()=>{
+  const email=$('#accountEmail').value.trim();if(!email){showAccountStatus('請先輸入註冊用的電子郵件。',true);return}
+  const btn=$('#accountResend');btn.disabled=true;showAccountStatus('正在重寄確認信…');
+  try{await accountAuthRequest('resend',{type:'signup',email});showAccountStatus('已要求重寄確認信。請查看收件匣、垃圾郵件或促銷內容。')}
+  catch(error){showAccountStatus(accountErrorText(error),true)}
+  finally{btn.disabled=false}
 };
 $('#accountSyncNow').onclick=async()=>{
   const btn=$('#accountSyncNow');btn.disabled=true;saveNow();

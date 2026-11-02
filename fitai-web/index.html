@@ -1685,6 +1685,32 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
           </div>
         </div>
       </div>
+      <div class="card stack" id="frGroupsCard">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <h3 style="margin:0">我的群組</h3>
+          <span class="small mute" id="frGroupCount">尚未加入群組</span>
+        </div>
+        <div class="row">
+          <div class="grow"><label class="f" for="frGroupName">建立群組</label><input id="frGroupName" type="text" maxlength="30" placeholder="例如：週末健身團"></div>
+          <button class="btn" type="button" id="frGroupCreate">建立</button>
+        </div>
+        <div class="row">
+          <div class="grow"><label class="f" for="frGroupCode">輸入群組 6 碼代碼</label><input id="frGroupCode" type="text" maxlength="8" placeholder="例如：A8B2C4" autocapitalize="characters" autocomplete="off"></div>
+          <button class="btn teal" type="button" id="frGroupJoin">加入群組</button>
+        </div>
+        <div id="frGroupNote" class="notice small" role="status" aria-live="polite" hidden></div>
+        <div id="frGroupContent" class="stack" hidden>
+          <div class="row">
+            <div class="grow"><label class="f" for="frGroupSelect">查看群組</label><select id="frGroupSelect"></select></div>
+            <button class="btn ghost small" type="button" id="frGroupLeave">退出群組</button>
+          </div>
+          <div class="row" style="justify-content:space-between">
+            <span class="small mute" id="frGroupMeta"></span>
+            <button class="btn ghost small" type="button" id="frGroupCopy">複製群組代碼</button>
+          </div>
+          <div id="frGroupBoard"></div>
+        </div>
+      </div>
       <div class="card stack" hidden>
         <div class="row" style="justify-content:space-between">
           <h3 style="margin:0">排行榜</h3>
@@ -2573,8 +2599,8 @@ $$('.tab').forEach(b=>b.onclick=()=>{
   if(b.dataset.tab==='coach')renderCoachPlan();
   if(b.dataset.tab==='friends'){
     renderFriends();
-    if(S.me.name&&!S.me.code)ensureFriendCode().then(ok=>{if(ok)friendBoard()});
-    else friendBoard();
+    if(S.me.name&&!S.me.code)ensureFriendCode().then(ok=>{if(ok){friendBoard();loadFriendGroups()}});
+    else{friendBoard();loadFriendGroups()}
   }
   if(cam.running||cam.starting)camStop();
   if(b.dataset.tab!=='timer'&&tRunning)tCtl.aborted=true;
@@ -4638,6 +4664,10 @@ function friendly(e){
   if(/profile required/i.test(m))return '請先建立你的資料';
   if(/name required/i.test(m))return '請輸入暱稱';
   if(/too many/i.test(m))return '好友人數已達上限（100 位）';
+  if(/group not found/i.test(m))return '找不到這個群組代碼，請確認是否輸入正確。';
+  if(/group is full/i.test(m))return '這個群組已達 100 人上限。';
+  if(/group membership required/i.test(m))return '你目前不是這個群組的成員，請重新整理群組清單。';
+  if(/group name required/i.test(m))return '請輸入群組名稱。';
   if(/資料同步失敗|發生錯誤/i.test(m))return '資料同步失敗，請稍後再試。';
   return '發生錯誤：'+m;
 }
@@ -4649,6 +4679,7 @@ const frBasePayload=()=>({p_id:S.me.id,p_name:S.me.name,p_reps:S.ver.reps|0,p_xp
 const frPayload=()=>({...frBasePayload(),p_ex_reps:S.ver.exs,p_week_ex_reps:weekExerciseRepsNow()});
 const frSig=()=>JSON.stringify([S.me.name,S.ver.reps,S.ver.exs,S.xp,streaks(S.ver.days).cur,weekRepsNow(),weekExerciseRepsNow(),weekKey()]);
 let frPending='',frRows=[],frSort='week',frAt=0,frBusy=false,frSyncT=0,frLastSig='',frLast=0,frExerciseStatsSupported=null,frCodeBusy=false;
+let frGroups=[],frGroupId='',frGroupBusy=false,frGroupLoadToken=0;
 async function friendUpsert(){
   if(frExerciseStatsSupported===false)return rpc('lin_upsert_profile',frBasePayload());
   try{const code=await rpc('lin_upsert_profile',frPayload());frExerciseStatsSupported=true;return code}
@@ -4839,6 +4870,108 @@ function renderBoard(){
   el.innerHTML=avNote+mineHTML+podHTML+listHTML;
   $('#frAt').textContent=`共 ${rows.length-1} 位好友・只計算鏡頭偵測的次數・更新於 ${hhmm(frAt)}`;
 }
+function setFriendGroupNote(message,isError=false){
+  const note=$('#frGroupNote');
+  note.hidden=!message;note.textContent=message||'';
+  note.classList.toggle('warn',isError);
+}
+function renderFriendGroupBoard(rows){
+  const el=$('#frGroupBoard');
+  if(!rows.length){el.innerHTML='<p class="small mute">群組目前沒有成員資料。</p>';return}
+  const sorted=[...rows].sort((a,b)=>{
+    const aw=a.week_key===weekKey()?Number(a.week_reps)||0:0,bw=b.week_key===weekKey()?Number(b.week_reps)||0:0;
+    return bw-aw||(Number(b.xp)||0)-(Number(a.xp)||0)||String(a.name).localeCompare(String(b.name));
+  });
+  const max=Math.max(1,...sorted.map(r=>r.week_key===weekKey()?Number(r.week_reps)||0:0));
+  el.innerHTML=sorted.map((r,i)=>{
+    const weekly=r.week_key===weekKey()?Number(r.week_reps)||0:0;
+    return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(i+1,4)}">${i+1}</span>${avatarHTML(r.is_me?S.me.avatar:frAvatars[r.code],r.name,r.code,'')}<div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">本週 ${weekly} 下　累計 ${Number(r.reps)||0} 下　連續 ${Number(r.streak)||0} 天　等級 ${lvOf(r)}</span><span class="meter"><i style="width:${Math.round(weekly/max*100)}%"></i></span></div><span class="fv">${weekly}<small>下</small></span></div>`;
+  }).join('');
+}
+function renderFriendGroups(){
+  const hasGroups=frGroups.length>0;
+  $('#frGroupCount').textContent=hasGroups?`已加入 ${frGroups.length} 個群組`:'尚未加入群組';
+  $('#frGroupContent').hidden=!hasGroups;
+  $('#frGroupSelect').innerHTML=frGroups.map(g=>`<option value="${esc(g.group_id)}">${esc(g.name)}・${Number(g.member_count)||0} 人</option>`).join('');
+  if(!hasGroups){frGroupId='';$('#frGroupBoard').innerHTML='<p class="small mute">建立群組後，把 6 碼群組代碼分享給朋友；朋友加入後就會出現在這裡。</p>';return}
+  if(!frGroups.some(g=>g.group_id===frGroupId))frGroupId=frGroups[0].group_id;
+  $('#frGroupSelect').value=frGroupId;
+  const current=frGroups.find(g=>g.group_id===frGroupId);
+  $('#frGroupMeta').textContent=`${Number(current.member_count)||0} 位成員${current.is_owner?'・你是群組建立者':''}`;
+  $('#frGroupLeave').textContent=current.is_owner?'退出並交接群組':'退出群組';
+}
+async function loadFriendGroupBoard(){
+  if(!frGroupId||!S.me.id)return;
+  const token=++frGroupLoadToken;
+  try{
+    const rows=await rpc('lin_get_group_board',{p_id:S.me.id,p_group_id:frGroupId});
+    if(token!==frGroupLoadToken)return;
+    if(!Array.isArray(rows))throw new Error('群組排行榜回傳格式不正確');
+    await friendAvatars(rows);renderFriendGroupBoard(rows);
+  }catch(e){if(token===frGroupLoadToken){$('#frGroupBoard').innerHTML='';setFriendGroupNote(e.code==='PGRST202'?'群組功能尚未設定：請在 Supabase 執行 supabase/migrations/20261102220000_friend_groups.sql。':friendly(e),true)}}
+}
+async function loadFriendGroups(){
+  if(!frCfgOk())return;
+  if(!S.me.id){setFriendGroupNote('先儲存暱稱並建立好友代碼，才能建立或加入群組。');return}
+  setFriendGroupNote('');
+  try{
+    const rows=await rpc('lin_get_groups',{p_id:S.me.id});
+    if(!Array.isArray(rows))throw new Error('群組清單回傳格式不正確');
+    frGroups=rows;renderFriendGroups();
+    if(frGroupId)await loadFriendGroupBoard();
+  }catch(e){
+    setFriendGroupNote(e.code==='PGRST202'?'群組功能尚未設定：請在 Supabase 執行 supabase/migrations/20261102220000_friend_groups.sql。':friendly(e),true);
+  }
+}
+async function createFriendGroup(){
+  if(!S.me.id){setFriendGroupNote('請先儲存暱稱並取得好友代碼。',true);return}
+  const name=$('#frGroupName').value.trim().slice(0,30);
+  if(!name){setFriendGroupNote('請輸入群組名稱。',true);return}
+  const button=$('#frGroupCreate');button.disabled=true;
+  try{
+    const group=await rpc('lin_create_group',{p_id:S.me.id,p_name:name});
+    if(!group||!group.id||!group.code)throw new Error('建立成功但伺服器沒有回傳群組代碼');
+    $('#frGroupName').value='';frGroupId=group.id;
+    await loadFriendGroups();setFriendGroupNote(`已建立「${group.name}」，群組代碼：${group.code}。分享代碼讓朋友加入。`);
+  }catch(e){setFriendGroupNote(e.code==='PGRST202'?'群組功能尚未設定：請在 Supabase 執行 supabase/migrations/20261102220000_friend_groups.sql。':friendly(e),true)}
+  finally{button.disabled=false}
+}
+async function joinFriendGroup(){
+  if(!S.me.id){setFriendGroupNote('請先儲存暱稱並取得好友代碼。',true);return}
+  const code=$('#frGroupCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==6){setFriendGroupNote('群組代碼需為 6 個英文字母或數字。',true);return}
+  const button=$('#frGroupJoin');button.disabled=true;
+  try{
+    const group=await rpc('lin_join_group',{p_id:S.me.id,p_code:code});
+    if(!group||!group.id)throw new Error('加入成功但伺服器沒有回傳群組資訊');
+    $('#frGroupCode').value='';frGroupId=group.id;
+    await loadFriendGroups();setFriendGroupNote(`已加入群組「${group.name}」。`);
+  }catch(e){setFriendGroupNote(e.code==='PGRST202'?'群組功能尚未設定：請在 Supabase 執行 supabase/migrations/20261102220000_friend_groups.sql。':friendly(e),true)}
+  finally{button.disabled=false}
+}
+async function leaveFriendGroup(){
+  const group=frGroups.find(g=>g.group_id===frGroupId);if(!group)return;
+  const promptText=group.is_owner?'退出後會把群組管理權交給最早加入的成員；若只剩你，群組會刪除。確定退出？':'確定退出這個群組？';
+  if(!confirm(promptText))return;
+  try{
+    await rpc('lin_leave_group',{p_id:S.me.id,p_group_id:frGroupId});
+    frGroups=frGroups.filter(g=>g.group_id!==frGroupId);frGroupId='';renderFriendGroups();setFriendGroupNote('已退出群組。');
+    if(frGroups.length)await loadFriendGroups();
+  }catch(e){setFriendGroupNote(e.code==='PGRST202'?'群組功能尚未設定：請在 Supabase 執行 supabase/migrations/20261102220000_friend_groups.sql。':friendly(e),true)}
+}
+$('#frGroupCreate').onclick=createFriendGroup;
+$('#frGroupJoin').onclick=joinFriendGroup;
+$('#frGroupCode').addEventListener('keydown',e=>{if(e.key==='Enter')joinFriendGroup()});
+$('#frGroupSelect').onchange=()=>{
+  frGroupId=$('#frGroupSelect').value;
+  renderFriendGroups();loadFriendGroupBoard();
+};
+$('#frGroupLeave').onclick=leaveFriendGroup;
+$('#frGroupCopy').onclick=async()=>{
+  const group=frGroups.find(g=>g.group_id===frGroupId);if(!group)return;
+  try{await navigator.clipboard.writeText(group.invite_code);setFriendGroupNote(`已複製群組代碼：${group.invite_code}`)}
+  catch(e){prompt('請複製群組代碼：',group.invite_code)}
+};
 function renderFriends(){
   const ok=frCfgOk();
   $('#frNoCfg').hidden=true;
@@ -4854,7 +4987,7 @@ function renderFriends(){
   else{$('#frQR').dataset.link='';$('#frQR').innerHTML=`<span class="small">${S.me.name?(frCodeBusy?'正在準備好友 QR…':'好友代碼尚未建立，按「儲存」重試'):'儲存暱稱後產生好友 QR'}</span>`}
   $('#frAddBox').hidden=!ok;
   const boardCard=$('#frBoard')&&$('#frBoard').closest('.card');
-  if(boardCard)boardCard.hidden=true;
+  if(boardCard)boardCard.hidden=!S.me.id||!ok;
   $$('#frSort button').forEach(b=>b.classList.toggle('on',b.dataset.v===frSort));
   if(frPending&&ok){$('#frNote').hidden=false;$('#frNote').textContent=S.me.id?'':`你收到好友邀請（代碼 ${frPending}）。先設定暱稱，建立後會自動加入。`}
   else{$('#frNote').hidden=true;$('#frNote').textContent='';}

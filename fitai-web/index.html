@@ -1025,6 +1025,20 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
 .panel.active{display:block}
 #tab-body .grid2,#tab-food .grid2{grid-template-columns:minmax(0,1fr)}
 .foot{position:static;max-width:none;margin:24px 0 0;padding:0 8px 16px;text-align:center}
+@media(min-width:641px){
+  .app-shell{max-width:none}
+  .top{flex-direction:row;align-items:center;padding:12px clamp(24px,4vw,64px)}
+  .top-heading{flex:1;width:auto}
+  .top .stats,.top #gameStats{width:auto;grid-template-columns:repeat(3,minmax(110px,1fr))}
+  main{padding:24px clamp(24px,4vw,64px) 32px}
+  .tabs{justify-content:center;gap:8px;padding:10px 24px}
+  .tabs .tab{flex:0 1 140px;flex-direction:row;gap:8px;min-width:90px;min-height:54px;padding:8px 14px;font-size:.875rem}
+  .tabs .tab-label{display:inline}
+  .tabs .tab::after{content:none}
+}
+@media(min-width:1000px){
+  .top-right{flex-wrap:nowrap}
+}
 </style>
 </head>
 <body>

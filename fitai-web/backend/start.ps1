@@ -3,9 +3,17 @@ Set-Location $PSScriptRoot
 
 $python = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
 if (-not (Test-Path $python)) {
-  & python -m venv .venv
+  $pyLauncher = Get-Command py -ErrorAction SilentlyContinue
+  if ($pyLauncher) {
+    & $pyLauncher.Source -3 -m venv .venv
+  } else {
+    & python -m venv .venv
+  }
   if ($LASTEXITCODE -ne 0) {
     throw 'Could not create the Python virtual environment. Check that Python is installed.'
+  }
+  if (-not (Test-Path $python)) {
+    throw 'Python did not create a Windows virtual environment. Install Python for Windows and retry.'
   }
 }
 

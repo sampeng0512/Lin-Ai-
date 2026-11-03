@@ -112,6 +112,7 @@ def health():
         "records": len(knowledge),
         "model": MODEL,
         "api_key_configured": bool(API_KEY),
+        "team_token_configured": bool(os.getenv("TEAM_ACCESS_TOKEN", "")),
     }
 
 # ===== 6. RAG 問答 =====

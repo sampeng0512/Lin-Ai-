@@ -1964,7 +1964,7 @@ main{display:block;flex:1 1 auto;width:100%;max-width:none;height:auto;min-width
 </dialog>
 <script type="module">
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const APP_VERSION='2026.10.23-v1';
 const ERRS=[];
 const logErr=m=>{ERRS.push(new Date().toLocaleTimeString()+'  '+String(m).slice(0,220));if(ERRS.length>8)ERRS.shift()};
@@ -3691,20 +3691,18 @@ function sanitizeDisplayText(text, fallback='資料同步失敗，請稍後再�
 }
 function sanitizeAiReply(src){
   if(typeof src !== 'string') return '';
-  let text = src.replace(/```[\s\S]*?```/g,' ').replace(/`[^`]+`/g,' ');
+  const text = src.replace(/```[\s\S]*?```/g,' ').replace(/`[^`]+`/g,' ');
   const lines=[];
-  for(const raw of text.split(/\n+/)){
+  for(const raw of text.split(/\n/)){
     const line=raw.trim();
     if(!line) continue;
-    if(/(could not choose the best candidate function|public\.[A-Za-z0-9_]+\(|\bSELECT\b.*\bFROM\b|\bINSERT\b.*\bINTO\b|\bUPDATE\b.*\bSET\b|\bDELETE\b.*\bFROM\b|\bCREATE\b.*\bFUNCTION\b|\bfunction\s+\w+\s*\()/i.test(line)) continue;
-    const looksCodeLike = /(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|FROM|WHERE|JOIN|VALUES|WITH|CASE|WHEN|END|public\.|function\s+\w+|const\s+\w+|let\s+\w+|class\s+\w+|=>|->|::)\b|[A-Za-z_]+\.[A-Za-z_]+\(|\b[a-zA-Z_]+\s*\([^)]*\))/i.test(line);
-    const isLongNoise = line.length > 180 && (/[A-Za-z]/.test(line) && /[;(){}\[\]=,]/.test(line) || (line.split(/\s+/).filter(Boolean).length > 25 && /[A-Za-z]/.test(line)));
-    const isSqlDump = /(?:\b(?:SELECT|UPDATE|INSERT|DELETE|CREATE|ALTER|DROP|FROM|WHERE|JOIN|LEFT|RIGHT|UNION|VALUES|RETURNING|WITH)\b)/i.test(line) && (line.length > 32 || /[;()]/.test(line));
-    if(looksCodeLike || isLongNoise || isSqlDump) continue;
+    // 只刪掉明顯是 SQL 或後端錯誤訊息的行（區分大小寫），一般句子如「WHO (世界衛生組織)」要保留。
+    // 回答在 md() 會先 esc() 才轉成 HTML，不會有 XSS，這裡不需要過濾一般英文。
+    if(/could not choose the best candidate function|public\.[A-Za-z0-9_]+\(|\bSELECT\b.*\bFROM\b|\bINSERT INTO\b|\bUPDATE\b.*\bSET\b|\bDELETE FROM\b|\bCREATE (?:OR REPLACE )?FUNCTION\b/.test(line)) continue;
     lines.push(line);
   }
-  let cleaned = lines.join('\n').replace(/\n{3,}/g,'\n\n').trim();
-  return sanitizeDisplayText(cleaned || src, '我先整理這段內容，請重新提問。');
+  const cleaned = lines.join('\n').trim();
+  return cleaned || '我先整理這段內容，請重新提問。';
 }
 function md(src){
   const blocks=[];let t=esc(sanitizeAiReply(src)).replace(/```(?:\w*\n)?([\s\S]*?)```/g,(m,c)=>{blocks.push(c);return `\u0000${blocks.length-1}\u0000`});
@@ -3723,35 +3721,54 @@ function md(src){
   }
   flush();return out.join('').replace(/\u0000(\d+)\u0000/g,(m,i)=>`<pre>${blocks[i]}</pre>`);
 }
-const chatHist=[];let asking=false;
+let asking=false;
 function addMsg(role,html){const d=document.createElement('div');d.className='msgb '+(role==='user'?'me':'ai');d.innerHTML=html;$('#chat').appendChild(d);$('#chat').scrollTop=1e9;return d}
 const API_BASE_URL='https://fitai-rag.onrender.com';
 const RAG_API_URL=`${API_BASE_URL}/ask`;
+const IS_LOCAL_API=/^http:\/\/(?:127\.0\.0\.1|localhost)\b/.test(API_BASE_URL);
+const MAX_QUESTION_CHARS=500;      // 與後端 AskBody 的上限一致
+const ASK_TIMEOUT_MS=70000;        // Render 免費方案閒置後第一次喚醒可能要將近一分鐘
+const TEAM_TOKEN_KEY='lin_team_token';
+// 組員密碼只存在這個分頁（sessionStorage），關掉分頁就要重新輸入
+function getTeamToken(){
+  let t='';try{t=sessionStorage.getItem(TEAM_TOKEN_KEY)||''}catch(e){}
+  if(t)return t;
+  t=(window.prompt('請輸入組員存取密碼')||'').trim();
+  if(t){try{sessionStorage.setItem(TEAM_TOKEN_KEY,t)}catch(e){}}
+  return t;
+}
+function forgetTeamToken(){try{sessionStorage.removeItem(TEAM_TOKEN_KEY)}catch(e){}}
 async function ask(text){
   text=(text||'').trim();
   if(!text||asking)return;
-  const teamToken = window.prompt('請輸入組員存取密碼');
-  if (!teamToken) return;
+  if(text.length>MAX_QUESTION_CHARS){toast(`問題太長，請精簡到 ${MAX_QUESTION_CHARS} 字以內`);return}
+  const teamToken=getTeamToken();
+  if(!teamToken)return;
   addMsg('user',esc(text));
   $('#chatIn').value='';
   $('#chatClear').hidden=false;
-  chatHist.push({role:'user',content:text});
   asking=true;
   $('#chatSend').disabled=true;
   const wait=addMsg('ai','<span class="mute">正在查詢 WHO 知識庫…</span>');
+  const ctrl=new AbortController();
+  const abortT=setTimeout(()=>ctrl.abort(),ASK_TIMEOUT_MS);
+  const slowT=setTimeout(()=>{wait.innerHTML='<span class="mute">後端喚醒中，第一次發問可能需要一分鐘，請稍候…</span>'},5000);
   try{
-    const r=await fetch(RAG_API_URL,{
-      method:'POST',
-      headers:{
-  'Content-Type':'application/json',
-  'X-Team-Token':teamToken
-},
-      body:JSON.stringify({question:text})
-    });
-    const data=await r.json();
-    if(!r.ok)throw new Error(data?.detail||('HTTP '+r.status));
-    const reply=typeof data.answer==='string'?data.answer:'後端未傳回回答。';
-    chatHist.push({role:'assistant',content:reply});
+    let r;
+    try{
+      r=await fetch(RAG_API_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Team-Token':teamToken},
+        body:JSON.stringify({question:text}),
+        signal:ctrl.signal
+      });
+    }finally{clearTimeout(slowT)}
+    let data=null;try{data=await r.json()}catch(e){}
+    if(!r.ok){
+      const err=new Error(typeof data?.detail==='string'?data.detail:('HTTP '+r.status));
+      err.status=r.status;throw err;
+    }
+    const reply=typeof data?.answer==='string'?data.answer:'後端未傳回回答。';
     wait.innerHTML=md(reply);
     if(Array.isArray(data.sources)&&data.sources.length){
       const refs=document.createElement('div');
@@ -3781,17 +3798,31 @@ async function ask(text){
       wait.appendChild(refs);
     }
   }catch(e){
-    chatHist.pop();
     const message=String(e.message||e);
-    wait.innerHTML=e instanceof TypeError&&API_BASE_URL.startsWith('http://127.0.0.1')
-      ? '無法連線到 RAG 後端：'+esc(message)+
-        '<br><span class="small mute">請在專案根目錄的 PowerShell 執行 <code>.\fitai-web\backend\start.ps1</code>，再開啟 http://127.0.0.1:8000/health 檢查狀態。</span>'
-      : e instanceof TypeError
-        ? '無法連線到教練服務：'+esc(message)+
-          '<br><span class="small mute">請確認 API_BASE_URL 已設定為可公開連線的 HTTPS 後端網址，並確認後端允許此網站網域的 CORS 請求。</span>'
-      : '教練服務回應錯誤：'+esc(message)+
-        '<br><span class="small mute">請確認 backend\\.env 的 OPENAI_API_KEY 設定，以及後端終端機的錯誤訊息。</span>';
+    const hint=s=>'<br><span class="small mute">'+s+'</span>';
+    if(e.status===401){
+      // 密碼錯誤：清掉記住的密碼，把問題放回輸入框，下次送出會重新詢問
+      forgetTeamToken();
+      $('#chatIn').value=text;
+      wait.innerHTML='組員存取密碼錯誤。'+hint('請再按一次送出，重新輸入密碼。');
+    }else if(e.status===429){
+      wait.innerHTML='發問太頻繁了。'+hint('請等一分鐘後再試。');
+    }else if(e.status===422){
+      wait.innerHTML='問題格式不正確。'+hint(`請輸入 1 到 ${MAX_QUESTION_CHARS} 字的問題。`);
+    }else if(e.name==='AbortError'){
+      $('#chatIn').value=text;
+      wait.innerHTML='教練服務等太久沒有回應。'+hint('後端可能還在喚醒，請稍等一下再按送出。');
+    }else if(e instanceof TypeError){
+      wait.innerHTML=IS_LOCAL_API
+        ? '無法連線到 RAG 後端：'+esc(message)+hint('請在專案根目錄的 PowerShell 執行 <code>.\\fitai-web\\backend\\start.ps1</code>，再開啟 http://127.0.0.1:8000/health 檢查狀態。')
+        : '目前無法連線到教練服務。'+hint('請確認網路連線後再試一次。');
+    }else{
+      wait.innerHTML=IS_LOCAL_API
+        ? '教練服務回應錯誤：'+esc(message)+hint('請確認 backend\\.env 的 OPENAI_API_KEY 設定，以及後端終端機的錯誤訊息。')
+        : '教練服務暫時出了點問題：'+esc(message)+hint('請稍後再試。');
+    }
   }finally{
+    clearTimeout(abortT);
     asking=false;
     $('#chatSend').disabled=false;
     $('#chat').scrollTop=1e9;
@@ -3799,7 +3830,7 @@ async function ask(text){
 }
 $('#chatSend').onclick=()=>ask($('#chatIn').value);
 $('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();ask($('#chatIn').value)}});
-$('#chatClear').onclick=()=>{chatHist.length=0;$('#chat').innerHTML='';$('#chatClear').hidden=true};
+$('#chatClear').onclick=()=>{$('#chat').innerHTML='';$('#chatClear').hidden=true};
 const coachWorkouts={
   '下肢肌力':['深蹲','弓箭步','啞鈴羅馬尼亞硬舉','臀橋','側抬腿'],
   '上肢肌力':['伏地挺身','啞鈴上斜臥推','啞鈴俯身划船','啞鈴臥推','肩推','二頭彎舉'],

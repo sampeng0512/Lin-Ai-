@@ -1,7 +1,7 @@
 /* Lin AI 的離線快取。
    網頁、CSS、JS 都是「網路優先」，有網路就一定拿最新版，所以平常改程式不用動版本號；
    只有想清掉舊快取（例如換了姿勢模型、圖示）時才把下面的版本號加 1。 */
-const VER = 'v19';
+const VER = 'v20';
 const CORE = ['./', './index.html', './manifest.webmanifest', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png'];
 const NET_TIMEOUT = 4000;   // 網路太慢時，最多等這麼久就先用快取頂著（背景還是會繼續抓新版）
 
@@ -62,7 +62,7 @@ self.addEventListener('fetch', e => {
   if (r.method !== 'GET') return;
   const u = new URL(r.url);
   if (u.protocol !== 'http:' && u.protocol !== 'https:') return;
-  if (u.hostname === 'api.anthropic.com' || u.hostname.endsWith('.supabase.co')) return;   // AI 對話、帳號資料不快取
+  if (u.hostname === 'fitai-rag.onrender.com' || u.hostname.endsWith('.supabase.co')) return;   // AI 問答後端、帳號資料不快取
   const sameOrigin = u.origin === self.location.origin;
   const isCode = /\.(html?|css|m?js|json|webmanifest)$/i.test(u.pathname) || r.destination === 'script' || r.destination === 'style' || r.destination === 'manifest';
 

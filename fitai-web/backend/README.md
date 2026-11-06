@@ -26,4 +26,16 @@
 
 Netlify 網域（`*.netlify.app`）及 localhost 已列入 CORS 規則。若 PWA 使用自訂網域，請在後端環境設定 `CORS_ALLOW_ORIGINS`，值為完整來源（含 `https://`，不要加路徑），多個來源以逗號分隔。CORS 不是 API 存取控制；正式公開服務仍需設定使用量限制及監控。
 
+## 使用量限制
+
+- 每個問題最多 500 字，超過會回 422。
+- 每個 IP 每分鐘最多發問 `RATE_LIMIT_PER_MINUTE` 次（預設 10），超過會回 429。可在 `.env` 或部署環境調整。
+- 每次回答最多 800 個輸出 token，呼叫 OpenAI 逾時 30 秒。
+
+限流紀錄存在記憶體，伺服器重啟就會清空；只跑一個執行個體時已足夠。
+
+## 資料庫
+
+Supabase 的資料表與函式以 `supabase/migrations/` 為準。`fitai-web/supabase-accounts.sql`、`supabase-avatars.sql` 是早期手動貼到 SQL Editor 用的舊版本，新環境請改用 migrations。
+
 停止伺服器請在啟動它的終端機按 `Ctrl+C`。

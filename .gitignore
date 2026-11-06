@@ -1,0 +1,8 @@
+# 後端的密碼與金鑰（絕對不能上傳）
+.env
+.evn
+
+# Python 虛擬環境與暫存
+.venv/
+__pycache__/
+*.pyc

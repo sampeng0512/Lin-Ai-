@@ -179,7 +179,7 @@ function loadPose(){
     const mod=await import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VER}`);
     const V=mod.PoseLandmarker?mod:(mod.default||mod);
     const fileset=await V.FilesetResolver.forVisionTasks(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VER}/wasm`);
-    const mk=S.cam.model,models=[`pose_landmarker_${mk}.task`,`https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${mk}/float16/1/pose_landmarker_${mk}.task`];
+    const mk=S.cam.model,models=[`assets/models/pose_landmarker_${mk}.task`,`https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${mk}/float16/1/pose_landmarker_${mk}.task`];
     let lastErr;
     for(const m of models)for(const d of ['GPU','CPU']){
       try{

@@ -56,7 +56,7 @@ function readAccountCache(id){try{const raw=localStorage.getItem(`${KEY}:user:${
 function writeAccountCache(id,state){localStorage.setItem(`${KEY}:user:${id}`,JSON.stringify(state))}
 function accountErrorText(error){
   const message=String(error&&error.message||error);
-  if(error&&error.code==='PGRST205'||/fitai_user_data|schema cache/i.test(message))return '尚未建立帳號資料表，請先在 Supabase 執行 fitai-web/supabase-accounts.sql。';
+  if(error&&error.code==='PGRST205'||/fitai_user_data|schema cache/i.test(message))return '尚未建立帳號資料表，請先在 Supabase 套用 supabase/migrations/ 裡的 SQL。';
   if(/invalid login credentials/i.test(message))return '電子郵件或密碼不正確。';
   if(/email not confirmed/i.test(message))return '請先到信箱完成驗證，再登入。';
   if(/already registered|user already exists/i.test(message))return '這個電子郵件已註冊，請直接登入。';
@@ -391,7 +391,7 @@ function renderBoard(){
     const summary=`${ex} 本週 ${Number((r.week_ex_reps||{})[ex])||0}　累計 ${Number((r.ex_reps||{})[ex])||0}`;
     return `<div class="fr ${r.is_me?'me':''}"><span class="rk r${Math.min(rank,4)}">${rank}</span>${av(r,'')}<div class="grow"><b>${esc(r.name)}${r.is_me?'（我）':''}</b><span class="small mute">${summary}　連續 ${r.streak} 天　等級 ${lvOf(r)}　${agoTxt(r.updated_at)}</span><span class="meter"><i style="width:${Math.round(Math.max(0,v)/top*100)}%"></i></span></div><span class="fv">${v}<small>${unit}</small></span>${del(r)}</div>`;
   }).join('');
-  const avNote=frAvatarOk===false?'<p class="notice warn small" style="margin:0 0 12px">看不到好友的頭像：好友伺服器還沒啟用頭像功能。請到 Supabase 的 SQL Editor 執行 <b>fitai-web/supabase-avatars.sql</b>，再按「重新整理」。</p>':'';
+  const avNote=frAvatarOk===false?'<p class="notice warn small" style="margin:0 0 12px">看不到好友的頭像：好友伺服器還沒啟用頭像功能。請在 Supabase 套用 <b>supabase/migrations/</b> 裡的 SQL，再按「重新整理」。</p>':'';
   el.innerHTML=avNote+mineHTML+podHTML+listHTML;
   $('#frAt').textContent=`共 ${rows.length-1} 位好友・只計算鏡頭偵測的次數・更新於 ${hhmm(frAt)}`;
 }

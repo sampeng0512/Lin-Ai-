@@ -22,7 +22,7 @@
 
 ## 正式環境
 
-不同使用者的裝置不能連到開發者電腦上的 `127.0.0.1`。部署 FastAPI 到可公開連線的 HTTPS 主機後，將 `fitai-web/index.html` 的 `API_BASE_URL` 改為該服務網址，並在後端部署環境設定 `OPENAI_API_KEY`。金鑰只放在後端環境變數，不要放進前端或提交至 Git。
+不同使用者的裝置不能連到開發者電腦上的 `127.0.0.1`。部署 FastAPI 到可公開連線的 HTTPS 主機後，將 `fitai-web/js/08-AI教練.js` 的 `API_BASE_URL` 改為該服務網址，並在後端部署環境設定 `OPENAI_API_KEY`。金鑰只放在後端環境變數，不要放進前端或提交至 Git。
 
 Netlify 網域（`*.netlify.app`）及 localhost 已列入 CORS 規則。若 PWA 使用自訂網域，請在後端環境設定 `CORS_ALLOW_ORIGINS`，值為完整來源（含 `https://`，不要加路徑），多個來源以逗號分隔。CORS 不是 API 存取控制；正式公開服務仍需設定使用量限制及監控。
 
@@ -36,6 +36,6 @@ Netlify 網域（`*.netlify.app`）及 localhost 已列入 CORS 規則。若 PWA
 
 ## 資料庫
 
-Supabase 的資料表與函式以 `supabase/migrations/` 為準。`fitai-web/supabase-accounts.sql`、`supabase-avatars.sql` 是早期手動貼到 SQL Editor 用的舊版本，新環境請改用 migrations。
+Supabase 的資料表與函式以 `supabase/migrations/` 為準。`supabase/舊版SQL/` 裡的兩個檔案是早期手動貼到 SQL Editor 用的舊版本，新環境請改用 migrations。
 
 停止伺服器請在啟動它的終端機按 `Ctrl+C`。

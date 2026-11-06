@@ -1,0 +1,160 @@
+/* ============================================================
+   05-鏡頭與計時器畫面
+   內容：鏡頭計數的選動作／進行中畫面、訓練計時器的設定／進行中畫面
+   注意：css 檔案依編號順序載入，後面的規則會蓋過前面的。
+   ============================================================ */
+
+.step-view{animation:stepIn .34s cubic-bezier(.2,.75,.25,1) both}
+.step-view[hidden],.cam-session[hidden],.cam-picker[hidden],.timer-setup[hidden],.timer-session[hidden]{display:none}
+@keyframes stepIn{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+.step-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.step-heading h2{margin:3px 0 0;font-size:1.35rem}
+.eyebrow{display:block;color:var(--mute);font-size:.72rem;font-weight:800;letter-spacing:.12em}
+.step-count{color:var(--mute);font:700 .78rem var(--num);letter-spacing:.08em}
+.daily-quick{display:grid;grid-template-columns:42px 1fr 20px;gap:12px;align-items:center;width:100%;padding:12px;border:1px solid rgba(113,240,192,.24);border-radius:18px;background:linear-gradient(125deg,rgba(113,240,192,.11),rgba(102,220,255,.06));color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.daily-quick-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:rgba(113,240,192,.16);color:var(--teal);font-size:1.3rem}
+.daily-quick-copy{min-width:0}.daily-quick-copy strong,.daily-quick-copy small{display:block}
+.daily-quick-copy strong{font-size:.88rem}.daily-quick-copy small{color:var(--mute);font-size:.7rem;line-height:1.35}
+.daily-quick-bar{display:block;height:4px;margin:5px 0;border-radius:9px;background:rgba(255,255,255,.1);overflow:hidden}
+.daily-quick-bar i{display:block;width:0;height:100%;background:var(--teal);border-radius:inherit}
+.daily-quick-arrow{color:var(--teal);font-size:1.5rem}
+.movement-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.movement-card{display:grid;justify-items:start;align-content:center;gap:4px;min-width:0;min-height:112px;padding:12px;border:1px solid var(--line);border-radius:18px;background:var(--glass),var(--card);color:var(--ink);text-align:left;font:inherit;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
+.movement-card:active{transform:scale(.96);border-color:var(--teal);box-shadow:0 0 22px rgba(113,240,192,.2)}
+.movement-card strong{font-size:.92rem}.movement-card small{color:var(--mute);font-size:.68rem}
+.movement-icon{font-size:1.4rem}
+.movement-more{display:flex;align-items:center;gap:12px;color:var(--mute);font-size:.78rem}
+.movement-more select{width:auto;flex:1;min-height:44px}
+.cam-session{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px}
+.session-toolbar{display:flex;align-items:center;gap:12px;min-height:48px}
+.session-title{flex:1;min-width:0}.session-title strong{display:block;font-size:1rem;line-height:1.2}
+.icon-control{display:grid;place-items:center;min-width:44px;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:15px;background:rgba(16,30,42,.76);color:var(--ink);font:inherit;font-weight:800;font-size:.86rem;cursor:pointer;backdrop-filter:blur(12px);transition:transform .16s,background .16s,color .16s}
+.icon-control:active{transform:scale(.92)}
+.icon-control.active{background:var(--teal);border-color:var(--teal);color:var(--dark)}
+.session-camera-switch{display:flex;gap:5px}
+.cam-stage-wrap{position:relative;flex:1;min-height:0}
+.cam-stage-wrap>[data-stage=cam]{height:100%}
+.cam-stage-wrap .stage{height:100%;min-height:0;aspect-ratio:auto;border-radius:24px}
+.cam-stage-wrap .stage .msg{z-index:6;background:rgba(3,13,20,.84)}
+.cam-session.is-error .cam-stage-wrap .stage .msg{inset:12px 12px auto;height:auto;min-height:72px;border-radius:16px;pointer-events:none}
+.cam-stage-wrap .stage .msg:not([hidden])::before{content:"";width:24px;height:24px;margin:0 auto 14px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite}
+.cam-stage-wrap .stage .msg{flex-direction:column}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cam-idle-card{position:absolute;inset:12px;z-index:4;display:grid;align-content:center;justify-items:center;gap:12px;padding:24px;text-align:center;border:1px solid rgba(113,240,192,.25);border-radius:22px;background:radial-gradient(circle at 50% 38%,rgba(20,82,80,.3),rgba(5,17,26,.95) 62%);transition:opacity .25s,transform .25s}
+.cam-idle-card strong{font-size:1.1rem}.cam-idle-card>span:not(.cam-idle-icon){max-width:300px;color:var(--mute);font-size:.84rem}
+.cam-idle-icon{display:grid;place-items:center;width:64px;height:64px;border:1px solid rgba(113,240,192,.25);border-radius:50%;color:var(--teal);font-size:2rem}
+.cam-idle-card .btn{width:min(100%,280px);min-height:56px}
+.cam-session.is-running .cam-idle-card{opacity:0;transform:scale(.98);pointer-events:none}
+.cam-session.is-loading .cam-idle-card{visibility:hidden}
+.cam-session-bottom{position:absolute;left:12px;right:12px;bottom:12px;z-index:7;display:flex;justify-content:space-between;align-items:end;gap:10px;pointer-events:none}
+.judgement-control,.cam-end{pointer-events:auto}
+.judgement-control{display:grid;gap:4px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:15px;background:rgba(7,18,27,.78);color:#fff;font-size:.68rem;backdrop-filter:blur(14px)}
+.judgement-control .seg{gap:4px}.judgement-control .seg button{padding:5px 10px;color:#fff;font-size:.74rem}
+.judgement-control .seg button.on{background:var(--teal);color:var(--dark)}
+.cam-end{min-height:44px;padding:8px 14px;background:rgba(7,18,27,.78);backdrop-filter:blur(14px)}
+.cam-history{display:none}
+.cam-legacy[hidden]{display:none}
+.cam-legacy{display:none}
+.timer-setup{height:100%;overflow-y:auto;overscroll-behavior:contain;display:grid;align-content:start;gap:10px;padding:2px 2px 8px}
+.timer-mode-area .f{margin:0 0 6px}
+#tModes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+#tModes button{min-height:44px;padding:6px 8px;font-size:.78rem}
+#tDesc{min-height:1.5em;margin:4px 0 0;font-size:.76rem;line-height:1.4}
+.timer-params{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.timer-params:empty{display:none}
+.timer-params .slider{grid-template-columns:1fr auto;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.timer-params .slider label{font-size:.72rem!important}.timer-params .slider output{font-size:1.1rem}
+.timer-params .slider input{height:20px}
+.timer-setup-foot{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;align-items:center}
+.timer-summary{display:grid;gap:4px;color:var(--mute);font-size:.7rem}
+.timer-summary span{display:flex;justify-content:space-between;gap:4px}.timer-summary b{color:var(--ink);font:700 1rem var(--num)}
+.timer-start{min-height:54px}
+.timer-optional{padding:8px 10px;border:1px solid var(--line);border-radius:15px;background:rgba(16,30,42,.48)}
+.timer-optional>summary{display:flex;align-items:center;min-height:44px;color:var(--mute);font-size:.78rem;font-weight:700;cursor:pointer}
+.timer-optional>.stack{margin-top:10px}
+.timer-session{height:100%;min-height:0;display:flex;flex-direction:column;gap:10px}
+.timer-session[hidden]{display:none}
+.timer-dash{flex:1;min-height:0;display:flex}
+.timer-dash .tcard{width:100%;min-height:0;padding:18px 12px;border-radius:26px}
+.timer-dash .tbig{font-size:clamp(100px,28vh,220px)}
+#timerSessionCamera{display:none}
+.timer-session.has-camera #timerSessionCamera{display:block;height:132px;flex:none}
+.timer-session.has-camera #timerSessionCamera .stage{height:100%;aspect-ratio:auto;min-height:0;border-radius:16px}
+.timer-session.has-camera #timerSessionCamera .stage .score{left:10px;top:7px}
+.timer-session.has-camera #timerSessionCamera .stage .n{font-size:3rem}
+.timer-session.has-camera .timer-dash .tcard{padding:8px}
+.timer-session-actions{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
+.timer-session-actions .timer-stop{min-width:112px}
+.timer-session-actions #tResult{grid-column:1/-1;max-height:22vh;overflow:auto;margin:0}
+.stage .n.count-pop{animation:countPop .34s cubic-bezier(.18,.9,.25,1.4)}
+@keyframes countPop{0%{transform:scale(1)}40%{transform:scale(1.28);filter:drop-shadow(0 0 18px var(--yellow))}100%{transform:scale(1)}}
+button:active{transform:scale(.97)}
+@media(min-width:641px){
+  .cam-session,.timer-session{height:calc(100dvh - 190px);min-height:440px;max-height:760px}
+  .cam-stage-wrap{min-height:360px}
+}
+@media(max-width:640px){
+  html,body{height:100%;height:100dvh;min-height:0;overflow:hidden}
+  body{display:flex;flex-direction:column}
+  .top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;gap:5px;width:100%;max-width:none;margin:0;height:146px;flex:none;padding:calc(8px + env(safe-area-inset-top)) 12px 4px}
+  .brand{font-size:1.5rem;line-height:1}
+  .top>.brand{grid-column:1/-1}
+  .top-right{display:contents}
+  #modeLabel{display:none}
+  #modeHomeBtn,#voiceBtn,#accountBtn{min-height:38px;padding:5px 8px;font-size:.68rem}
+  #stats{display:grid;grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%;padding:0}
+  #stats .stat{min-width:0;padding:6px 3px;border:1px solid var(--line);border-radius:12px;text-align:center}
+  #stats .stat b{font-size:1.2rem}
+  #stats .stat span{display:block;font-size:.58rem;line-height:1.2}
+  main{width:100%;max-width:none;margin:0;height:calc(100dvh - 210px - env(safe-area-inset-bottom));min-height:0;flex:1;overflow:hidden;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+  .panel{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+  #tab-cam,#tab-timer{overflow:hidden}
+  .cam-picker{height:100%;min-height:0;display:flex;flex-direction:column;gap:10px}
+  .step-heading h2{font-size:1.22rem}
+  .daily-quick{grid-template-columns:36px 1fr 16px;gap:8px;padding:8px 10px;border-radius:15px}
+  .daily-quick-icon{width:34px;height:34px}
+  .daily-quick-copy strong{font-size:.78rem}.daily-quick-copy small{font-size:.62rem}
+  .movement-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1;min-height:0;align-content:stretch}
+  .movement-card{min-height:68px;grid-template-columns:38px 1fr;grid-template-rows:1fr 1fr;align-items:center;gap:0 8px;padding:8px 10px;border-radius:15px}
+  .movement-icon{grid-row:1/3;font-size:1.35rem}
+  .movement-card strong{align-self:end;font-size:.8rem}
+  .movement-card small{align-self:start;font-size:.63rem}
+  .movement-more{gap:8px;font-size:.68rem}
+  .movement-more select{min-height:44px;padding:6px 10px;font-size:.78rem}
+  .cam-session{gap:6px}
+  .session-toolbar{min-height:44px;gap:8px}
+  .icon-control{min-width:44px;min-height:44px;border-radius:13px}
+  .cam-stage-wrap .stage{border-radius:20px}
+  .cam-stage-wrap .stage .n{font-size:clamp(64px,18vw,100px)}
+  .cam-session-bottom{left:8px;right:8px;bottom:8px}
+  .judgement-control{padding:6px 8px}
+  .cam-end{font-size:.72rem}
+  .timer-setup{gap:6px;padding:0 2px}
+  .timer-optional{padding:2px 10px}
+  #tModes{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  #tModes button{min-height:44px;padding:4px;font-size:.66rem}
+  .timer-params{gap:5px}
+  .timer-params .slider{padding:6px}
+  .timer-params .slider label{font-size:.63rem!important}
+  .timer-params .slider output{font-size:1rem}
+  .timer-params .slider input{margin:3px 0}
+  .timer-session{gap:8px}
+  .timer-dash .tcard{padding:12px 8px}
+  .timer-dash .tlabel{font-size:1rem}
+  .timer-dash .tbig{font-size:clamp(96px,24vh,190px)}
+  .timer-session-actions{gap:8px}
+}
+@media(max-height:700px) and (max-width:640px){
+  .top{height:140px}
+  main{height:calc(100dvh - 200px - env(safe-area-inset-bottom))}
+  .cam-picker{gap:7px}
+  .movement-card{min-height:58px}
+  .daily-quick{padding:6px 9px}
+}
+body[data-primary-view="cam"] .fab,body[data-primary-view="cam"] .bd-fab,body[data-primary-view="cam"] .bd-bubble,body[data-primary-view="cam"] .bd-panel,
+body[data-primary-view="timer"] .fab,body[data-primary-view="timer"] .bd-fab,body[data-primary-view="timer"] .bd-bubble,body[data-primary-view="timer"] .bd-panel{display:none}
+@media(prefers-reduced-motion:reduce){
+  .step-view{animation:none}
+  .movement-card,.icon-control,.cam-idle-card{transition:none}
+  .stage .n.count-pop{animation:none}
+}

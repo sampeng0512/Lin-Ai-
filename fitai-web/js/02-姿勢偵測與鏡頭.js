@@ -20,28 +20,66 @@ const ang=(a,b,c)=>{const v1=[a[0]-b[0],a[1]-b[1]],v2=[c[0]-b[0],c[1]-b[1]];
   const cos=(v1[0]*v2[0]+v1[1]*v2[1])/(Math.hypot(...v1)*Math.hypot(...v2)+1e-6);
   return Math.acos(Math.max(-1,Math.min(1,cos)))*180/Math.PI};
 /* 三個點的可信度都夠才算角度；有 3D 世界座標就用 3D（不受拍攝角度影響），否則用畫面 2D 座標 */
-const angles=(lm,a,b,c)=>['l','r'].map(s=>{
+const angleOne=(lm,s,a,b,c)=>{
   const ix=[a,b,c].map(n=>IDX[`${s}_${n}`]);
   if(!ix.every(i=>lm[i]&&lm[i][2]>=S.cam.vis))return null;
   if(S.cam.use3d&&lm.w&&ix.every(i=>lm.w[i]))return angN(...ix.map(i=>lm.w[i].slice(0,3)));
   return ang(...ix.map(i=>[lm[i][0],lm[i][1]]));
-}).filter(v=>v!==null);
+};
+const angles=(lm,a,b,c)=>['l','r'].map(s=>angleOne(lm,s,a,b,c)).filter(v=>v!==null);
 const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+/* 一側幾個關節裡最低的可信度（側拍時遠側被身體擋住，位置是模型猜的，可信度會明顯偏低） */
+const sideW=(lm,s,names)=>Math.min(...names.map(n=>{const p=lm[IDX[`${s}_${n}`]];return p?p[2]:0}));
+const bestSide=(lm,names)=>{const l=sideW(lm,'l',names),r=sideW(lm,'r',names),m=Math.max(l,r);return m<S.cam.vis?null:(l>=r?'l':'r')};
+/* 左右都看得清楚就依可信度加權平均；兩邊可信度差很多（側拍）就只用近側，避免被遠側的猜測值帶偏 */
+const sideAng=(lm,a,b,c)=>{
+  const r=[];for(const s of ['l','r']){const v=angleOne(lm,s,a,b,c);if(v!==null)r.push([v,sideW(lm,s,[a,b,c])])}
+  if(!r.length)return null;if(r.length===1)return r[0][0];
+  const [x,y]=r;if(Math.abs(x[1]-y[1])>.15)return x[1]>y[1]?x[0]:y[0];
+  return (x[0]*x[1]+y[0]*y[1])/(x[1]+y[1]);
+};
+/* 上半身前傾角度：0＝站直，90＝和地面平行（用畫面 2D 座標，鏡頭要擺正） */
+const torsoLean=lm=>{const s=bestSide(lm,['sh','hip']);if(!s)return null;const a=P(lm,s+'_sh'),b=P(lm,s+'_hip');if(!a||!b)return null;
+  return Math.atan2(Math.abs(a[0]-b[0]),b[1]-a[1])*180/Math.PI};
+const segDist=(p,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1e-6,t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L));return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)};
+/* One Euro 濾波：動作慢時強力去抖動、動作快時幾乎不延遲（比固定比例的平滑更準，快速動作的最低點不會被抹掉） */
+class OneEuro{
+  constructor(minCut=1.4,beta=4,dCut=1){this.minCut=minCut;this.beta=beta;this.dCut=dCut;this.x=null;this.dx=0;this.t=0}
+  static a(cut,dt){const r=2*Math.PI*cut*dt;return r/(r+1)}
+  f(x,t){
+    if(this.x===null){this.x=x;this.t=t;this.dx=0;return x}
+    if(t<=this.t)return this.x;
+    const dt=Math.min(.2,(t-this.t)/1000);this.t=t;
+    this.dx+=((x-this.x)/dt-this.dx)*OneEuro.a(this.dCut,dt);
+    this.x+=(x-this.x)*OneEuro.a(this.minCut+this.beta*Math.abs(this.dx),dt);return this.x;
+  }
+}
+const mkFilters=()=>Array.from({length:33},()=>({x:new OneEuro(),y:new OneEuro(),z:new OneEuro(),v:null}));
 const torso=lm=>mean(['l','r'].map(s=>{const a=P(lm,s+'_sh'),b=P(lm,s+'_hip');return a&&b?dist(a,b):null}).filter(v=>v!==null));
 const armsUp=lm=>{const t=torso(lm);if(!t)return null;
   const sh=['l','r'].map(s=>P(lm,s+'_sh')).filter(Boolean),wr=['l','r'].map(s=>P(lm,s+'_wr')).filter(Boolean);
   if(!sh.length||!wr.length)return null;return (mean(sh.map(p=>p[1]))-mean(wr.map(p=>p[1])))/t};
 const kneeHeight=(lm,s)=>{const t=torso(lm),k=P(lm,s+'_kn'),h=P(lm,s+'_hip');return t&&k&&h?(h[1]-k[1])/t:null};
+/* 姿勢守門：只有「動作頂點」時身體姿勢也對，這一下才算（避免別的動作或亂動被誤算） */
+const wrists=lm=>['l','r'].map(s=>P(lm,s+'_wr')).filter(Boolean),shoulders=lm=>['l','r'].map(s=>P(lm,s+'_sh')).filter(Boolean);
+const wristsAboveSh=k=>lm=>{const t=torso(lm),w=wrists(lm),sh=shoulders(lm);if(!t||!w.length||!sh.length)return false;return mean(w.map(p=>p[1]))<mean(sh.map(p=>p[1]))-k*t};   // 手腕比肩膀高 k 個軀幹長
+const wristsNotBelow=k=>lm=>{const t=torso(lm),w=wrists(lm),sh=shoulders(lm);if(!t||!w.length||!sh.length)return false;return mean(w.map(p=>p[1]))<mean(sh.map(p=>p[1]))+k*t};
+const leanAtLeast=d=>lm=>{const l=torsoLean(lm);return l!==null&&l>=d};
+const wristNearHip=k=>lm=>{const t=torso(lm);if(!t)return false;return ['l','r'].some(s=>{const w=P(lm,s+'_wr'),h=P(lm,s+'_hip');return w&&h&&dist(w,h)<k*t})};
+const wristNearTorso=k=>lm=>{const t=torso(lm);if(!t)return false;return ['l','r'].some(s=>{const w=P(lm,s+'_wr'),a=P(lm,s+'_sh'),h=P(lm,s+'_hip');return w&&a&&h&&segDist(w,a,h)<k*t})};
+const armsForward=k=>lm=>['l','r'].some(s=>{const a=P(lm,s+'_sh'),e=P(lm,s+'_el'),w=P(lm,s+'_wr');return a&&e&&w&&Math.abs(w[0]-a[0])>k*(dist(a,e)+dist(e,w))});   // 手臂往前伸（側拍時手腕和肩膀水平距離夠遠）
+const allOf=(...g)=>(lm,s,st)=>g.every(f=>f(lm,s,st));
 const EX={
- "深蹲":{en:"Squats",lo:105,hi:160,fn:lm=>mean(angles(lm,'hip','kn','an'))},
- "伏地挺身":{en:"Push-ups",lo:95,hi:150,fn:lm=>mean(angles(lm,'sh','el','wr'))},
- "捲腹":{en:"Crunches",lo:80,hi:105,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
- "仰臥起坐":{en:"Sit-ups",lo:70,hi:110,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
+ "深蹲":{en:"Squats",lo:105,hi:160,fn:lm=>sideAng(lm,'hip','kn','an')},
+ "伏地挺身":{en:"Push-ups",lo:95,hi:150,fn:lm=>sideAng(lm,'sh','el','wr')},
+ "捲腹":{en:"Crunches",lo:80,hi:105,fn:lm=>sideAng(lm,'sh','hip','kn')},
+ "仰臥起坐":{en:"Sit-ups",lo:70,hi:110,fn:lm=>sideAng(lm,'sh','hip','kn')},
  "側平舉":{en:"Lateral Raises",lo:35,hi:75,fn:lm=>mean(angles(lm,'hip','sh','el'))},
- "二頭彎舉":{en:"Bicep Curls",lo:55,hi:140,fn:lm=>mean(angles(lm,'sh','el','wr'))},
+ "二頭彎舉":{en:"Bicep Curls",lo:55,hi:140,fn:lm=>sideAng(lm,'sh','el','wr'),
+   peakGuard:lm=>{const a=sideAng(lm,'el','sh','hip');return a!==null&&a<=50},guardMsg:'上臂貼緊身體，只彎手肘'},
  "開合跳":{en:"Jumping Jacks",lo:-.3,hi:.3,fn:armsUp},
  "弓箭步":{en:"Lunges",lo:105,hi:155,fn:lm=>{const a=angles(lm,'hip','kn','an');return a.length?Math.min(...a):null}},
- "臀橋":{en:"Glute Bridges",lo:135,hi:160,fn:lm=>mean(angles(lm,'sh','hip','kn'))},
+ "臀橋":{en:"Glute Bridges",lo:135,hi:160,fn:lm=>sideAng(lm,'sh','hip','kn')},
  "高抬腿":{en:"High Knees",lo:-.6,hi:-.25,side:true,fn:kneeHeight},
 };
 /* ===== 新增動作的偵測方式 ===== */
@@ -53,15 +91,15 @@ const legSpread=(lm,s)=>{const t=torso(lm),a=P(lm,s+'_an'),h=P(lm,s+'_hip');retu
 const jumpSig=(lm,sd,st)=>{ // 腳踝離「地面」多高（地面＝最近腳踝最低的位置，會慢慢跟著調整）
   const t=torso(lm),ys=['l','r'].map(s=>P(lm,s+'_an')).filter(Boolean).map(p=>p[1]);if(!t||!ys.length)return null;
   const y=mean(ys);if(st.base===undefined||y>st.base)st.base=y;else st.base+=(y-st.base)*.01;return (st.base-y)/t};
-const elbowAng=lm=>mean(angles(lm,'sh','el','wr')),rowAng=lm=>{const a=angles(lm,'sh','el','wr');return a.length?Math.min(...a):null}, // 划船取彎得最多的那隻手：單手划船時支撐手不會把平均拉高
- hipAng=lm=>mean(angles(lm,'sh','hip','kn'));
+const elbowAng=lm=>sideAng(lm,'sh','el','wr'),rowAng=lm=>{const a=angles(lm,'sh','el','wr');return a.length?Math.min(...a):null}, // 單手划船取彎得最多的那隻手：支撐手不會把平均拉高
+ hipAng=lm=>sideAng(lm,'sh','hip','kn');
 const wristDrop=lm=>mean(['l','r'].map(s=>{const a=P(lm,s+'_sh'),e=P(lm,s+'_el'),w=P(lm,s+'_wr');return a&&e&&w?(w[1]-a[1])/(dist(a,e)+dist(e,w)+1e-6):null}).filter(v=>v!==null)); // 手腕比肩膀低多少（用手臂長度換算）
 Object.assign(EX,{
  "深蹲跳":{en:"Jump Squats",lo:105,hi:160,fn:EX["深蹲"].fn},
- "肩推":{en:"Shoulder Press",lo:95,hi:155,fn:elbowAng},
+ "肩推":{en:"Shoulder Press",lo:95,hi:155,fn:elbowAng,peakGuard:wristsAboveSh(.3),guardMsg:'往頭頂正上方推，手腕要高過肩膀'},
  "仰臥抬腿":{en:"Leg Raises",lo:100,hi:150,fn:hipAng},
  "前平舉":{en:"Front Raises",lo:35,hi:75,fn:lm=>mean(angles(lm,'hip','sh','wr'))},
- "引體向上":{en:"Pull-ups",lo:75,hi:150,fn:elbowAng},
+ "引體向上":{en:"Pull-ups",lo:75,hi:150,fn:elbowAng,startGuard:wristsAboveSh(.5),peakGuard:wristsAboveSh(.1),guardMsg:'雙手要握在頭頂上方的單槓，把身體往上拉'},
  "側抬腿":{en:"Side Leg Raises",lo:.12,hi:.35,side:true,fn:legSpread},
  "側彎":{en:"Side Bends",lo:.08,hi:.30,fn:tiltRatio},
  "站姿抬膝碰肘":{en:"Standing Knee-to-Elbow",lo:.55,hi:.9,side:true,fn:kneeElbow},
@@ -72,12 +110,20 @@ Object.assign(EX,{
    cue2:{fn:lm=>mean(angles(lm,'el','sh','hip')),ok:80,msg:'手肘張太開，收近身體一點（上臂和身體約 45–75 度）'}},
  "啞鈴上斜臥推":{en:"Incline Dumbbell Press",lo:95,hi:155,fn:elbowAng,
    cue2:{fn:lm=>mean(angles(lm,'el','sh','hip')),ok:80,msg:'手肘張太開，收近身體一點（上臂和身體約 45–75 度）'}},
- "啞鈴俯身划船":{en:"Bent-over Dumbbell Row",lo:95,hi:145,fn:rowAng},
- "俯身划船":{en:"Bent-over Barbell Row",lo:95,hi:145,fn:rowAng},
- "繩索划船":{en:"Seated Cable Row",lo:95,hi:145,fn:rowAng},
- "高位下拉":{en:"Lat Pulldown",lo:90,hi:145,fn:elbowAng},
+ /* 划船、下拉：只看手肘角度會把二頭彎舉、亂揮手也算進去，所以再加上身體姿勢與手的位置檢查 */
+ "啞鈴俯身划船":{en:"Bent-over Dumbbell Row",lo:95,hi:145,fn:rowAng,
+   startGuard:leanAtLeast(20),peakGuard:allOf(leanAtLeast(15),wristNearHip(.95)),guardMsg:'請側拍：上身前傾、手臂垂下，再把啞鈴拉到腰側'},
+ "俯身划船":{en:"Bent-over Barbell Row",lo:95,hi:145,fn:elbowAng,
+   startGuard:allOf(leanAtLeast(20),lm=>!wristsAboveSh(0)(lm)),peakGuard:allOf(leanAtLeast(15),wristNearHip(.9)),guardMsg:'請側拍：髖部往後推、上身前傾約 45 度，把槓拉到肚臍',
+   cue2:{type:'min',fn:torsoLean,ok:28,msg:'上身越做越直立了，保持前傾約 45 度、背打平'}},
+ "繩索划船":{en:"Seated Cable Row",lo:95,hi:145,fn:elbowAng,
+   startGuard:armsForward(.45),peakGuard:wristNearTorso(.5),guardMsg:'請側拍：手臂先往前伸直，再把握把拉到肚子前',
+   cue2:{fn:torsoLean,ok:35,msg:'上身保持挺直，不要前後搖擺借力'}},
+ "高位下拉":{en:"Lat Pulldown",lo:90,hi:145,fn:elbowAng,
+   startGuard:wristsAboveSh(.5),peakGuard:wristsNotBelow(.35),guardMsg:'雙手先舉高握槓，再把槓往下拉到上胸'},
  "啞鈴反向飛鳥":{en:"Reverse Dumbbell Fly",lo:.3,hi:.75,fn:wristDrop},
- "啞鈴羅馬尼亞硬舉":{en:"Dumbbell Romanian Deadlift",lo:115,hi:160,fn:hipAng},
+ "啞鈴羅馬尼亞硬舉":{en:"Dumbbell Romanian Deadlift",lo:115,hi:160,fn:hipAng,
+   peakGuard:lm=>{const k=sideAng(lm,'hip','kn','an');return k===null||k>=120},guardMsg:'膝蓋微彎就好，是把髖部往後推，不是蹲下'},
 });
 const START_HIGH=new Set(['深蹲','伏地挺身','捲腹','仰臥起坐','二頭彎舉','弓箭步','引體向上','仰臥抬腿','波比跳','啞鈴臥推','啞鈴上斜臥推','啞鈴俯身划船','啞鈴反向飛鳥','啞鈴羅馬尼亞硬舉','高位下拉','繩索划船','俯身划船']);
 // 計數器用 startAngle（起始姿勢）／peakAngle（動作頂點）判斷；沒另外設定就用 lo/hi
@@ -130,36 +176,55 @@ const TEMPO={"深蹲":1.8,"伏地挺身":1.6,"二頭彎舉":1.6,"弓箭步":1.8,
 Object.assign(TEMPO,{"啞鈴臥推":1.6,"肩推":1.6,"仰臥抬腿":1.8,"前平舉":1.6,"引體向上":2.0,"啞鈴上斜臥推":1.6,"啞鈴俯身划船":1.6,"俯身划船":1.6,"繩索划船":1.6,"高位下拉":1.6,"啞鈴反向飛鳥":1.6,"啞鈴羅馬尼亞硬舉":2.0});
 for(const [k,v] of Object.entries(TEMPO))EX[k].tempo=v;
 
+/* 計數精準度參數 */
+const REP_GRACE=400;     // 關節短暫看不到（被手臂擋住、模糊）多久以內不中斷這一下（毫秒）
+const REP_CONFIRM=2;     // 起始／頂點姿勢要連續幾幀成立才算數，避免單幀抖動誤判
+const REP_SMOOTH=.55;    // 角度的平滑比例（關節點已經先用 One Euro 濾過，這裡只輕微平滑，保留真正的最低點）
 class RepCounter{
   constructor(key){this.key=key;this.cfg=EX[key];this.relax=.06;this.reset()}
-  reset(){this.count=0;this.cueTotal=0;this.cueBad=0;this.hist=[];this.cycles=[];this.tempoFast=0;this.store={};this.trk={};this.lastRepAt=0;
-    (this.cfg.side?['l','r']:['_']).forEach(s=>this.trk[s]={phase:'seek-start',lastCount:0,v:null,cmin:0,cmax:0,c2:-Infinity,peakValid:false})}
-  lost(){this.store={};Object.values(this.trk).forEach(t=>{t.v=null;t.phase='seek-start';t.cmin=0;t.cmax=0;t.c2=-Infinity;t.peakValid=false})}
+  reset(){this.count=0;this.cueTotal=0;this.cueBad=0;this.hist=[];this.cycles=[];this.tempoFast=0;this.store={};this.trk={};this.lastRepAt=0;this.lastHint=0;
+    (this.cfg.side?['l','r']:['_']).forEach(s=>{this.trk[s]={phase:'seek-start',lastCount:0,v:null,lastSeen:0,sN:0,pN:0};this._cycle(this.trk[s],0)})}
+  _cycle(t,v){t.cmin=v;t.cmax=v;t.c2=null;t.peakValid=false;t.startOk=!this.cfg.startGuard}
+  lost(){this.store={};Object.values(this.trk).forEach(t=>{t.v=null;t.phase='seek-start';t.sN=0;t.pN=0;this._cycle(t,0)})}
+  _guard(lm,s,t){return t.startOk&&(!this.cfg.peakGuard||!!this.cfg.peakGuard(lm,s,this.store))}
   _eval(ext){const q=this.cfg.cue;if(!q)return null;const bad=q.type==='min'?ext>q.ok:ext<q.ok;
     this.cueTotal++;if(bad)this.cueBad++;this.hist=[...this.hist,bad?1:0].slice(-3);return {bad,msg:q.msg}}
-  _eval2(ext){const q=this.cfg.cue2,bad=ext>q.ok;this.cueTotal++;if(bad)this.cueBad++;this.hist=[...this.hist,bad?1:0].slice(-3);return {bad,msg:q.msg}}
+  _eval2(ext){const q=this.cfg.cue2,bad=q.type==='min'?ext<q.ok:ext>q.ok;this.cueTotal++;if(bad)this.cueBad++;this.hist=[...this.hist,bad?1:0].slice(-3);return {bad,msg:q.msg}}
   update(lm,now){
     const c=this.cfg,gap=(c.hi-c.lo)*this.relax,angleGap=Math.abs(c.startAngle-c.peakAngle)*this.relax,lo=c.lo+gap,hi=c.hi-gap,
       startLimit=c.startHigh?c.startAngle-angleGap:c.startAngle+angleGap,peakLimit=c.startHigh?c.peakAngle+angleGap:c.peakAngle-angleGap,
       vals=[],ev=[],cooldown=Math.max(450,(c.tempo||.75)*650);
     for(const [s,t] of Object.entries(this.trk)){
       const raw=c.fn(lm,s,this.store);
-      if(raw===null){t.v=null;t.phase='seek-start';continue}
-      t.v=t.v===null?raw:t.v+(raw-t.v)*.32;const v=t.v;vals.push(v);
-      const v2=c.cue2?c.cue2.fn(lm,s,this.store):null;
-      if(t.phase==='seek-start'&&(c.startHigh?v>=startLimit:v<=startLimit)){t.phase='seek-peak';t.cmin=v;t.cmax=v;t.c2=-Infinity;t.peakValid=false}
-      if(t.phase!=='seek-start'){t.cmin=Math.min(t.cmin,v);t.cmax=Math.max(t.cmax,v);if(v2!==null)t.c2=Math.max(t.c2,v2)}
-      if(t.phase==='seek-peak'&&(c.startHigh?v<=peakLimit:v>=peakLimit)){t.phase='seek-return';t.peakValid=!c.peakGuard||c.peakGuard(lm,s,this.store)}
-      if(t.phase==='seek-return'&&c.peakGuard&&c.peakGuard(lm,s,this.store))t.peakValid=true;
-      if(t.phase==='seek-return'&&(c.startHigh?v>=startLimit:v<=startLimit)&&now-this.lastRepAt>=cooldown){
-        if(!t.peakValid){t.phase='seek-peak';t.cmin=v;t.cmax=v;t.c2=-Infinity;continue}
-        this.count++;t.phase='seek-peak';t.peakValid=false;this.lastRepAt=now;
+      if(raw===null||!Number.isFinite(raw)){
+        if(t.v!==null&&now-t.lastSeen<=REP_GRACE){vals.push(t.v);continue}   // 短暫看不到：保留目前進度，不重來
+        t.v=null;t.phase='seek-start';t.sN=0;t.pN=0;continue;
+      }
+      t.lastSeen=now;
+      t.v=t.v===null?raw:t.v+(raw-t.v)*REP_SMOOTH;const v=t.v;vals.push(v);
+      t.sN=(c.startHigh?v>=startLimit:v<=startLimit)?t.sN+1:0;
+      t.pN=(c.startHigh?v<=peakLimit:v>=peakLimit)?t.pN+1:0;
+      const atStart=t.sN>=REP_CONFIRM,atPeak=t.pN>=REP_CONFIRM;
+      if(t.phase==='seek-start'&&atStart){t.phase='seek-peak';this._cycle(t,v)}
+      if(t.phase!=='seek-start'){
+        t.cmin=Math.min(t.cmin,v);t.cmax=Math.max(t.cmax,v);
+        if(c.cue2){const v2=c.cue2.fn(lm,s,this.store);if(v2!==null&&Number.isFinite(v2))t.c2=t.c2===null?v2:(c.cue2.type==='min'?Math.min(t.c2,v2):Math.max(t.c2,v2))}
+        if(t.phase==='seek-peak'&&!t.startOk&&t.sN>0&&c.startGuard(lm,s,this.store))t.startOk=true;   // 在起始位置時姿勢對過一次就記住（動作中途剛好符合不算）
+      }
+      if(t.phase==='seek-peak'&&atPeak){t.phase='seek-return';t.peakValid=this._guard(lm,s,t)}
+      if(t.phase==='seek-return'&&!t.peakValid&&this._guard(lm,s,t))t.peakValid=true;
+      if(t.phase==='seek-return'&&atStart&&now-this.lastRepAt>=cooldown){
+        if(!t.peakValid){   // 角度有到，但身體姿勢不對：不算，並提示正確做法
+          if(c.guardMsg&&now-this.lastHint>3500){this.lastHint=now;ev.push({kind:'hint',bad:true,msg:c.guardMsg})}
+          t.phase='seek-peak';this._cycle(t,v);continue;
+        }
+        this.count++;t.phase='seek-peak';this.lastRepAt=now;
         for(const other of Object.values(this.trk))if(other!==t&&other.phase==='seek-return'){other.phase='seek-peak';other.peakValid=false}
         const cyc=t.lastCount?(now-t.lastCount)/1000:null;t.lastCount=now;
         if(c.tempo&&cyc!==null){this.cycles=[...this.cycles,cyc].slice(-6);if(cyc<c.tempo){this.tempoFast++;ev.push({kind:'tempo',bad:true,msg:'動作再放慢一些，保持穩定節奏'})}else this.tempoFast=0}
-        if(c.cue2&&isFinite(t.c2))ev.push(this._eval2(t.c2));
+        if(c.cue2&&t.c2!==null)ev.push(this._eval2(t.c2));
         if(c.cue){const e=this._eval(c.cue.type==='min'?t.cmin:t.cmax);e&&ev.push(e)}
-        t.cmin=v;t.cmax=v;t.c2=-Infinity;
+        this._cycle(t,v);if(c.startGuard&&c.startGuard(lm,s,this.store))t.startOk=true;
       }
     }
     const value=mean(vals);
@@ -169,27 +234,48 @@ class RepCounter{
 
 /* ================= 姿勢模型與鏡頭（MediaPipe，在使用者自己的裝置上執行） ================= */
 const VER='0.10.14';
-let poseLM=null,posePromise=null;
-function resetPose(){if(poseLM&&poseLM.close){try{poseLM.close()}catch(e){}}poseLM=null;posePromise=null}
-function loadPose(){
-  if(window.__fakePose){poseLM=window.__fakePose;return Promise.resolve(poseLM)}
-  if(poseLM)return Promise.resolve(poseLM);
-  if(posePromise)return posePromise;
-  posePromise=(async()=>{
+let poseLM=null,posePromise=null,poseModel='';
+/* 模型：預設用 full（關節位置比 lite 準很多）；裝置跑不動（FPS 太低）時，這次開啟期間自動改用 lite */
+const POSE_AUTO={liteFps:13,checkAfter:5000};
+let poseForceLite=false;
+const poseModelKey=()=>poseForceLite?'lite':(S.cam.model==='lite'?'lite':'full');
+function resetPose(){if(poseLM&&poseLM.close){try{poseLM.close()}catch(e){}}poseLM=null;posePromise=null;poseModel=''}
+let visionMod=null;
+async function createPose(mk){
+  if(!visionMod){
     const mod=await import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VER}`);
     const V=mod.PoseLandmarker?mod:(mod.default||mod);
-    const fileset=await V.FilesetResolver.forVisionTasks(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VER}/wasm`);
-    const mk=S.cam.model,models=[`assets/models/pose_landmarker_${mk}.task`,`https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${mk}/float16/1/pose_landmarker_${mk}.task`];
-    let lastErr;
-    for(const m of models)for(const d of ['GPU','CPU']){
-      try{
-        poseLM=await V.PoseLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath:m,delegate:d},runningMode:'VIDEO',numPoses:1,minPoseDetectionConfidence:.7,minPosePresenceConfidence:.65,minTrackingConfidence:.7});
-        return poseLM;
-      }catch(e){lastErr=e;console.warn('model load failed',m,d,e)}
-    }
-    throw lastErr||new Error('模型載入失敗');
+    visionMod={V,fileset:await V.FilesetResolver.forVisionTasks(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VER}/wasm`)};
+  }
+  const {V,fileset}=visionMod,conf=Math.min(.9,Math.max(.4,S.cam.conf||.7));
+  const models=[`assets/models/pose_landmarker_${mk}.task`,`https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${mk}/float16/1/pose_landmarker_${mk}.task`];
+  let lastErr;
+  for(const m of models)for(const d of ['GPU','CPU']){
+    try{return await V.PoseLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath:m,delegate:d},runningMode:'VIDEO',numPoses:1,minPoseDetectionConfidence:conf,minPosePresenceConfidence:conf-.05,minTrackingConfidence:conf})}
+    catch(e){lastErr=e;console.warn('model load failed',m,d,e)}
+  }
+  throw lastErr||new Error('模型載入失敗');
+}
+function loadPose(){
+  if(window.__fakePose){poseLM=window.__fakePose;return Promise.resolve(poseLM)}
+  if(poseLM&&poseModel===poseModelKey())return Promise.resolve(poseLM);
+  if(poseLM)resetPose();
+  if(posePromise)return posePromise;
+  const mk=poseModelKey();
+  posePromise=(async()=>{
+    let lm;
+    try{lm=await createPose(mk)}
+    catch(e){if(mk==='lite')throw e;console.warn('full 模型載入失敗，改用 lite',e);poseForceLite=true;lm=await createPose('lite')}
+    poseLM=lm;poseModel=poseForceLite?'lite':mk;return lm;
   })().catch(e=>{posePromise=null;throw e});
   return posePromise;
+}
+/* 執行中換成 lite：新模型載好之前舊模型繼續跑，畫面不會中斷、次數不會歸零 */
+function poseDowngrade(){
+  if(poseForceLite||cam.swapping||window.__fakePose)return;
+  cam.swapping=true;poseForceLite=true;console.warn('FPS 太低，改用 lite 模型');
+  createPose('lite').then(n=>{const old=poseLM;poseLM=n;poseModel='lite';posePromise=Promise.resolve(n);if(old&&old!==n&&old.close){try{old.close()}catch(e){}}})
+    .catch(e=>console.warn(e)).finally(()=>{cam.swapping=false});
 }
 
 const STAGE_HTML=`<div class="stage"><video class="v" playsinline muted></video><canvas class="c"></canvas>
@@ -237,10 +323,11 @@ function makeView(host,getCounter,go){
 const CHIP={ready:['姿勢標準！','ready'],low:['動作幅度再完整一點','low'],nobody:['請將全身保持在畫面框線內','warn'],rest:['休息中','']};
 let lastCueSay=0;
 function handleCue(v,counter,e,now){
-  if(e.kind==='tempo'){
+  if(e.kind==='tempo'||e.kind==='hint'){
     clearTimeout(v.cueT);v.cueEl.hidden=false;v.cueEl.className='cue bad';v.cueEl.textContent=e.msg;
     v.cueT=setTimeout(()=>{v.cueEl.hidden=true},2400);v.cueInfo={text:e.msg,bad:true,until:now+2400};
-    if(counter.tempoFast>=2&&now-lastCueSay>6000){lastCueSay=now;say('放慢一點')}
+    if(e.kind==='tempo'&&counter.tempoFast>=2&&now-lastCueSay>6000){lastCueSay=now;say('放慢一點')}
+    if(e.kind==='hint'&&now-lastCueSay>6000){lastCueSay=now;say(e.msg)}
     return;
   }
   const dk=dkey(new Date()),df=S.dayForm[dk]||(S.dayForm[dk]={ok:0,bad:0});
@@ -251,7 +338,7 @@ function handleCue(v,counter,e,now){
   v.cueInfo={text:e.bad?e.msg:'姿勢標準！',bad:e.bad,until:now+(e.bad?2400:900)};
   if(e.bad&&counter.hist.slice(-2).join()==='1,1'&&now-lastCueSay>6000){lastCueSay=now;say(e.msg)}
 }
-const cam={running:false,starting:false,requestId:0,view:null,stream:null,raf:0,lastT:-1,onStop:null,filtered:null};
+const cam={running:false,starting:false,requestId:0,view:null,stream:null,raf:0,lastT:-1,onStop:null,filtered:null,wfiltered:null,swapping:false,t0:0};
 const CONN=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
 function drawSkeleton(ctx,lm,k=1){
   ctx.lineWidth=5*k;ctx.lineCap='round';ctx.strokeStyle='#3dd6d0';
@@ -290,22 +377,25 @@ function tick(){
     const W=vid.videoWidth,H=vid.videoHeight;
     if(v.canvas.width!==W){v.canvas.width=W;v.canvas.height=H}
     const ctx=v.canvas.getContext('2d');ctx.clearRect(0,0,W,H);
-    let res=null;try{res=poseLM.detectForVideo(vid,performance.now())}catch(e){console.warn(e)}
+    const now=performance.now();
+    let res=null;try{res=poseLM&&poseLM.detectForVideo(vid,now)}catch(e){console.warn(e)}
     const raw=res&&res.landmarks&&res.landmarks[0];
     let info={status:'nobody',value:null},msg='';
     if(raw){
       const lm=LM,nL=Math.min(raw.length,33);
-      cam.filtered=cam.filtered||Array.from({length:33},()=>null);
-      for(let i=0;i<nL;i++){
-        const p=raw[i],a=lm[i],confidence=p.visibility===undefined?1:p.visibility,px=p.x*W,py=p.y*H,prev=cam.filtered[i];
-        if(!prev||confidence<.25)cam.filtered[i]=[px,py,p.z||0,confidence];
-        else{prev[0]+=(px-prev[0])*.42;prev[1]+=(py-prev[1])*.42;prev[2]+=((p.z||0)-prev[2])*.42;prev[3]+=(confidence-prev[3])*.42}
-        const filtered=cam.filtered[i];a[0]=filtered[0];a[1]=filtered[1];a[2]=filtered[3];
+      cam.filtered=cam.filtered||mkFilters();
+      for(let i=0;i<nL;i++){   // 畫面座標（0–1）先濾波再換成像素
+        const p=raw[i],a=lm[i],f=cam.filtered[i],confidence=p.visibility===undefined?1:p.visibility;
+        a[0]=f.x.f(p.x,now)*W;a[1]=f.y.f(p.y,now)*H;f.v=f.v===null?confidence:f.v+(confidence-f.v)*.5;a[2]=f.v;
       }
       const wr=res.worldLandmarks&&res.worldLandmarks[0];
-      if(wr){for(let i=0;i<Math.min(wr.length,33);i++){const p=wr[i],a=WLM[i];a[0]=p.x;a[1]=p.y;a[2]=p.z;a[3]=p.visibility}lm.w=WLM}else lm.w=null;
+      if(wr){   // 3D 世界座標（公尺）也要濾波，不然 3D 角度會抖
+        cam.wfiltered=cam.wfiltered||mkFilters();
+        for(let i=0;i<Math.min(wr.length,33);i++){const p=wr[i],a=WLM[i],f=cam.wfiltered[i];a[0]=f.x.f(p.x,now);a[1]=f.y.f(p.y,now);a[2]=f.z.f(p.z,now);a[3]=p.visibility}
+        lm.w=WLM;
+      }else lm.w=null;
       v.hasWorld=!!lm.w;
-      drawSkeleton(ctx,lm,Math.max(1,W/640));if(S.cam.show)drawAngles(ctx,lm,Math.max(1,W/640));if(counter)info=counter.update(lm,performance.now());
+      drawSkeleton(ctx,lm,Math.max(1,W/640));if(S.cam.show)drawAngles(ctx,lm,Math.max(1,W/640));if(counter)info=counter.update(lm,now);
       if(v.onLm)v.onLm(lm,performance.now());
       let nv=0,x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
       for(let i=0;i<nL;i++){const p=lm[i];if(p[2]>.5){nv++;if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1]}}
@@ -314,7 +404,7 @@ function tick(){
         if(counter&&info.status==='nobody')msg=size>.92?'離太近，請退後一點':'有些關節沒入鏡，請調整位置或角度，讓全身入鏡';
         else if(size<.4)msg='離太遠，請靠近一點，讓人佔畫面一半以上';
       }
-    }else{cam.filtered=null;if(counter)counter.lost();msg='請站到鏡頭前，讓 AI 教練看見全身';if(v.onLm)v.onLm(null,performance.now())}
+    }else{cam.filtered=cam.wfiltered=null;if(counter)counter.lost();msg='請站到鏡頭前，讓 AI 教練看見全身';if(v.onLm)v.onLm(null,performance.now())}
     if(!counter)info={status:'rest',value:null};
     v.badFrames=msg&&counter?v.badFrames+1:0;
     if(!v.manualHint){const showHint=v.badFrames>20;if(v.hintEl.hidden===showHint)v.hintEl.hidden=!showHint;if(showHint&&v.hintEl.textContent!==msg)v.hintEl.textContent=msg}
@@ -329,8 +419,9 @@ function tick(){
     if(v.gaugeFn)gw=v.gaugeFn();
     setT(v.chip,txt);setC(v.chip,'chip '+cls);
     if(v._g!==gw){v._g=gw;v.gaugeEl.style.width=gw}
-    {const nf=performance.now();if(cam.lastF){const f=1000/Math.max(1,nf-cam.lastF);cam.fps=cam.fps?cam.fps*.9+f*.1:f}cam.lastF=nf}
-    if(S.cam.show){v.dbgEl.hidden=false;setT(v.dbgEl,`FPS ${Math.round(cam.fps||0)}　${S.cam.use3d&&v.hasWorld?'3D':'2D'}　模型：${S.cam.model}　門檻 ${S.cam.vis}`)}else if(!v.dbgEl.hidden)v.dbgEl.hidden=true;
+    {const nf=performance.now();if(cam.lastF){const f=1000/Math.max(1,nf-cam.lastF);cam.fps=cam.fps?cam.fps*.9+f*.1:f}cam.lastF=nf;
+      if(poseModel==='full'&&cam.t0&&nf-cam.t0>POSE_AUTO.checkAfter&&cam.fps<POSE_AUTO.liteFps)poseDowngrade()}
+    if(S.cam.show){v.dbgEl.hidden=false;setT(v.dbgEl,`FPS ${Math.round(cam.fps||0)}　${S.cam.use3d&&v.hasWorld?'3D':'2D'}　模型：${poseModel||'—'}　門檻 ${S.cam.vis}`)}else if(!v.dbgEl.hidden)v.dbgEl.hidden=true;
     if(rec.on&&rec.view===v)drawRec(v,counter);
     if(v.go&&!v.fsgo.hidden){const t=v.go.label();if(v.fsgo.textContent!==t)v.fsgo.textContent=t}
     if(v.onFrame)v.onFrame(info);
@@ -340,7 +431,7 @@ function tick(){
 }
 async function camStart(view){
   camStop();
-  const requestId=cam.requestId;cam.starting=true;cam.view=view;cam.filtered=null;
+  const requestId=cam.requestId;cam.starting=true;cam.view=view;cam.filtered=cam.wfiltered=null;
   view.setMsg('正在準備 AI 視覺教練...');
   try{await loadPose()}catch(e){if(cam.requestId!==requestId)return false;cam.starting=false;view.setMsg('AI 教練暫時無法啟動，請檢查網路後再試一次。');console.error(e);return false}
   if(cam.requestId!==requestId)return false;
@@ -355,7 +446,7 @@ async function camStart(view){
   if(cam.requestId!==requestId){stream.getTracks().forEach(t=>t.stop());return false}
   listCams();
   if(view.video.videoWidth)view.stage.style.aspectRatio=`${view.video.videoWidth} / ${view.video.videoHeight}`;   // 手機直拿時畫面比例跟著變，不會被裁掉
-  view.setMsg('');cam.view=view;cam.running=true;cam.starting=false;cam.lastT=-1;cam.filtered=null;if(view===camView)$('#camSession').classList.add('is-running');scheduleTick();
+  view.setMsg('');cam.view=view;cam.running=true;cam.starting=false;cam.lastT=-1;cam.filtered=cam.wfiltered=null;cam.t0=performance.now();cam.fps=0;if(view===camView)$('#camSession').classList.add('is-running');scheduleTick();
   try{cam.wake=await navigator.wakeLock?.request('screen')}catch(e){}
   return true;
 }
@@ -366,7 +457,7 @@ function camStop(){
   if(cam.vf&&cam.view&&cam.view.video.cancelVideoFrameCallback){try{cam.view.video.cancelVideoFrameCallback(cam.vf)}catch(e){}}cam.vf=0;
   if(cam.wake){cam.wake.release().catch(()=>{});cam.wake=null}
   if(cam.stream){cam.stream.getTracks().forEach(t=>t.stop());cam.stream=null}
-  cam.filtered=null;$('#camSession').classList.remove('is-running','is-loading','is-error');
+  cam.filtered=cam.wfiltered=null;$('#camSession').classList.remove('is-running','is-loading','is-error');
   if(cam.view){cam.view.video.srcObject=null;const c=cam.view.canvas;c.getContext('2d').clearRect(0,0,c.width,c.height);
     cam.view.chip.className='chip';cam.view.chip.textContent='鏡頭未開啟';cam.view.gaugeEl.style.width='0';cam.view.hintEl.hidden=true;cam.view.setMsg('鏡頭已關閉。')}
   if(was&&cam.onStop)cam.onStop();

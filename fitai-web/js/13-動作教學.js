@@ -21,9 +21,9 @@ const GUIDE=[
  {n:'啞鈴臥推',m:'胸大肌、肱三頭肌、三角肌前束',video:'OpYbmmtS3t4',tips:['躺在穩固的長椅，雙腳踩地，肩胛收緊貼住椅面','手肘不要張太開，上臂和身體大約 45–75 度','下放到手肘約 90 度，再推到手臂伸直但不要鎖死'],bad:['手肘張到 90 度（肩膀壓力大）','用彈的借力、屁股離開椅面'],cam:'從側面或頭頂方向拍；3D 角度模式下比較準。沒有啞鈴可以用裝水的水瓶'},
  {n:'啞鈴上斜臥推',m:'上胸（胸大肌鎖骨部）、三角肌前束、肱三頭肌',video:'lpdbfRX4TOY',tips:['椅背調到約 30–45 度，雙腳踩地，肩胛收緊貼住椅背','啞鈴從上胸兩側往斜上方推，手肘和身體約 45–75 度','下放到手肘約 90 度、上胸有伸展感，再推到手臂伸直'],bad:['椅背太陡（超過 45 度會變成肩推）','下背拱離椅面、用彈的借力'],cam:'從側面拍；3D 角度模式下比較準。沒有斜椅可以用沙發靠背或枕頭墊高上背'},
  {n:'啞鈴俯身划船',m:'背闊肌、菱形肌、斜方肌中下束、肱二頭肌',tips:['膝蓋微彎，髖部往後推，上身前傾約 45 度，背保持平直','手臂自然垂下，用背部把手肘往後上方拉到腰側','頂端夾緊肩胛停一下，再慢慢放下到手臂伸直'],bad:['圓背或聳肩','用身體上下甩動借力'],cam:'從側面拍。沒有啞鈴可以用裝水的水瓶'},
- {n:'俯身划船',m:'背闊肌、菱形肌、斜方肌中下束、豎脊肌',tips:['雙手略比肩寬握槓，膝蓋微彎，髖部往後推，上身前傾約 45 度','背保持平直，把槓沿著大腿拉到肚臍附近','頂端夾緊肩胛，再慢慢放下到手臂伸直'],bad:['圓背或上身越做越直立','用髖部上下甩動借力'],cam:'從側面拍'},
- {n:'繩索划船',m:'背闊肌、菱形肌、斜方肌中下束、肱二頭肌',tips:['坐穩，雙腳踩住踏板，膝蓋微彎，上身挺直','手肘貼近身體，把握把拉到肚子前','頂端夾緊肩胛，再慢慢放回到手臂伸直'],bad:['上身前後大幅搖擺借力','聳肩、手腕往下折'],cam:'從側面拍'},
- {n:'高位下拉',m:'背闊肌、大圓肌、肱二頭肌',tips:['雙手略比肩寬握槓，大腿固定在護墊下','上身微微後仰，先讓肩胛下沉，再把槓拉到上胸','慢慢放回到手臂接近伸直'],bad:['把槓拉到頸後','身體大幅後仰借力'],cam:'正面'},
+ {n:'槓鈴俯身划船',ex:'俯身划船',m:'背闊肌、菱形肌、斜方肌中下束、豎脊肌',tips:['雙手略比肩寬握槓，膝蓋微彎，髖部往後推，上身前傾約 45 度','背保持平直，把槓沿著大腿拉到肚臍附近','頂端夾緊肩胛，再慢慢放下到手臂伸直'],bad:['圓背或上身越做越直立','用髖部上下甩動借力'],cam:'從側面拍'},
+ {n:'繩索划船',video:'d-GELgdfADw',m:'背闊肌、菱形肌、斜方肌中下束、肱二頭肌',tips:['坐穩，雙腳踩住踏板，膝蓋微彎，上身挺直','手肘貼近身體，把握把拉到肚子前','頂端夾緊肩胛，再慢慢放回到手臂伸直'],bad:['上身前後大幅搖擺借力','聳肩、手腕往下折'],cam:'從側面拍'},
+ {n:'高位下拉',video:'R2hQl_gO39Q',m:'背闊肌、大圓肌、肱二頭肌',tips:['雙手略比肩寬握槓，大腿固定在護墊下','上身微微後仰，先讓肩胛下沉，再把槓拉到上胸','慢慢放回到手臂接近伸直'],bad:['把槓拉到頸後','身體大幅後仰借力'],cam:'正面'},
  {n:'啞鈴反向飛鳥',m:'三角肌後束、菱形肌、斜方肌中束',video:'yravey8G-fc',tips:['上身前傾到接近與地面平行，背保持平直','手肘微彎固定，雙手往兩側打開抬到與背同高','頂端夾緊肩胛，慢慢放下'],bad:['重量太重用甩的','聳肩、脖子用力'],cam:'正面。用輕重量（裝水的水瓶就可以）'},
  {n:'啞鈴羅馬尼亞硬舉',m:'下背（豎脊肌）、臀大肌、腿後側',video:'zmhKzN13uqM',tips:['雙手拿啞鈴放大腿前，膝蓋微彎','把屁股往後推，啞鈴貼著腿往下滑到小腿中段','背保持平直，感到腿後側拉伸後用臀部發力站直'],bad:['圓背','啞鈴離身體太遠，下背壓力大'],cam:'從側面拍。下背不舒服時請停止'},
  {n:'肩推',m:'三角肌、肱三頭肌',video:'m1E4lGqYZ1M',tips:['雙手拿水瓶或啞鈴在肩膀高度，手肘約 90 度','核心收緊，往正上方推到手臂伸直','慢慢放下'],bad:['下背過度反弓','手腕往後折'],cam:'正面'},
@@ -38,13 +38,13 @@ const GUIDE=[
  {n:'側棒式',cat:'撐住類',m:'腹斜肌、臀中肌',tips:['側躺，前臂撐地，手肘在肩膀正下方','把髖部抬起，讓身體成一直線','兩腳疊放或前後錯開'],bad:['髖部下沉','身體往前或往後轉'],cam:'從正面或背面拍，讓身體橫向入鏡'},
 ];
 function renderGuide(){
-  const cats=[...new Set([...CATS,'核心','撐住類'])],catOf=g=>g.cat||(EX[g.n]&&EX[g.n].cat)||'其他';
+  const cats=[...new Set([...CATS,'核心','撐住類'])],catOf=g=>g.cat||(EX[g.ex||g.n]&&EX[g.ex||g.n].cat)||'其他';
   const item=g=>`<details><summary>${g.n}　<span class="small mute" style="font-weight:500">${g.m}</span></summary><div class="stack" style="padding-bottom:14px">
     <div><b>動作要點</b><ul>${g.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>
     <div><b>常見錯誤</b><ul>${g.bad.map(t=>`<li>${t}</li>`).join('')}</ul></div>
     ${g.video?`<div class="guide-video"><iframe src="https://www.youtube.com/embed/${g.video}?rel=0&modestbranding=1" title="${g.n} 動作示範影片" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`:''}
     <p class="small mute">鏡頭擺放：${g.cam}</p>
-    ${EX[g.n]?`<button class="btn teal small" type="button" data-go="${g.n}">用這個動作開鏡頭計數</button>`:HOLDTIP[g.n]?`<button class="btn teal small" type="button" data-hold="${g.n}">到「撐住挑戰」練習</button>`:''}</div></details>`;
+    ${EX[g.ex||g.n]?`<button class="btn teal small" type="button" data-go="${g.ex||g.n}">用這個動作開鏡頭計數</button>`:HOLDTIP[g.n]?`<button class="btn teal small" type="button" data-hold="${g.n}">到「撐住挑戰」練習</button>`:''}</div></details>`;
   $('#guideList').innerHTML=cats.filter(c=>guideFilter==='全部'||c===guideFilter).map(c=>{const arr=GUIDE.filter(g=>catOf(g)===c);return arr.length?`<h3 style="margin:20px 0 8px">${c}（${arr.length}）</h3>`+arr.map(item).join(''):''}).join('');
   $$('#guideList [data-go]').forEach(b=>b.onclick=()=>{
     const n=b.dataset.go;if(![...$('#camEx').options].some(o=>o.value===n)){toast('鏡頭計數的選單裡沒有這個動作');return}

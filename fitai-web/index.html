@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="css/04-遊戲畫面.css">
 <link rel="stylesheet" href="css/05-鏡頭與計時器畫面.css">
 <link rel="stylesheet" href="css/06-版面調整與手機.css">
+<link rel="stylesheet" href="css/07-訓練報告.css">
 </head>
 <body>
 
@@ -626,14 +627,29 @@
     </div>
     </div>
     <div class="stats-subpanel stack" data-stats-panel="data" hidden>
-    <div class="card stack">
-      <h3 style="margin:0">備份與還原</h3>
-      <p class="small mute">紀錄只存在這個瀏覽器。換手機或電腦前，先匯出備份檔，再到新的裝置匯入。備份檔不含 API 金鑰。</p>
+    <div class="card stack rpt-entry">
+      <div><h3 style="margin:0">📊 訓練報告</h3><p class="small mute" style="margin:4px 0 0">把訓練成果整理成一份看得懂的報告，可以存成 PDF 或分享成圖片。</p></div>
       <div class="row">
-        <button class="btn teal" type="button" id="stExport">匯出備份</button>
-        <label class="btn ghost" style="cursor:pointer">匯入備份<input type="file" id="stImport" accept="application/json,.json" hidden></label>
+        <button class="btn" type="button" id="rptWeekBtn">本週報告</button>
+        <button class="btn teal" type="button" id="rptAllBtn">全部紀錄報告</button>
+      </div>
+    </div>
+    <div class="card stack">
+      <h3 style="margin:0">資料管理</h3>
+      <p class="small mute" style="margin:0">登入帳號後紀錄會存在雲端，換裝置只要登入同一個帳號就好。</p>
+      <div class="row">
         <button class="btn ghost" type="button" id="stReset">清除所有紀錄</button>
       </div>
+      <details class="rpt-adv">
+        <summary>進階：本機備份（沒有登入帳號時使用）</summary>
+        <div class="stack" style="padding-top:10px">
+          <p class="small mute" style="margin:0">沒登入時，紀錄只存在這個瀏覽器。換手機或電腦前，先匯出備份檔，再到新的裝置匯入。備份檔不含 API 金鑰。</p>
+          <div class="row">
+            <button class="btn ghost" type="button" id="stExport">匯出備份</button>
+            <label class="btn ghost" style="cursor:pointer">匯入備份<input type="file" id="stImport" accept="application/json,.json" hidden></label>
+          </div>
+        </div>
+      </details>
     </div>
     </div>
   </div>
@@ -936,6 +952,21 @@
   </div>
 </div>
 <!-- ===== 錄影完成視窗 ｜ 程式：js/20-進階偵測與錄影.js ===== -->
+<div class="rpt" id="rpt" role="dialog" aria-modal="true" aria-labelledby="rptTitle" hidden>
+  <div class="rpt-bar">
+    <div class="seg" id="rptSeg"><button type="button" data-m="week">本週</button><button type="button" data-m="all">全部</button></div>
+    <div class="rpt-nav" id="rptNav"><button class="btn ghost" type="button" id="rptPrev">‹ 上一週</button><button class="btn ghost" type="button" id="rptNext">下一週 ›</button></div>
+    <button class="rpt-x" type="button" id="rptX" aria-label="關閉報告">×</button>
+  </div>
+  <div class="rpt-body" id="rptBody"></div>
+  <div class="rpt-share" id="rptShareBox" hidden><img id="rptShareImg" alt="訓練報告分享圖預覽"><div class="row"><a class="btn teal" id="rptShareDl" download>下載圖片</a><button class="btn ghost" type="button" id="rptShareHide">收起預覽</button></div></div>
+  <div class="rpt-foot">
+    <div class="rpt-pdf"><button class="btn" type="button" id="rptPdf">存成 PDF</button><small class="mute">在列印視窗選擇「儲存為 PDF」</small></div>
+    <button class="btn teal" type="button" id="rptShare">分享圖片</button>
+    <button class="btn ghost" type="button" id="rptClose">關閉</button>
+  </div>
+</div>
+
 <dialog class="recdlg" id="recDlg" aria-label="錄影完成">
   <h3 style="margin-top:0">錄影完成</h3>
   <video id="recVideo" controls playsinline style="width:100%; border-radius:12px; background:#000; max-height:60vh"></video>
@@ -971,5 +1002,6 @@
 <script defer src="js/21-健身夥伴.js"></script>
 <script defer src="js/22-訓練音樂.js"></script>
 <script defer src="js/23-安裝App與啟動.js"></script>
+<script defer src="js/24-訓練報告.js"></script>
 </body>
 </html>

@@ -107,7 +107,8 @@ const kcalPerSec=met=>met*bmrOf(S.body)/86400;
 const exKcal=(ex,n)=>{const [met,sec]=EX_MET[String(ex).replace(/（.*?）/g,'').trim()]||[4,2.5];return kcalPerSec(met)*sec*n};
 const exMapKcal=(m,reps)=>{let named=0,k=0;for(const [e,n] of Object.entries(m||{})){named+=n;k+=exKcal(e,n)}return k+exKcal('',Math.max(0,(reps||0)-named))};
 function addKcal(k){if(!(k>0))return;const d=dkey(new Date());S.kx[d]=(S.kx[d]||0)+k}   // 撐住、健身忍者這類「按秒算」的熱量
-const kcalToday=()=>{const d=dkey(new Date());return exMapKcal(S.dayEx[d],S.days[d])+(S.kx[d]||0)};
+const kcalOn=d=>exMapKcal(S.dayEx[d],S.days[d])+(S.kx[d]||0);
+const kcalToday=()=>kcalOn(dkey(new Date()));
 const kcalTotal=()=>exMapKcal(S.exs,S.reps)+Object.values(S.kx).reduce((a,b)=>a+b,0)+(S.kxHold0||0)*kcalPerSec(4);   // kxHold0：這個功能上線前就累積的撐住秒數
 function streaks(days=S.days){
   const nums=Object.keys(days).filter(k=>days[k]>0).map(dayN).sort((x,y)=>x-y);

@@ -1,7 +1,7 @@
 {
   "name": "Lin AI 健身教練",
   "short_name": "Lin AI",
-  "description": "鏡頭計數、訓練計時器、成就與喝水提醒的健身教練",
+  "description": "鏡頭計數、訓練計時器、成就與喝水紀錄的健身教練",
   "lang": "zh-Hant",
   "start_url": "./",
   "scope": "./",

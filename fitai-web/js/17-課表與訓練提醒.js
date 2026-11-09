@@ -22,7 +22,7 @@ function renderSched(){
   $('#scOn').checked=S.schedOn;$('#scTime').value=S.schedTime;
   $('#scNote').textContent=S.schedOn?`每天 ${S.schedTime}，如果今天有課表卻還沒有任何運動紀錄，會提醒你。網頁要開著才有效。`:'打開後，到了設定的時間，如果今天有課表卻還沒運動，會提醒你。';
 }
-$('#scOn').onchange=e=>{S.schedOn=e.target.checked;save();renderSched();if(S.schedOn&&'Notification' in window&&Notification.permission==='default')toast('想在網頁縮到背景時也收到提醒，可以到「統計紀錄」的喝水提醒按「允許瀏覽器通知」')};
+$('#scOn').onchange=e=>{S.schedOn=e.target.checked;save();renderSched();if(S.schedOn&&'Notification' in window&&Notification.permission==='default')toast('想在網頁縮到背景時也收到提醒，可以到「統計紀錄」的喝水紀錄卡片按「允許瀏覽器通知」')};
 $('#scTime').onchange=e=>{S.schedTime=e.target.value;S.schedSeen[dkey(new Date())]=false;save();renderSched()};
 function planTick(){
   if(!S.schedOn)return;

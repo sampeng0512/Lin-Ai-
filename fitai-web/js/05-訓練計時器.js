@@ -149,7 +149,6 @@ $('#tStart').onclick=async()=>{
     live:useCam?()=>timerCounter?timerCounter.count:0:null,mini:useCam?timerView:null});
   tRunning=false;$('#tStop').disabled=true;tBuild();$('#tStart').textContent='再來一組';
   if(fullStage===timerView.stage)exitFull();   // 結束後離開全螢幕，才看得到結果表
-  if(ok)waterNudge('訓練完成，喝點水補充一下吧。');
   if(useCam){
     if(!ok&&cur&&cur.kind==='work'&&timerCounter)sets.push({label:cur.label+'（中斷）',ex:timerCounter.key,n:timerCounter.count,f:formTxt(timerCounter)});
     showTimerResult(sets);

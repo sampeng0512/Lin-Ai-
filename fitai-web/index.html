@@ -164,13 +164,6 @@
 <div class="notice" id="installBar" hidden><span id="installTxt"></span><button class="btn small" type="button" id="installGo">安裝</button><button class="btn ghost small" type="button" id="installNo">不用了</button></div>
 <!-- ===== 右下提示訊息（toast） ｜ 程式：js/01-共用工具與資料.js ===== -->
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<!-- ===== 提醒列：喝水 ｜ 程式：js/09-喝水提醒.js ===== -->
-<div class="wbar" id="waterBar" role="alert" hidden>
-  <span id="wText"></span>
-  <button class="btn small" id="wDrink" type="button">我喝了 250 ml</button>
-  <button class="btn ghost small" id="wLater" type="button">10 分鐘後再提醒</button>
-  <button class="x" id="wClose" type="button" aria-label="關閉提醒">×</button>
-</div>
 
 <main>
 <!-- ===== 分頁：鏡頭計數 ｜ 程式：js/04-鏡頭計數.js（進階設定與錄影在 js/20-進階偵測與錄影.js，動作判定在 js/02-姿勢偵測與鏡頭.js） ｜ 樣式：css/05-鏡頭與計時器畫面.css ===== -->
@@ -616,14 +609,7 @@
     </div>
     <div class="card stack" id="waterCard">
       <div class="row" style="justify-content:space-between">
-        <h3 style="margin:0">喝水提醒</h3>
-        <label><input type="checkbox" id="wOn"> 開啟提醒</label>
-      </div>
-      <div class="row">
-        <div class="grow"><label class="f" for="wMin">每隔</label>
-          <select id="wMin"><option value="30">30 分鐘</option><option value="45">45 分鐘</option><option value="60">60 分鐘</option><option value="90">90 分鐘</option><option value="120">2 小時</option></select></div>
-        <div class="grow"><label class="f" for="wFrom">提醒時段，從</label><select id="wFrom"></select></div>
-        <div class="grow"><label class="f" for="wTo">到</label><select id="wTo"></select></div>
+        <h3 style="margin:0">喝水紀錄</h3>
       </div>
       <div class="bar"><i id="wBar"></i></div>
       <p class="small" id="wTxt"></p>

@@ -55,7 +55,7 @@ $('#chSubmit').onclick=()=>{
   if(!chPending)return;const p=chPending,n=Math.max(0,Math.round(+$('#chReps').value||0));
   const stars=n>=p.t*1.2?3:n>=p.t?2:n>=p.t*.7?1:0,xp=Math.round(n*2*MULT[p.d])+stars*10,key=p.ex+'|'+p.d,isBest=n>(S.best[key]||0);
   if(isBest)S.best[key]=n;if(stars===3)S.stars3=(S.stars3||0)+1;S.xp+=xp;addReps(n,p.ex,p.auto===null?0:Math.min(n,p.auto));S.log.unshift({ex:p.ex,d:p.d,t:p.t,n,s:stars});S.log=S.log.slice(0,20);
-  save();renderStats();chPending=null;$('#chResult').hidden=true;waterNudge('挑戰完成，喝點水休息一下吧。');
+  save();renderStats();chPending=null;$('#chResult').hidden=true;
   $('#chDone').hidden=false;$('#chDone').textContent=`${stars?'★'.repeat(stars):'再接再厲'}　${p.ex} ${n} 下（目標 ${p.t}），獲得 ${xp} 經驗值${isBest?'，新的個人紀錄！':''}`;
   chRefresh();
   finishArcadeLegacy('ch',n,0,xp,60*kcalPerSec(8),`${stars?'獲得 '+stars+' 顆星！':'完成挑戰！'} ${p.ex} ${n} 下${isBest?'，刷新個人最佳！':''}`);
@@ -467,7 +467,6 @@ function pyFinish(full){
     sub:full?`${esc(ex)}・頂層 ${py.peak} 下，登頂再下山全部完成！`:`${esc(ex)}・完成 ${py.done}/${n} 層${py.failAt>=0?'，時間到了':''}`,
     score:total+' 下',isBest,best,xp,facts:[[`${py.done}/${n}`,'完成層數'],[total,'總次數'],[py.peak,'頂層次數']]}).replace(/最高 (\d+) 分/,'最多 $1 下');
   say(full?`金字塔完成，共 ${total} 下`:`挑戰結束，共 ${total} 下`,{cancel:true});
-  if(total>0)waterNudge('金字塔挑戰完成，喝點水休息一下吧。');
   finishArcadeLegacy('pyr',total,py.done,xp,Math.floor(py.workElapsed/1000)*kcalPerSec(6),`${full?'登頂再下山，完整通關！':`突破 ${py.done}/${n} 層`}・共 ${total} 下`);
 }
 function renderPyr(){

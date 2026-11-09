@@ -10,22 +10,21 @@ html{scroll-behavior:smooth}
 body{
   background-image:
     radial-gradient(900px 520px at 88% -8%,rgba(61,214,208,.15),transparent 62%),
-    radial-gradient(760px 520px at -6% 6%,rgba(255,210,63,.09),transparent 58%),
-    repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.028) 119px 120px);
+    radial-gradient(760px 520px at -6% 6%,rgba(255,210,63,.09),transparent 58%);
 }
 ::selection{background:rgba(255,210,63,.35)}
 
 /* 頂部 */
 .top{padding:20px 20px 12px}
 .brand{display:flex; align-items:center; gap:12px; font-size:2.15rem; letter-spacing:.01em}
-.brand::before{content:""; width:12px; height:30px; border-radius:4px; transform:skewX(-14deg); background:linear-gradient(180deg,var(--yellow),var(--teal)); box-shadow:0 0 18px rgba(255,210,63,.35)}
+.brand::before{content:""; width:12px; height:30px; border-radius:4px; transform:skewX(-14deg); background:linear-gradient(180deg,var(--yellow),var(--teal))}
 .brand small{margin-left:2px}
 .stats{gap:0; padding:8px 6px; border:1px solid var(--line); border-radius:18px; background:var(--glass); box-shadow:var(--sh)}
 .stat{padding:2px 16px; text-align:center}
 .stat+.stat{border-left:1px solid var(--line)}
 .stat{appearance:none; background:none; border:0; border-radius:12px; color:inherit; font:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px; min-width:92px; transition:background .15s}
 .stat:hover{background:rgba(255,255,255,.05)}
-.stat small{font-size:.68rem; color:var(--mute); opacity:.85; white-space:nowrap}
+.stat small{font-size:.7rem; color:var(--mute); opacity:.85; white-space:nowrap}
 .stat.done b{color:var(--teal)}.stat.done small{color:var(--teal)}
 .stat.warn small{color:var(--coral); opacity:1}
 .stat .sbar{display:block; width:100%; max-width:84px; height:4px; margin-top:4px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden}
@@ -39,7 +38,7 @@ body{
 .tab svg{width:17px; height:17px; flex:none; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 .tab:hover{background:rgba(255,255,255,.07); color:var(--ink)}
 .tab:active{transform:scale(.97)}
-.tab[aria-selected=true]{background:var(--yellow); color:var(--dark); border-color:var(--yellow); box-shadow:0 6px 20px rgba(255,210,63,.25)}
+.tab[aria-selected=true]{background:var(--yellow); color:var(--dark); border-color:var(--yellow); box-shadow:0 6px 16px rgba(0,0,0,.28)}
 .tab:first-child{margin-left:auto}.tab:last-child{margin-right:auto}
 
 /* 版面節奏 */
@@ -54,19 +53,18 @@ h3{letter-spacing:.01em}
 /* 卡片 */
 .card,.fact,.glass,.boss,.badge,.ach,.fr{background-image:var(--glass); background-color:var(--card)}
 .card{border-radius:var(--r-lg); padding:20px 22px; box-shadow:var(--sh)}
-.fact{position:relative; overflow:hidden; border-radius:14px; padding:14px 16px 14px 20px}
-.fact::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg,var(--yellow),var(--teal))}
+.fact{position:relative; overflow:hidden; border-radius:14px; padding:14px 16px}
 .fact b{font-size:2rem}
 .ach,.fr,.badge{transition:transform .16s,border-color .16s,box-shadow .16s}
 .ach:hover,.fr:hover{transform:translateY(-2px); border-color:rgba(255,210,63,.35); box-shadow:0 10px 26px rgba(0,0,0,.3)}
-.notice{border-radius:0 14px 14px 0}
+.notice{border-radius:14px}
 
 /* 按鈕與輸入 */
-.btn{font-weight:800; letter-spacing:.02em; box-shadow:0 8px 22px rgba(255,210,63,.20); transition:transform .12s,filter .15s,box-shadow .15s}
-.btn:hover{transform:translateY(-1px); box-shadow:0 10px 26px rgba(255,210,63,.28)}
+.btn{font-weight:800; letter-spacing:.02em; box-shadow:0 6px 16px rgba(0,0,0,.24); transition:transform .12s,filter .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.3)}
 .btn:active{transform:scale(.98)}
-.btn.teal{box-shadow:0 8px 22px rgba(61,214,208,.20)}
-.btn.teal:hover{box-shadow:0 10px 26px rgba(61,214,208,.28)}
+.btn.teal{box-shadow:0 6px 16px rgba(0,0,0,.24)}
+.btn.teal:hover{box-shadow:0 8px 20px rgba(0,0,0,.3)}
 .btn.ghost{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.22); background:rgba(255,255,255,.03)}
 .btn.ghost:hover{background:rgba(255,255,255,.08); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
 .btn:disabled{box-shadow:none}
@@ -114,7 +112,7 @@ select,input[type=number],input[type=password],input[type=text],input[type=email
 .scan-box{position:relative; width:100%; aspect-ratio:1; max-height:60vh; border-radius:18px; overflow:hidden; background:#000}
 .scan-box video{width:100%; height:100%; object-fit:cover; display:block}
 .scan-box::after{content:""; position:absolute; inset:16%; border-radius:18px; box-shadow:0 0 0 999px rgba(0,0,0,.45); border:3px solid var(--yellow)}
-.scan-box i{position:absolute; left:16%; right:16%; top:16%; height:3px; background:var(--teal); box-shadow:0 0 12px var(--teal); animation:scanLine 2s ease-in-out infinite alternate; z-index:1}
+.scan-box i{position:absolute; left:16%; right:16%; top:16%; height:3px; background:var(--teal); animation:scanLine 2s ease-in-out infinite alternate; z-index:1}
 @keyframes scanLine{to{top:84%}}
 .fr-mine{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; background:linear-gradient(135deg,rgba(255,210,63,.14),rgba(61,214,208,.10)); border:1px solid rgba(255,210,63,.35); margin-bottom:12px}
 .fr-mine b{color:var(--yellow)}
@@ -139,7 +137,7 @@ select,input[type=number],input[type=password],input[type=text],input[type=email
 .man-form:has(#manNameWrap:not([hidden])){grid-template-columns:1.5fr 1.5fr 1fr 1.3fr auto}
 .man-form input[type=date]{width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:9px 12px; font:inherit; color-scheme:dark}
 #manNameWrap[hidden]{display:none}
-.man-list{list-style:none; margin:0; padding:0; display:grid; gap:6px}
+.man-list{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:minmax(0,1fr); gap:6px}
 .man-list li{display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:12px; background:var(--bg2)}
 .man-list .mdate{font:700 .85rem var(--num); color:var(--mute); min-width:3.2em}
 .man-list b{color:var(--yellow)}
@@ -180,7 +178,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
   background-repeat:no-repeat}
 .stage.full::after{display:none}
 .stage .msg{flex-direction:column; gap:14px; background:transparent; font-size:1.02rem; line-height:1.6; color:var(--ink); max-width:100%}
-.stage .msg::before{content:""; width:76px; height:76px; border-radius:50%; background:rgba(61,214,208,.10) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%233dd6d0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='13' r='6'/%3E%3Cpath d='M32 21v17M32 27l-12 8M32 27l12 8M32 38l-9 17M32 38l9 17'/%3E%3C/svg%3E") center/46px no-repeat; box-shadow:0 0 0 1px rgba(61,214,208,.35),0 0 40px rgba(61,214,208,.18)}
+.stage .msg::before{content:""; width:76px; height:76px; border-radius:50%; background:rgba(61,214,208,.10) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%233dd6d0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='13' r='6'/%3E%3Cpath d='M32 21v17M32 27l-12 8M32 27l12 8M32 38l-9 17M32 38l9 17'/%3E%3C/svg%3E") center/46px no-repeat; box-shadow:inset 0 0 0 1px rgba(61,214,208,.35)}
 .stage .msg[hidden]{display:none}
 .stage .chip{border-radius:999px; padding:6px 16px; backdrop-filter:blur(6px)}
 .stage .fsbtn,.stage .recbtn{border-radius:14px}
@@ -201,7 +199,7 @@ details#camAdv{background:var(--glass); border:1px solid var(--line); border-rad
 .rk{width:38px; height:38px; box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .codebox{background:linear-gradient(135deg,rgba(255,210,63,.10),rgba(61,214,208,.06)); border:1px dashed rgba(255,210,63,.45); border-radius:16px}
 .ach{border-radius:18px}
-.msgb.me{box-shadow:0 6px 18px rgba(255,210,63,.18)}
+.msgb.me{box-shadow:0 6px 16px rgba(0,0,0,.22)}
 .msgb.ai{box-shadow:var(--sh)}
 
 /* 其他 */

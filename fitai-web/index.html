@@ -72,7 +72,7 @@
 </header>
 <!-- ===== 登入／註冊視窗 ｜ 程式：js/19-帳號與好友排行.js ===== -->
 <dialog class="recdlg" id="accountDlg" aria-labelledby="accountTitle">
-  <h3 id="accountTitle" style="margin-top:0">Lin AI 帳號</h3>
+  <h2 id="accountTitle" style="margin-top:0;font-size:1.15rem">Lin AI 帳號</h2>
   <div id="accountSignedOut">
     <div class="acc-tabs" role="tablist" aria-label="帳號操作">
       <button type="button" role="tab" id="accountTabLogin" data-mode="login" aria-selected="true" aria-controls="accountForm">登入</button>
@@ -268,7 +268,7 @@
           </div>
         </div>
         <div class="card stack">
-          <h4 style="margin:0">我的菜單</h4>
+          <h3 style="margin:0;font-size:1rem">我的菜單</h3>
           <p class="small mute">儲存目前設定，下次快速開始。</p>
           <div class="row"><input type="text" id="mpName" maxlength="12" placeholder="輸入菜單名稱" style="flex:1 1 160px;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit"><button class="btn teal" type="button" id="mpSave">儲存</button></div>
           <div class="row" id="mpList" style="gap:8px"></div>
@@ -433,7 +433,7 @@
         <label><input type="checkbox" id="chSound" checked> 倒數音效</label>
         <button class="btn block" id="chStart">開始 60 秒挑戰</button>
         <div id="chWarn" class="notice warn small" hidden></div>
-        <div><h4>最近的成績</h4><table id="chLog"></table></div>
+        <div><h3 style="font-size:1rem">最近的成績</h3><table id="chLog"></table></div>
       </div>
     </div>
   </div>
@@ -562,7 +562,7 @@
       <button type="button" role="tab" aria-selected="false" data-stats-view="data">資料管理</button>
     </div>
     <div class="stats-subpanel stack" data-stats-panel="training">
-    <div class="facts" id="stFacts"></div>
+    <div class="facts st-facts" id="stFacts"></div>
     <div class="card stack" id="manCard">
       <div><h3 style="margin:0">✍️ 自訂紀錄</h3><p class="small mute" style="margin:4px 0 0">沒用鏡頭做的運動（健身房、外出、補登）可以自己記。會算進統計、熱量和每日目標，但<b>不計入好友排行</b>。</p></div>
       <div class="man-form">
@@ -579,11 +579,11 @@
       <div id="stExTotals"></div>
     </div>
     <div class="card stack" id="stChartCard">
-      <div class="row" style="justify-content:space-between">
-        <h3 style="margin:0">單一動作近期次數</h3>
+      <div class="row st-ex-head">
+        <h3 class="st-ex-title"><label for="stExercise">動作：</label><select id="stExercise"></select></h3>
         <div class="seg" id="stRange"><button class="on" data-n="7">7 天</button><button data-n="30">30 天</button></div>
       </div>
-      <div><label class="f" for="stExercise">統計動作</label><select id="stExercise"></select></div>
+      <div class="st-ex-stats" id="stExStats"></div>
       <div id="stChart"></div>
     </div>
     <div class="card stack">
@@ -813,12 +813,34 @@
         <p class="small" id="fdLeft" style="margin:0"></p>
         <div class="facts" id="fdMacro"></div>
       </div>
-      <h4>今天吃了什麼</h4>
+      <div class="card stack fd-ai" id="fdAi">
+        <div><h3 style="margin:0">🤖 AI 幫我記這餐</h3><p class="small mute" style="margin:4px 0 0">拍照或打字描述，AI 幫你估算熱量。確認之後才會記錄，照片不會被保存。</p></div>
+        <div class="row fd-ai-acts">
+          <button class="btn" type="button" id="fdAiPhoto">📷 拍照／選照片</button>
+          <button class="btn ghost" type="button" id="fdAiText">✍️ 用打字描述</button>
+        </div>
+        <input type="file" id="fdAiFile" accept="image/*" capture="environment" hidden>
+        <div class="notice warn fd-ai-login" id="fdAiLogin" hidden><span>AI 辨識需要先登入帳號。</span><button class="btn small" type="button" id="fdAiLoginBtn">登入帳號</button></div>
+        <div class="notice warn small" id="fdAiMsg" role="alert" hidden></div>
+        <div class="stack" id="fdAiPhotoBox" hidden>
+          <div class="fd-ai-shot"><img id="fdAiPrev" alt="這餐的照片預覽"><span class="small mute" id="fdAiWhenTxt"></span></div>
+          <div><label class="f" for="fdAiHint">補充說明（選填）</label><input type="text" id="fdAiHint" maxlength="200" placeholder="補充說明（例如：飯只吃一半）"></div>
+          <div class="row"><button class="btn" type="button" id="fdAiSendPhoto">AI 辨識這張照片</button><button class="btn ghost" type="button" id="fdAiCancelPhoto">取消</button></div>
+        </div>
+        <div class="stack" id="fdAiTextBox" hidden>
+          <div><label class="f" for="fdAiDesc">這餐吃了什麼</label><textarea id="fdAiDesc" rows="3" maxlength="400" placeholder="例如：牛肉麵一碗、燙青菜、無糖綠茶"></textarea></div>
+          <div class="row"><button class="btn" type="button" id="fdAiSendText">AI 估算熱量</button><button class="btn ghost" type="button" id="fdAiCancelText">取消</button></div>
+        </div>
+        <p class="fd-ai-busy" id="fdAiBusy" role="status" hidden>AI 辨識中…</p>
+        <div class="stack" id="fdAiResult" hidden></div>
+      </div>
+      <h3 style="font-size:1rem">今天吃了什麼</h3>
       <ul class="log" id="fdList"></ul>
       <p class="small mute" id="fdAvg"></p>
     </div>
     <div class="stack">
       <h3>快速新增</h3>
+      <div class="fd-mine-wrap" id="fdMineWrap" hidden><p class="small mute" style="margin:0 0 6px">我的常吃（長按或按 × 可以刪除）</p><div class="fd-mine" id="fdMine"></div></div>
       <div class="food-quick-grid" id="fdQuick"></div>
       <hr class="rule" style="margin:6px 0">
       <h3>自己輸入</h3>

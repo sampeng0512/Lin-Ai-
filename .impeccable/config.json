@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "fitai-web/index.html"
+        ],
+        "createdAt": "2026-11-09T15:21:38.626Z",
+        "reason": "Agent: static scan cannot resolve padding:var(--card-inset)=clamp(10px,3vw,16px); Playwright measured every .card/.fact at 390px and 1280px with >=8px padding and no flush children"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "fitai-web/index.html"
+        ],
+        "createdAt": "2026-11-09T15:21:38.895Z",
+        "reason": "Agent: #shareImg and #rptShareImg sit in hidden containers; JS sets a blob src before unhiding them"
+      }
+    ]
+  }
+}

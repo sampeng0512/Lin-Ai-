@@ -1,0 +1,41 @@
+[     241ms] Identifier 'hhmm' has already been declared
+[     260ms] ReferenceError: addFood is not defined
+    at http://127.0.0.1:8799/js/23-%E5%AE%89%E8%A3%9DApp%E8%88%87%E5%95%9F%E5%8B%95.js:70:264
+[     262ms] ReferenceError: renderFood is not defined
+    at http://127.0.0.1:8799/js/23-%E5%AE%89%E8%A3%9DApp%E8%88%87%E5%95%9F%E5%8B%95.js:69:36
+[     351ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=food1:0
+[     624ms] Identifier 'hhmm' has already been declared
+[     635ms] ReferenceError: addFood is not defined
+    at http://127.0.0.1:8799/js/23-%E5%AE%89%E8%A3%9DApp%E8%88%87%E5%95%9F%E5%8B%95.js:70:264
+[     635ms] ReferenceError: renderFood is not defined
+    at http://127.0.0.1:8799/js/23-%E5%AE%89%E8%A3%9DApp%E8%88%87%E5%95%9F%E5%8B%95.js:69:36
+[     731ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=food1:0
+[   21878ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=food1:0
+[   70137ms] [ERROR] Failed to load resource: the server responded with a status of 429 (Too Many Requests) @ https://cgswbvtkayfboskqorxs.supabase.co/functions/v1/food-ai:0
+[  201411ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=food1:0
+[  655640ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=food1:0
+[  685905ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=food1:0
+[  705712ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=food1:0
+[  743827ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=regpro375:0
+[  749900ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=regpro1280:0
+[  756337ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=reggame375:0
+[  760402ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=reggame1280:0
+[  781386ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=rk:0
+[  801677ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=rk2320:0
+[  805765ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=rk2375:0
+[  810291ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=rk2414:0
+[  814804ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=rk2768:0
+[  833213ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=rk3:0
+[  882592ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2pro320:0
+[  887256ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2pro375:0
+[  892601ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2pro390:0
+[  897361ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2pro768:0
+[  901964ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2pro1280:0
+[  907705ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2game320:0
+[  910736ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2game375:0
+[  914258ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2game390:0
+[  917365ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2game768:0
+[  920415ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=r2game1280:0
+[  953644ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=ov320:0
+[  961379ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=ov375:0
+[  969690ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://127.0.0.1:8799/index.html?t=ov1280:0

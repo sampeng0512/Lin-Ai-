@@ -13,7 +13,6 @@
 html{color-scheme:dark}
 body{
   margin:0; color:var(--ink); background-color:var(--bg);
-  background-image:repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.03) 119px 120px);
   font:16px/1.65 "Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;
 }
@@ -43,7 +42,7 @@ main{max-width:1100px; margin:0 auto; padding:22px 16px 80px}
 
 /* 版面 */
 .grid2{display:grid; grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr); gap:22px; align-items:start}
-@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+@media(max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
 .stack>*+*{margin-top:14px}
 .stack>label{display:block}
 .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
@@ -54,7 +53,7 @@ label.f{display:block; font-size:.875rem; color:var(--mute); margin-bottom:6px}
 
 /* 表單 */
 select,input[type=number],input[type=password],input[type=text],input[type=email],textarea{width:100%; background:var(--bg2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:inherit}
-input[type=range]{width:100%; accent-color:var(--yellow)}
+input[type=range]{width:100%; margin-left:0; margin-right:0; accent-color:var(--yellow)}
 input[type=checkbox]{accent-color:var(--yellow); width:18px; height:18px; vertical-align:-3px}
 .slider{display:grid; grid-template-columns:1fr auto; gap:2px 12px; align-items:center}
 .slider output{font:700 1.25rem var(--num); color:var(--yellow)}
@@ -136,8 +135,8 @@ ul.log li{padding:5px 0; border-bottom:1px solid var(--line)}
 table{border-collapse:collapse; width:100%; font-size:.92rem}
 th,td{border-bottom:1px solid var(--line); padding:6px 8px; text-align:left}
 th{color:var(--mute); font-weight:600}
-.notice{border-left:4px solid var(--teal); padding:8px 14px; background:rgba(61,214,208,.08); border-radius:0 10px 10px 0}
-.notice.warn{border-color:var(--coral); background:rgba(255,107,87,.08)}
+.notice{border:1px solid rgba(61,214,208,.32); padding:10px 14px; background:rgba(61,214,208,.08); border-radius:10px}
+.notice.warn{border-color:rgba(255,107,87,.38); background:rgba(255,107,87,.08)}
 
 #frSaveMe{white-space:nowrap; min-width:116px}
 #frName{max-width:280px}
@@ -182,7 +181,7 @@ th{color:var(--mute); font-weight:600}
 .ach .bar{margin:6px 0}
 .tag{display:inline-block; font-size:.72rem; font-weight:800; padding:1px 9px; border-radius:6px; color:var(--dark); vertical-align:2px}
 .tag.t1{background:#cd7f32} .tag.t2{background:#c8d1da} .tag.t3{background:#ffd23f}
-.achgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px}
+.achgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr)); gap:12px}
 .guide details{background:var(--bg2); border:1px solid var(--line); border-radius:14px; padding:4px 16px; margin-bottom:10px}
 .guide summary{cursor:pointer; font-weight:800; padding:12px 0}
 .guide ul{margin:.3em 0 .6em 1.2em; padding:0}

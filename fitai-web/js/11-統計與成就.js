@@ -13,19 +13,23 @@ function lastDays(n){const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.set
 function renderStatsTab(){
   const exerciseSelect=$('#stExercise');
   if(!exerciseSelect.options.length){
-    const extra=Object.keys(S.exs).filter(ex=>!ORDER.includes(ex)&&!REMOVED_EXERCISES.has(ex)).sort((a,b)=>a.localeCompare(b));
+    const extra=Object.keys(S.exs).filter(ex=>!ORDER.includes(ex)).sort((a,b)=>a.localeCompare(b));
     exerciseSelect.innerHTML=optsByCat(ORDER)+extra.map(ex=>`<option value="${esc(ex)}">${esc(ex)}</option>`).join('');
   }
   if(![...exerciseSelect.options].some(option=>option.value===S.statsEx))S.statsEx=ORDER[0];
   exerciseSelect.value=S.statsEx;
   const ex=S.statsEx,days=lastDays(chartN),vals=days.map(x=>Number(S.dayEx[x.k]?.[ex])||0);
   const todayKey=dkey(new Date()),today=Number(S.dayEx[todayKey]?.[ex])||0;
-  const sum7=lastDays(7).reduce((a,x)=>a+(Number(S.dayEx[x.k]?.[ex])||0),0);
+  const dayTotal=k=>Object.values(S.dayEx[k]||{}).reduce((sum,n)=>sum+(Number(n)||0),0);
+  const last7=lastDays(7),sum7=last7.reduce((a,x)=>a+(Number(S.dayEx[x.k]?.[ex])||0),0);
   const bestDay=Math.max(0,...Object.values(S.dayEx).map(day=>Number(day?.[ex])||0));
   const streak=streaks(),cameraTotal=Number(S.ver.exs[ex])||0;
   const manualTotal=S.manual.filter(entry=>entry.ex===ex).reduce((sum,entry)=>sum+entry.n,0);
-  $('#stFacts').innerHTML=[[Number(S.exs[ex])||0,`${ex} 累計次數`],[today,`今日${ex}次數`],[sum7,`${ex} 近 7 天次數`],[bestDay,`${ex} 單日最高`],[streak.cur+' 天','目前運動連續'],[streak.longest+' 天','最長運動連續'],['📷 '+cameraTotal,`${ex} 鏡頭偵測`],['✍️ '+manualTotal,`${ex} 自訂紀錄`]]
+  const weekDays=weekDates().filter(d=>S.days[dkey(d)]>0).length;
+  $('#stFacts').innerHTML=[[dayTotal(todayKey),'今日總次數'],[last7.reduce((a,x)=>a+dayTotal(x.k),0),'近 7 天總次數'],[Number(S.reps)||0,'累計總次數'],[weekDays+' 天','本週訓練天數'],[streak.cur+' 天','目前連續天數'],[streak.longest+' 天','最長連續天數']]
     .map(([b,l])=>`<div class="fact"><b>${b}</b><span>${l}</span></div>`).join('');
+  $('#stExStats').innerHTML=[[Number(S.exs[ex])||0,'累計次數'],[today,'今日次數'],[sum7,'近 7 天'],[bestDay,'單日最高'],['📷 '+cameraTotal,'鏡頭偵測'],['✍️ '+manualTotal,'自訂紀錄']]
+    .map(([b,l])=>`<div><b>${b}</b><span>${l}</span></div>`).join('');
   const mx=Math.max(10,...vals),top=mx<=20?20:mx<=50?50:Math.ceil(mx/50)*50;
   const W=700,H=250,L=34,R=6,T=16,B=34,bw=(W-L-R)/days.length,ch=H-T-B;let g='';
   for(const f of [0,.5,1]){const y=T+ch*(1-f);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.1)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#93aeb3">${Math.round(top*f)}</text>`}
@@ -43,7 +47,7 @@ function renderStatsTab(){
 }
 function renderExerciseTotals(){
   const known=new Set(ORDER),groups=CATS.map(cat=>[cat,ORDER.filter(ex=>EX[ex].cat===cat)]);
-  const unlisted=Object.keys(S.exs).filter(ex=>!known.has(ex)&&!REMOVED_EXERCISES.has(ex)).sort((a,b)=>a.localeCompare(b));
+  const unlisted=Object.keys(S.exs).filter(ex=>!known.has(ex)).sort((a,b)=>a.localeCompare(b));
   if(unlisted.length)groups.push(['其他動作',unlisted]);
   const html=groups.map(([cat,exercises])=>`<div><h4>${esc(cat)}</h4><table><tbody>${exercises.map(ex=>`<tr><td>${esc(ex)}</td><td style="text-align:right"><b style="color:var(--yellow)">${Math.max(0,Number(S.exs[ex])||0)}</b> 下</td></tr>`).join('')}</tbody></table></div>`).join('');
   const knownTotal=Object.values(S.exs).reduce((sum,n)=>sum+(Number(n)||0),0),unclassified=Math.max(0,(Number(S.reps)||0)-knownTotal);
@@ -57,7 +61,7 @@ const manDateLimits=()=>{const t=new Date(),m=new Date();m.setDate(t.getDate()-3
 $('#manEx').onchange=()=>{$('#manNameWrap').hidden=$('#manEx').value!=='__custom';if(!$('#manNameWrap').hidden)$('#manName').focus()};
 function renderManual(){
   manDateLimits();
-  const L=S.manual.slice(0,12);
+  const L=[...S.manual].sort((a,b)=>String(b.d).localeCompare(String(a.d))||(Number(b.t)||0)-(Number(a.t)||0)).slice(0,12);
   $('#manList').innerHTML=L.length?L.map(m=>`<li><span class="mdate">${m.d.slice(5).replace('-','/')}</span><span class="grow">${esc(m.ex)}</span><b>${m.n}</b><span class="small mute">下</span><button class="xbtn" type="button" data-id="${m.id}" aria-label="刪除 ${esc(m.ex)} ${m.n} 下">×</button></li>`).join('')+(S.manual.length>12?`<li class="small mute">另外還有 ${S.manual.length-12} 筆較早的紀錄</li>`:''):'<li class="small mute">還沒有自訂紀錄。</li>';
 }
 $('#manAdd').onclick=()=>{

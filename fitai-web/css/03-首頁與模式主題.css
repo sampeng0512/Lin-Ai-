@@ -46,10 +46,10 @@ body[data-mode="game"]{--yellow:#ffd23f; --teal:#67e8a5; --coral:#ff7894}
   #modeLabel{display:none}
   #voiceBtn,#accountBtn{min-height:44px; padding:8px 12px}
   .tabs{position:fixed; top:auto; bottom:0; left:0; right:0; z-index:30; display:flex; justify-content:space-around; gap:2px; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); overflow-x:hidden; border-top:1px solid var(--line); border-bottom:0; background:rgba(10,26,32,.96); backdrop-filter:blur(16px)}
-  .tabs .tab{flex:1 1 0; flex-direction:column; gap:2px; justify-content:center; min-width:0; min-height:52px; padding:5px 2px; font-size:.65rem; white-space:nowrap}
+  .tabs .tab{flex:1 1 0; flex-direction:column; gap:2px; justify-content:center; min-width:0; min-height:52px; padding:5px 2px; font-size:.7rem; white-space:nowrap}
   .tabs .tab svg{width:18px; height:18px}
   .tabs .tab-label{display:none}
-  .tabs .tab::after{content:attr(data-short); font-size:.62rem; line-height:1}
+  .tabs .tab::after{content:attr(data-short); font-size:.7rem; line-height:1}
   .tabs .tab:first-child,.tabs .tab:last-child{margin:0}
   main{padding:14px 12px calc(82px + env(safe-area-inset-bottom))}
   .foot{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
@@ -79,7 +79,7 @@ body[data-theme="professional"] .stat{border-radius:12px; background:rgba(14,29,
 body[data-theme="professional"] .stat b{color:var(--teal); font-variant-numeric:tabular-nums}
 body[data-theme="game"]{
   --bg:#fff4e9; --bg2:#fffdf9; --card:#fffdf9; --line:rgba(96,53,117,.14);
-  --ink:#302044; --mute:#786b86; --yellow:#ffad36; --teal:#35bd99; --coral:#ed6297; --dark:#302044;
+  --ink:#302044; --mute:#5f5270; --yellow:#ffad36; --teal:#35bd99; --coral:#ed6297; --dark:#302044;
   --glass:linear-gradient(145deg,#fff,#fff8ed); --sh:0 12px 30px rgba(100,61,116,.14);
   color:var(--ink);
   background-image:radial-gradient(760px 480px at 90% -10%,rgba(255,166,92,.25),transparent 66%),radial-gradient(650px 420px at -10% 30%,rgba(206,151,255,.19),transparent 68%),linear-gradient(180deg,#fff4e9,#fff8f1);
@@ -87,19 +87,18 @@ body[data-theme="game"]{
 body[data-theme="game"] .top{border-bottom:1px solid var(--line)}
 body[data-theme="game"] .brand::before{border-radius:10px; transform:rotate(-12deg); background:linear-gradient(180deg,#ff9a5c,#c17bfa)}
 body[data-theme="game"] .card,body[data-theme="game"] .fact,body[data-theme="game"] .boss,body[data-theme="game"] .nj-result{border-radius:24px; box-shadow:var(--sh)}
-body[data-theme="game"] .fact::before{width:5px; background:linear-gradient(180deg,#ff9a5c,#c17bfa)}
 body[data-theme="game"] .btn{border-radius:18px; box-shadow:0 6px 0 rgba(151,84,44,.16); transition:transform .16s,box-shadow .16s}
 body[data-theme="game"] .btn:hover{transform:translateY(-2px); box-shadow:0 8px 0 rgba(151,84,44,.13)}
 body[data-theme="game"] .btn:active{transform:translateY(2px); box-shadow:0 2px 0 rgba(151,84,44,.16)}
-body[data-theme="game"] .tab[aria-selected="true"]{background:linear-gradient(135deg,#ffbf45,#ff9b59); color:#352044; border-color:transparent; box-shadow:0 5px 14px rgba(255,157,80,.25)}
+body[data-theme="game"] .tab[aria-selected="true"]{background:linear-gradient(135deg,#ffbf45,#ff9b59); color:#352044; border-color:transparent; box-shadow:0 5px 14px rgba(100,61,116,.18)}
 body[data-theme="game"] .tabs{background:rgba(255,250,245,.96); border-color:var(--line)}
 body[data-theme="game"] .panel h2::after{width:54px; height:5px; background:linear-gradient(90deg,#ff9c54,#bb7cf2,#48c9a0)}
-body[data-theme="game"] .stage{border:2px solid rgba(116,83,147,.16); box-shadow:0 12px 28px rgba(86,57,112,.16)}
+body[data-theme="game"] .stage{border:2px solid rgba(116,83,147,.16); box-shadow:0 12px 28px rgba(0,0,0,.1)}
 body[data-theme="game"] .stage .u,body[data-theme="game"] .stage .nm,body[data-theme="game"] .stage .msg{color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.8)}
 body[data-theme="game"] .stage .chip{background:rgba(10,26,32,.9); color:#f4f7fa; border-color:rgba(255,255,255,.3)}
 body[data-theme="game"] .stage .chip.ready{color:#74f0c0; border-color:#74f0c0}
 body[data-theme="game"] .stage .chip.low{color:#ffe17a; border-color:#ffe17a}
 body[data-theme="game"] .stage .chip.warn{color:#ff9aa7; border-color:#ff9aa7}
-body[data-theme="game"] .stat{background:#fffdf9; border:1px solid var(--line); border-radius:18px; box-shadow:0 5px 14px rgba(86,57,112,.08)}
+body[data-theme="game"] .stat{background:#fffdf9; border:1px solid var(--line); border-radius:18px; box-shadow:0 5px 14px rgba(0,0,0,.06)}
 body[data-theme="game"] .stat b{color:#b560d8}
 body[data-theme="game"] #stChartCard,body[data-theme="game"] #stHeatCard{display:none}

@@ -1,0 +1,23 @@
+- generic [active] [ref=e1]:
+  - region [ref=e2]:
+    - generic [ref=e3]:
+      - text: Lin AI
+      - generic [ref=e4]: 你的 AI 健身教練
+    - generic [ref=e5]:
+      - paragraph [ref=e6]: 準備好開始了嗎？
+      - heading "今天想怎麼運動？" [level=1] [ref=e7]
+    - generic [ref=e8]:
+      - button "專業訓練模式 AI 姿勢判定、即時計數與訓練數據" [ref=e9] [cursor=pointer]:
+        - generic [aria-hidden] [ref=e10]: 🎯
+        - generic [ref=e11]:
+          - strong [ref=e12]: 專業訓練模式
+          - generic [ref=e13]: AI 姿勢判定、即時計數與訓練數據
+        - generic [aria-hidden] [ref=e14]: ›
+      - button "輕鬆遊戲模式 健身挑戰、小遊戲與趣味互動" [ref=e15] [cursor=pointer]:
+        - generic [aria-hidden] [ref=e16]: 🎮
+        - generic [ref=e17]:
+          - strong [ref=e18]: 輕鬆遊戲模式
+          - generic [ref=e19]: 健身挑戰、小遊戲與趣味互動
+        - generic [aria-hidden] [ref=e20]: ›
+    - paragraph [ref=e21]: 隨時可以返回這裡切換運動模式。
+  - text: ✎ ✎

@@ -8,7 +8,7 @@
 
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const APP_VERSION='2026.10.23-v1';
+const APP_VERSION='2026.11.11-v1';
 const ERRS=[];
 const logErr=m=>{ERRS.push(new Date().toLocaleTimeString()+'  '+String(m).slice(0,220));if(ERRS.length>8)ERRS.shift()};
 addEventListener('error',e=>logErr(`${e.message} @${(e.filename||'').split('/').pop()}:${e.lineno}`));

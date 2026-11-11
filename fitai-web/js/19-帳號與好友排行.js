@@ -46,11 +46,56 @@ async function accountDataRequest(method,session,state){
   if(!response.ok){const err=new Error(data&&(data.message||data.hint||data.details)||`資料庫錯誤（${response.status}）`);err.status=response.status;err.code=data&&data.code;throw err}
   return data;
 }
+const ACCOUNT_EXPIRED_KEY='fitai_auth_expired_v1';
+let accountRefreshing=null,accountExpiring=false;
+function syncAccountFromStorage(){
+  if(!accountSession)return;
+  const stored=readAccountSession();
+  if(stored&&stored.user&&stored.user.id===accountSession.user.id&&stored.refresh_token&&stored.refresh_token!==accountSession.refresh_token)accountSession=stored;
+}
+function isAccountExpiredError(error){
+  if(!error||!(error.status===400||error.status===401||error.status===403))return false;
+  return /refresh_token_not_found|refresh_token_already_used|session_not_found|session_expired/.test(String(error.code||''))||/invalid refresh token|refresh token not found|already used|session.*(not found|expired)/i.test(String(error.message||''));
+}
+function handleAccountExpired(){
+  if(accountExpiring)return;
+  accountExpiring=true;
+  const email=accountSession&&accountSession.user&&accountSession.user.email||'';
+  try{saveNow();if(activeUserId)localStorage.setItem(dirtyKey(activeUserId),'1');sessionStorage.setItem(ACCOUNT_EXPIRED_KEY,email||'1')}catch(e){}
+  noSave=true;clearAccountSession();localStorage.removeItem(ACTIVE_KEY);activeUserId='';
+  setTimeout(()=>location.reload(),50);
+}
+function showAccountExpiredNotice(){
+  let flag=null;try{flag=sessionStorage.getItem(ACCOUNT_EXPIRED_KEY);sessionStorage.removeItem(ACCOUNT_EXPIRED_KEY)}catch(e){}
+  if(!flag)return;
+  setAccountMode('login');
+  if(flag!=='1')$('#accountEmail').value=flag;
+  $('#accountDlg').showModal();renderAccount();
+  showAccountStatus('登入已過期，請重新登入。尚未同步的紀錄會在登入後自動上傳。',true);
+}
+addEventListener('storage',e=>{
+  if(e.key!==AUTH_KEY||!accountSession)return;
+  if(!e.newValue){location.reload();return}
+  syncAccountFromStorage();
+});
+async function refreshAccountSession(){
+  const used=accountSession.refresh_token;
+  try{
+    const data=await accountAuthRequest('token?grant_type=refresh_token',{refresh_token:used});
+    return saveAccountSession({...data,user:data.user||accountSession.user});
+  }catch(error){
+    syncAccountFromStorage();
+    if(accountSession&&accountSession.refresh_token!==used&&accountSession.expires_at>Date.now()/1000+90)return accountSession;
+    if(isAccountExpiredError(error)){handleAccountExpired();const err=new Error('登入已過期，請重新登入。');err.expired=true;throw err}
+    throw error;
+  }
+}
 async function freshAccountSession(){
   if(!accountSession)throw new Error('請先登入帳號。');
+  syncAccountFromStorage();
   if(accountSession.expires_at>Date.now()/1000+90)return accountSession;
-  const data=await accountAuthRequest('token?grant_type=refresh_token',{refresh_token:accountSession.refresh_token});
-  return saveAccountSession({...data,user:data.user||accountSession.user});
+  if(!accountRefreshing)accountRefreshing=refreshAccountSession().finally(()=>{accountRefreshing=null});
+  return accountRefreshing;
 }
 function readAccountCache(id){try{const raw=localStorage.getItem(`${KEY}:user:${id}`);return raw?normalizeState({...DEF,...JSON.parse(raw)}):null}catch(e){return null}}
 function writeAccountCache(id,state){localStorage.setItem(`${KEY}:user:${id}`,JSON.stringify(state))}
@@ -105,7 +150,7 @@ async function activateAccount(rawSession){
   }catch(error){clearAccountSession();throw error}
 }
 async function initializeAccount(){
-  if(!activeUserId){accountSession=null;renderAccount();return}
+  if(!activeUserId){accountSession=null;renderAccount();showAccountExpiredNotice();return}
   const saved=readAccountSession();
   if(!saved||!saved.user||saved.user.id!==activeUserId){localStorage.removeItem(ACTIVE_KEY);activeUserId='';location.reload();return}
   accountSession=saved;
@@ -170,8 +215,8 @@ $('#accountSyncNow').onclick=async()=>{
   finally{btn.disabled=false}
 };
 $('#accountLogout').onclick=async()=>{
-  $('#accountLogout').disabled=true;saveNow();
-  try{await syncAccountNow();const session=await freshAccountSession();await accountAuthRequest('logout',{},session.access_token)}catch(error){logErr('account logout '+error.message)}
+  $('#accountLogout').disabled=true;saveNow();accountExpiring=true;
+  try{await syncAccountNow();const session=await freshAccountSession();await accountAuthRequest('logout?scope=local',{},session.access_token)}catch(error){logErr('account logout '+error.message)}
   clearAccountSession();localStorage.removeItem(ACTIVE_KEY);activeUserId='';location.reload();
 };
 function friendly(e){

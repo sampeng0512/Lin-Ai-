@@ -131,10 +131,11 @@ _hits_lock = threading.Lock()
 
 
 def client_ip(request: Request):
-    # Render 等主機會經過代理，真正的來源在 X-Forwarded-For 的第一個
+    # Render 的代理會把真正的來源 IP 加在 X-Forwarded-For 的最後面；
+    # 前面的值可以由使用者自己亂填，拿來限流會被繞過
     forwarded = request.headers.get("x-forwarded-for", "")
     if forwarded:
-        return forwarded.split(",")[0].strip()
+        return forwarded.split(",")[-1].strip()
     return request.client.host if request.client else "unknown"
 
 
@@ -177,6 +178,9 @@ def ask(
     request: Request,
     x_team_token: str = Header(default="")
 ):
+    # 先限流再檢查密碼，避免組員密碼被無限次猜
+    check_rate_limit(client_ip(request))
+
     expected_token = os.getenv("TEAM_ACCESS_TOKEN", "")
 
     if not expected_token:
@@ -193,8 +197,6 @@ def ask(
             status_code=401,
             detail="組員存取密碼錯誤"
         )
-
-    check_rate_limit(client_ip(request))
 
     question = body.question.strip()
 

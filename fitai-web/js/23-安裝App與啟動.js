@@ -62,10 +62,17 @@ $$('.tab').forEach(b=>{const ic=TAB_ICONS[b.dataset.tab];if(ic){const label=b.te
 /* ================= 啟動 ================= */
 const idle=f=>('requestIdleCallback' in window)?requestIdleCallback(f,{timeout:1500}):setTimeout(f,60);
 renderCamCfg();renderHold();setInterval(planTick,20000);setTimeout(planTick,4000);
+function refreshAfterStateChange(){   // 雲端合併後 S 換成新的內容，重畫有用到紀錄的畫面
+  bdLastReps=S.reps;
+  applyBody();renderStats(true);renderHist();
+  if(!chRunning)chRefresh();
+  if(!nj.on)renderNinja();if(!rn.on)renderRun();if(!ps.on)renderPose();if(!py.on)renderPyr();if(!hold.on)renderHold();
+  if(!rk.on)rkRender();renderSched();renderFood();renderWeights();renderPresets();renderAch();refreshGameLobby();renderAccount();
+}
 (async()=>{   // 等帳號登入狀態確認後再畫出其餘畫面
-await initializeAccount();
+await initializeAccount();bdLastReps=S.reps;
 renderMusic();showInstall();renderFacing();renderVoice();applyBody();calc();renderCoachPlan();renderStats(true);renderHist();chRefresh();renderNinja();renderRun();renderPose();rkRender();rkRecover();plan();
 renderFriends();if(S.me.name&&!S.me.code)ensureFriendCode();setTimeout(handleInvite,600);
 idle(()=>{listCams();renderSched();renderFood();renderGuide();renderWeights();renderPresets();renderAch()});   // 第一次畫面先出來，其餘慢慢補
-window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,trainSummary,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,addWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,nj,njFinish,rn,rnFinish,rnView,ps,psFinish,psView,POSES,kcalToday,kcalTotal,renderBuddy,rk,rkRender,runMet,runKcal,S,runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
+window.__fit={renderStats,rpc,friendSync,friendBoard,friendAdd,friendCreate,FRIEND_CFG,frCfgOk,renderFriends,normalizeState,ERRS,diagText,APP_VERSION,saveNow,angles,angleAt,resetPose,renderCamCfg,hold,holdCheck,holdFrame,holdFinish,holdView,planTick,addFood,renderFood,renderSched,music,Synth,STYLES,musicStart,musicStop,rec,recStart,recStop,toggleFull,ACH,achState,notePR,dailyTask,checkDaily,renderAch,renderHeat,loadPreset,makeShare,addWater,addReps,streaks,checkBadges,renderStatsTab,say,CUES,RepCounter,EX,MODES,nj,njFinish,rn,rnFinish,rnView,ps,psFinish,psView,POSES,kcalToday,kcalTotal,renderBuddy,rk,rkRender,runMet,runKcal,get S(){return S},runPhases,ph,md,bodyInfo,camStart,cam,camView,chView,get chCounter(){return chCounter},get camCounter(){return camCounter}};
 })();

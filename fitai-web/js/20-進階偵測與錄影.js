@@ -23,7 +23,7 @@ function renderCamCfg(){
   $('#cfgModel').value=c.model;$('#cfgMirror').checked=c.mirror;$('#cfgShow').checked=c.show;
   renderFacing();
 }
-async function restartCam(){if(cam.running){const v=cam.view;await camStart(v)}}
+async function restartCam(){if(cam.running){const v=cam.view;if(!await camStart(v,{restart:true})&&cam.onStop)cam.onStop()}}
 $$('#cfg3d button').forEach(b=>b.onclick=()=>{S.cam.use3d=b.dataset.v==='1';save();renderCamCfg()});
 $('#cfgVis').oninput=e=>{S.cam.vis=+e.target.value/100;$('#cfgVisO').textContent=S.cam.vis.toFixed(2);save()};
 $('#cfgWin').oninput=e=>{S.cam.win=+e.target.value;$('#cfgWinO').textContent=S.cam.win;save()};
@@ -33,7 +33,7 @@ $('#cfgModel').onchange=e=>{S.cam.model=e.target.value;save();resetPose();restar
 $('#camDev').onchange=e=>{S.cam.dev=e.target.value;save();renderFacing();restartCam()};
 $('#cfgMirror').onchange=e=>{S.cam.mirror=e.target.checked;save();renderFacing()};
 $('#cfgShow').onchange=e=>{S.cam.show=e.target.checked;save()};
-$('#cfgReset').onclick=()=>{S.cam={...DEF.cam};save();resetPose();renderCamCfg();listCams();restartCam();toast('已還原偵測設定')};
+$('#cfgReset').onclick=()=>{S.cam=freshState().cam;save();resetPose();renderCamCfg();listCams();restartCam();toast('已還原偵測設定')};
 if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',listCams);
 
 /* ================= 前後鏡頭 ================= */
@@ -44,7 +44,7 @@ function renderFacing(){
     el.innerHTML=`<button type="button" data-f="user" class="${S.facing==='user'?'on':''}">前鏡頭</button><button type="button" data-f="environment" class="${S.facing==='environment'?'on':''}">後鏡頭</button>`;
     $$('button',el).forEach(b=>b.onclick=async()=>{
       if(S.facing===b.dataset.f)return;S.facing=b.dataset.f;save();renderFacing();
-      if(cam.running){const v=cam.view;await camStart(v)}
+      if(cam.running){const v=cam.view;if(!await camStart(v,{restart:true})&&cam.onStop)cam.onStop()}
     });
   });
 }

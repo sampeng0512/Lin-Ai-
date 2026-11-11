@@ -36,7 +36,7 @@ function planTick(){
   $('#plText').textContent=text;$('#planBar').hidden=false;say('該訓練了');
   if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){try{new Notification('Lin AI 訓練提醒',{body:text})}catch(e){}}
 }
-$('#plGo').onclick=()=>{$('#planBar').hidden=true;$('.tab[data-tab=cam]').click()};
+$('#plGo').onclick=()=>{$('#planBar').hidden=true;if(document.body.dataset.mode!=='professional')enterMode('professional');else $('.tab[data-tab=cam]').click()};
 $('#plLater').onclick=()=>{S.schedSeen[dkey(new Date())]=false;S.schedNext=Date.now()+30*60000;save();$('#planBar').hidden=true};
 $('#plClose').onclick=()=>{$('#planBar').hidden=true};
 

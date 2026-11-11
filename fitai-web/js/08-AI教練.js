@@ -7,14 +7,6 @@
 'use strict';
 
 /* ================= AI 教練 ================= */
-const SYSTEM=`你是「Lin AI」的專業健身教練，使用繁體中文（台灣用語）回答。
-任務：根據使用者的目標、程度、時間與器材，規劃具體可執行的訓練菜單，並回答訓練、動作姿勢與飲食問題。
-規則：
-- 資訊不足以排菜單時，先簡短詢問最多 3 個關鍵問題（目標、每週可練天數、程度/器材/傷病）；資訊夠了就直接給完整菜單。
-- 菜單請用表格或條列：每天重點、動作、組數×次數（或秒數）、組間休息，並提醒暖身與收操，以及如何逐週進步。
-- 動作優先使用本系統支援的：深蹲、深蹲跳、弓箭步、臀橋、側抬腿、伏地挺身、肩推、側平舉、前平舉、二頭彎舉、引體向上、啞鈴臥推、啞鈴上斜臥推、啞鈴俯身划船、俯身划船、繩索划船、高位下拉、啞鈴反向飛鳥、啞鈴羅馬尼亞硬舉、捲腹、仰臥起坐、仰臥抬腿、側彎、站姿抬膝碰肘、開合跳、高抬腿、原地踏步、原地跳繩、波比跳，以及撐住類的平板支撐、側棒式、靠牆深蹲、臀橋停留，也可加入其他徒手或啞鈴動作。
-- 安全第一：不推薦極端節食或過低熱量；有疼痛、傷病、慢性病、懷孕等情況，請建議先諮詢醫師或物理治療師。你不是醫師。
-- 回答簡潔、鼓勵但誠實。`;
 const QUICK=['成年人每週需要多少分鐘中等強度有氧？','WHO 是否規定一週運動幾天？','高強度有氧每週建議多久？','每週五天各做30分鐘有氧可以嗎？','沒有運動習慣的人如何開始？'];
 $('#quick').innerHTML=QUICK.map(q=>`<button class="btn ghost small">${q}</button>`).join('');
 $$('#quick button').forEach(b=>b.onclick=()=>ask(b.textContent));
@@ -110,7 +102,7 @@ async function ask(text){
     }
     const reply=typeof data?.answer==='string'?data.answer:'後端未傳回回答。';
     wait.innerHTML=md(reply);
-    if(Array.isArray(data.sources)&&data.sources.length){
+    if(Array.isArray(data?.sources)&&data.sources.length){
       const refs=document.createElement('div');
       refs.className='small mute';
       refs.style.marginTop='10px';

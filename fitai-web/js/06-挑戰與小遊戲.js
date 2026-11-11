@@ -47,12 +47,15 @@ $('#chStart').onclick=async()=>{
   if(!ok){$('#chTimer').className='tcard idle';$('#chTimer').innerHTML='<div class="tlabel">已停止。</div>';return}
   const auto=useCam?chCounter.count:null;
   chPending={ex,d:chDiff,t,auto};
-  $('#chResult').hidden=false;$('#chReps').value=auto===null?t:auto;
+  $('#chResult').hidden=false;$('#chReps').value=auto===null?'':auto;
   $('#chResultMsg').textContent=auto===null?`時間到。請輸入你剛剛 ${ex} 做了幾下。`:`時間到，鏡頭偵測到 ${auto} 下${chCounter.cueTotal?`（姿勢達標 ${formTxt(chCounter)}）`:''}。如果不準，可以修正後再提交。`;
-  $('#chSubmit').click();
+  if(gameActiveKey==='ch'&&auto!==null)$('#chSubmit').click();
+  else setTimeout(()=>$('#chReps').focus(),0);
 };
 $('#chSubmit').onclick=()=>{
-  if(!chPending)return;const p=chPending,n=Math.max(0,Math.round(+$('#chReps').value||0));
+  if(!chPending)return;const p=chPending,raw=$('#chReps').value.trim();
+  if(raw===''||!Number.isFinite(+raw)||+raw<0){toast('請輸入這 60 秒做了幾下');$('#chReps').focus();return}
+  const n=Math.min(1000,Math.round(+raw));
   const stars=n>=p.t*1.2?3:n>=p.t?2:n>=p.t*.7?1:0,xp=Math.round(n*2*MULT[p.d])+stars*10,key=p.ex+'|'+p.d,isBest=n>(S.best[key]||0);
   if(isBest)S.best[key]=n;if(stars===3)S.stars3=(S.stars3||0)+1;S.xp+=xp;addReps(n,p.ex,p.auto===null?0:Math.min(n,p.auto));S.log.unshift({ex:p.ex,d:p.d,t:p.t,n,s:stars});S.log=S.log.slice(0,20);
   save();renderStats();chPending=null;$('#chResult').hidden=true;
@@ -176,6 +179,10 @@ $('#njStart').onclick=()=>{
   audioInit();nj.on=true;nj.phase='count';nj.t0=performance.now();nj.lastR=0;$('#njResult').hidden=true;$('#njStart').textContent='停止';
 };
 /* ================= 小遊戲共用工具 ================= */
+function screenLm(lm,W){   // 鏡頭原始座標換成「螢幕座標」：畫面是鏡像時 x 要左右翻轉，判定和畫圖才會在同一個位置
+  if(!lm||!isMirror())return lm;
+  return lm.map(p=>p&&[W-p[0],p[1],p[2]]);
+}
 function onScreen(ctx,W,fn){ctx.save();if(isMirror()){ctx.translate(W,0);ctx.scale(-1,1)}fn();ctx.restore()}   // 用「螢幕座標」畫：鏡像畫面下文字、方向也是正的
 function gameCount(g,v,now){   // 3 秒倒數；回傳 true 表示還在倒數
   const r=Math.ceil(3-(now-g.t0)/1000);if(r<=0)return false;
@@ -207,7 +214,7 @@ rnView.manualHint=true;$('.u',rnView.stage).textContent='分';rnView.nm.textCont
 rnView.chipFn=()=>rn.chip;rnView.gaugeFn=()=>rn.on&&rn.phase==='run'?rn.lives/3*100+'%':'0';
 rnView.onLm=(lm,now)=>rnFrame(lm,now);
 function rnFrame(lm,now){
-  const v=rnView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,m=bodyMetrics(lm);
+  const v=rnView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,m=bodyMetrics(screenLm(lm,W));
   if(!rn.on){rn.chip=[m&&m.hy?'鏡頭已就緒，按「開始遊戲」':'請退後，讓肩膀到膝蓋都入鏡',m&&m.hy?'ready':'warn'];return}
   if(rn.phase==='count'){
     if(m&&m.hy){rn.cal.push([m.hy,m.torso])}   // 倒數時記下站姿高度當基準
@@ -498,7 +505,7 @@ seg($('#gSub'),b=>{if(nj.on)njFinish(false);if(rn.on)rnFinish(false);if(ps.on)ps
 document.body.appendChild($('#gameArena'));
 let gameActiveKey='',gameSelectedKey='',gamePaused=false,gameLeaving=false,gameCountdownToken=0;
 const GAME_META={
-  ch:{name:'一分鐘挑戰',icon:'⏱️',tags:'全身燃脂・次數闖關',how:'跟著倒數完成指定動作，每一下都會替頭目造成傷害。動作幅度完整、節奏穩定，挑戰你的個人最佳。',view:chView,start:()=>$('#chStart').click(),host:$('#sub-ch [data-stage=ch]'),seconds:60},
+  ch:{name:'一分鐘挑戰',icon:'⏱️',tags:'全身燃脂・次數闖關',how:'跟著倒數完成指定動作，每一下都會替頭目造成傷害。動作幅度完整、節奏穩定，挑戰你的個人最佳。',view:chView,start:()=>{$('#chCam').checked=true;$('#chStart').click()},host:$('#sub-ch [data-stage=ch]'),seconds:60},
   hold:{name:'撐住挑戰',icon:'🛡️',tags:'核心穩定・耐力守關',how:'依照鏡頭提示維持標準姿勢，姿勢正確時能量槽持續充能，撐到目標時間即可通關。',view:null,start:()=>$('#hStart').click(),host:$('#sub-hold [data-stage=hold]'),seconds:60},
   pyr:{name:'金字塔挑戰',icon:'🔺',tags:'肌力攀登・層層突破',how:'從第一層開始逐步增加次數，登頂後再完成下山。每突破一層都會削減頭目能量。',view:pyView,start:()=>$('#pyStart').click(),host:$('#sub-pyr [data-stage=pyr]'),seconds:60},
   ninja:{name:'健身忍者',icon:'🥷',tags:'敏捷反應・全身出擊',how:'用雙手揮擊水果、抬膝擊中低位目標，遇到炸彈要避開。連擊越高，分數倍率越高。',view:njView,start:()=>$('#njStart').click(),host:$('#sub-ninja [data-stage=ninja]'),seconds:60},
@@ -514,12 +521,15 @@ function gameBest(key){
   if(key==='ninja')return Math.max(0,...Object.values(S.ninja.best||{}).map(Number).filter(Number.isFinite));
   return Number(S.games[key]&&S.games[key].best)||0;
 }
-function refreshGameLobby(){
-  const all=['ch','hold','pyr','ninja','run','pose','rhythm','dodge'];
-  const records=all.map(gameBest),best=Math.max(0,...records);
+const GAME_KEYS=['ch','hold','pyr','ninja','run','pose','rhythm','dodge'];
+function refreshGameHeader(){
+  const best=Math.max(0,...GAME_KEYS.map(gameBest));
   $('#headerGameCombo').textContent=Math.max(S.ninja.bestCombo||0,...(S.games.pose.log||[]).map(x=>x.c||0),...(S.games.rhythm.log||[]).map(x=>x.c||0),...(S.games.dodge.log||[]).map(x=>x.c||0));
   $('#headerGameScore').textContent=best.toLocaleString();
-  $('#headerGameLevel').textContent=`等級 ${Math.floor((S.xp||0)/500)+1}`;
+  $('#headerGameLevel').textContent=`等級 ${level()}`;
+}
+function refreshGameLobby(){
+  refreshGameHeader();
   $$('#gameCards .game-card').forEach(card=>{
     const key=card.dataset.game,score=gameBest(key);
     $('.game-card-score b',card).textContent=score?score.toLocaleString():'—';
@@ -560,7 +570,7 @@ function syncArcadeHud(){
   if(key==='ch'){score=chCounter?chCounter.count:0;progress=Number($('#chTarget').textContent)>0?score/Number($('#chTarget').textContent):0;tip='完成動作，持續攻擊頭目！';const clock=$('#chTimer .tbig');updateGameHud(score,combo,tip,clock?Number(clock.textContent)||0:60)}
   if(key==='hold'){score=Math.floor(hold.good||0);progress=hold.target?score/hold.target:0;tip='姿勢正確時能量持續充能！';updateGameHud(score,combo,tip,Math.max(0,(hold.target||60)-(hold.good||0)))}
   if(key==='pyr'){score=py.counter?py.total+py.counter.count:py.total||0;progress=py.steps&&py.steps.length?py.done/py.steps.length:0;tip=py.phase==='rest'?'休息後繼續攀登！':'完成本層次數，突破頭目防線！';updateGameHud(score,combo,tip,py.on&&py.until?Math.max(0,(py.until-performance.now())/1000):60)}
-  if(key==='ninja'){score=nj.score||0;combo=nj.combo||0;progress=Math.min(1,score/1200);tip=nj.elapsed>nj.secs-10?'狂熱時間！分數加倍！':'揮拳擊中水果，避開炸彈！';updateGameHud(score,combo,tip,Math.max(0,NJ_DIFF[nj.diff].secs-(nj.elapsed||0)))}
+  if(key==='ninja'){score=nj.score||0;combo=nj.combo||0;progress=Math.min(1,score/1200);tip=nj.elapsed>NJ_DIFF[nj.diff].secs-10?'狂熱時間！分數加倍！':'揮拳擊中水果，避開炸彈！';updateGameHud(score,combo,tip,Math.max(0,NJ_DIFF[nj.diff].secs-(nj.elapsed||0)))}
   if(key==='run'){score=rn.score||0;combo=rn.cleared||0;progress=Math.min(1,(rn.elapsed||0)/120);tip='左右移動跑道，跳過低欄、蹲下滑行！';updateGameHud(score,combo,tip,Math.max(0,120-(rn.elapsed||0)))}
   if(key==='pose'){score=ps.score||0;combo=ps.combo||0;progress=Math.min(1,(ps.done||0)/20);tip=ps.cur?`模仿姿勢：${ps.cur.n}`:'全身入鏡，準備配對！';updateGameHud(score,combo,tip,Math.max(0,60-(ps.elapsed||0)))}
   if(['ch','hold','pyr'].includes(key)){updateGameHud(score,combo,tip);$('#gameArenaBossBar').style.width=`${Math.max(4,Math.min(100,100-progress*100))}%`}
@@ -628,8 +638,12 @@ function pauseArcade(){
 }
 let gamePausedAt=0;
 function shiftArcadeClock(delta){
-  const states=[hold,nj,rn,ps,py,rhythm,dodge],fields=['t0','start','last','next','until','curT','lastHit','airT','sayAt'];
-  for(const state of states)if(state&&state.on)for(const field of fields)if(Number.isFinite(state[field]))state[field]+=delta;
+  const states=[hold,nj,rn,ps,py,rhythm,dodge],fields=['t0','start','last','next','until','curT','lastHit','airT','sayAt','coinNext','nextBeat','flash','good','holdT','badSince'];
+  for(const state of states)if(state&&state.on){
+    for(const field of fields)if(Number.isFinite(state[field])&&state[field]>0)state[field]+=delta;
+    for(const list of [state.targets,state.objects,state.fx,state.particles])if(Array.isArray(list))for(const o of list){if(Number.isFinite(o.born))o.born+=delta;if(Number.isFinite(o.t))o.t+=delta}
+    if(state.laser&&Number.isFinite(state.laser.until))state.laser.until+=delta;
+  }
 }
 $('#gameCards').onclick=e=>{const card=e.target.closest('[data-game]');if(card)openGameDetails(card.dataset.game)};
 $('#gameDialogClose').onclick=()=>$('#gameDetails').close();
@@ -671,7 +685,7 @@ function rhythmBegin(){
 function gameDifficultyName(){return $$('#gameDifficulty button').find(b=>b.classList.contains('on'))?.dataset.diff||'normal'}
 function gameDifficultyValue(){const d=gameDifficultyName();return d==='easy'?45:d==='hard'?75:60}
 function rhythmFrame(lm,now){
-  const v=rhythmView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,person=gamePerson(lm),u=Math.min(W,H);
+  const v=rhythmView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height;lm=screenLm(lm,W);const person=gamePerson(lm),u=Math.min(W,H);
   if(!rhythm.on){if(gameActiveKey==='rhythm')updateGameHud(0,0,person?'準備好後，跟著節奏動起來！':'請讓全身保持在畫面內');return}
   if(rhythm.phase==='count'){if(gameCount(rhythm,v,now))return;rhythm.phase='run';rhythm.start=now;rhythm.last=now;rhythm.next=now+400;say('節拍開始！',{cancel:true})}
   const dt=Math.min(.06,Math.max(0,(now-rhythm.last)/1000));rhythm.last=now;rhythm.elapsed=(now-rhythm.start)/1000;
@@ -734,15 +748,15 @@ function dodgeBegin(){
   dodge.duration=gameDifficultyValue();
 }
 function dodgeFrame(lm,now){
-  const v=dodgeView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,u=Math.min(W,H),person=gamePerson(lm);
+  const v=dodgeView,ctx=v.canvas.getContext('2d'),W=v.canvas.width,H=v.canvas.height,u=Math.min(W,H);lm=screenLm(lm,W);const person=gamePerson(lm);
   if(!dodge.on){if(gameActiveKey==='dodge')updateGameHud(0,0,person?'全身保持在框線內，準備閃避！':'請讓頭、手腕、膝蓋與腳踝都入鏡');return}
   if(dodge.phase==='count'){if(gameCount(dodge,v,now))return;dodge.phase='run';dodge.start=now;dodge.last=now;dodge.next=now+500;say('閃避開始！',{cancel:true})}
   const dt=Math.min(.06,Math.max(0,(now-dodge.last)/1000));dodge.last=now;dodge.elapsed=(now-dodge.start)/1000;const left=dodge.duration-dodge.elapsed;
   if(left<=0||dodge.lives<=0){dodgeFinish();return}
   const elapsed=dodge.elapsed,speed=H*(.34+Math.min(.25,elapsed*.004));
   if(now>=dodge.next){
-    const gem=Math.random()<.52,hazard=gem?'gem':Math.random()<.28?'beam':'meteor';
-    dodge.objects.push({type:hazard,lane:Math.random()*3|0,x:(.2+(Math.random()*3|0)*.3)*W,y:gem?H*(.82+Math.random()*.08):-u*.1,r:u*(gem?.045:.09),born:now,vy:speed*(gem?.72:1),warn:!gem,kind:hazard==='beam'?'beam':!gem&&Math.random()<.45?'low':'normal'});
+    const gem=Math.random()<.52,hazard=gem?'gem':Math.random()<.28?'beam':'meteor',lane=Math.random()*3|0;
+    dodge.objects.push({type:hazard,lane,x:(lane+.5)/3*W,y:gem?H*(.82+Math.random()*.08):-u*.1,r:u*(gem?.045:.09),born:now,vy:speed*(gem?.72:1),warn:!gem,kind:hazard==='beam'?'beam':!gem&&Math.random()<.45?'low':'normal'});
     dodge.next=now+(dodge.diff==='hard'?650:dodge.diff==='easy'?1150:850)*(0.8+Math.random()*.35);
   }
   const jump=person&&person.ankleY!==null&&person.hipY!==null&&person.hipY-person.ankleY>person.torso*1.15;
@@ -779,7 +793,10 @@ function dodgeFinish(){
   arenaFinish('dodge',dodge.score,dodge.maxCombo,xp,kc,`${isBest?'締造新紀錄！':''}收集 ${dodge.hits} 顆能量，錯失 ${dodge.miss} 顆能量。最高紀錄 ${best} 分。`);
 }
 const previousGameCamStop=cam.onStop;
-cam.onStop=()=>{previousGameCamStop&&previousGameCamStop();if(gameLeaving||!gameActiveKey)return;if(gameActiveKey==='rhythm'&&rhythm.on)rhythmFinish();if(gameActiveKey==='dodge'&&dodge.on)dodgeFinish()};
+cam.onStop=()=>{previousGameCamStop&&previousGameCamStop();if(gameLeaving)return;
+  if(nj.on)njFinish(false);if(rn.on)rnFinish(false);if(ps.on)psFinish(false);
+  $('#njCamBtn').disabled=$('#rnCamBtn').disabled=$('#psCamBtn').disabled=false;$('#njCamOff').disabled=$('#rnCamOff').disabled=$('#psCamOff').disabled=true;
+  if(!gameActiveKey)return;if(gameActiveKey==='rhythm'&&rhythm.on)rhythmFinish();if(gameActiveKey==='dodge'&&dodge.on)dodgeFinish()};
 function finishArcadeLegacy(key,score,combo,xp,kcal,message){arenaFinish(key,score,combo,xp,kcal,message)}
 $('#gameArena').addEventListener('click',e=>{if(e.target===$('#gameArenaCountdown'))return});
 refreshGameLobby();

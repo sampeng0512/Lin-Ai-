@@ -38,14 +38,6 @@ async function accountAuthRequest(path,payload,token){
   return data;
 }
 function accountRestHeaders(session,extra={}){const {key}=sbCfg();return {apikey:key,Authorization:`Bearer ${session.access_token}`,'content-type':'application/json',...extra}}
-async function accountDataRequest(method,session,state){
-  const {url}=sbCfg(),id=session.user.id;
-  const path=method==='GET'?`?select=state&user_id=eq.${encodeURIComponent(id)}&limit=1`:'?on_conflict=user_id';
-  let response;try{response=await fetch(`${url}/rest/v1/${ACCOUNT_TABLE}${path}`,{method,headers:accountRestHeaders(session,method==='GET'?{}:{prefer:'resolution=merge-duplicates,return=minimal'}),...(method==='GET'?{}:{body:JSON.stringify({user_id:id,state})})})}catch(e){throw new Error('目前無法連線到雲端資料庫。')}
-  const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
-  if(!response.ok){const err=new Error(data&&(data.message||data.hint||data.details)||`資料庫錯誤（${response.status}）`);err.status=response.status;err.code=data&&data.code;throw err}
-  return data;
-}
 const ACCOUNT_EXPIRED_KEY='fitai_auth_expired_v1';
 let accountRefreshing=null,accountExpiring=false;
 function syncAccountFromStorage(){
@@ -97,7 +89,7 @@ async function freshAccountSession(){
   if(!accountRefreshing)accountRefreshing=refreshAccountSession().finally(()=>{accountRefreshing=null});
   return accountRefreshing;
 }
-function readAccountCache(id){try{const raw=localStorage.getItem(`${KEY}:user:${id}`);return raw?normalizeState({...DEF,...JSON.parse(raw)}):null}catch(e){return null}}
+function readAccountCache(id){try{const raw=localStorage.getItem(`${KEY}:user:${id}`);return raw?stateFrom(JSON.parse(raw)):null}catch(e){return null}}
 function writeAccountCache(id,state){localStorage.setItem(`${KEY}:user:${id}`,JSON.stringify(state))}
 function accountErrorText(error){
   const message=String(error&&error.message||error);
@@ -127,26 +119,111 @@ function renderAccount(){
 function scheduleCloudSave(){
   clearTimeout(cloudSaveT);cloudSaveT=setTimeout(()=>syncAccountNow().catch(()=>{}),1200);
 }
-function syncAccountNow(){
-  if(!accountSession||!activeUserId)return Promise.resolve();
+/* ===== 雲端合併：上次同步時的雲端內容（base）＋本機變化＋雲端變化，三方合併 ===== */
+const baseKey=id=>`${KEY}:base:${id}`;
+function readBase(id){try{const b=JSON.parse(localStorage.getItem(baseKey(id))||'null');return b&&b.state&&typeof b.at==='string'?b:null}catch(e){return null}}
+function writeBase(id,state,at){try{localStorage.setItem(baseKey(id),JSON.stringify({at:String(at||''),state}))}catch(e){logErr('base save '+e.message)}}
+const MERGE_SUM=['xp','reps','workSecs','stars3','formOk','formBad','prCount','holdSecs','pyFull','days.*','exs.*','dayEx.*.*','workDays.*','water.*','kx.*','dayForm.*.ok','dayForm.*.bad','ver.reps','ver.days.*','ver.exs.*','ver.dayEx.*.*','ninja.hits','ninja.plays','ninja.secs','games.*.plays'];
+const MERGE_MAX=['best.*','holdBest.*','games.*.best','ninja.best.*','ninja.bestCombo','ach.*'];
+const pathIs=(path,list)=>list.some(p=>{const a=p.split('.');return a.length===path.length&&a.every((x,i)=>x==='*'||x===path[i])});
+const jsonEq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+const jclone=v=>v===undefined?undefined:JSON.parse(JSON.stringify(v));
+const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
+function mergeList(b,l,r){
+  const key=x=>x&&typeof x==='object'&&x.id!=null?'id:'+x.id:JSON.stringify(x);
+  const count=a=>{const m=new Map();for(const x of a)m.set(key(x),(m.get(key(x))||0)+1);return m};
+  const B=count(b),L=count(l),R=count(r),out=[],used=new Map();
+  const want=k=>Math.max(0,(R.get(k)||0)+(L.get(k)||0)-(B.get(k)||0));
+  for(const x of [...l,...r]){const k=key(x),n=used.get(k)||0;if(n<want(k)){used.set(k,n+1);out.push(jclone(x))}}
+  if(out.length>1&&out.every(x=>x&&Number.isFinite(x.t))){const desc=l.length>1?l[0].t>=l[l.length-1].t:r.length>1?r[0].t>=r[r.length-1].t:true;out.sort((x,y)=>desc?y.t-x.t:x.t-y.t)}
+  return out;
+}
+function mergeVal(b,l,r,path){
+  if(jsonEq(l,r))return jclone(l);
+  if(jsonEq(l,b))return jclone(r);
+  if(jsonEq(r,b))return jclone(l);
+  if(pathIs(path,MERGE_SUM)&&(typeof l==='number'||l===undefined)&&(typeof r==='number'||r===undefined)){const v=(Number(r)||0)+(Number(l)||0)-(Number(b)||0);return Math.max(0,Math.round(v*1000)/1000)}
+  if(pathIs(path,MERGE_MAX)&&typeof l==='number'&&typeof r==='number')return Math.max(l,r);
+  if(path.length===1&&path[0]==='me'&&isObj(l)&&isObj(r)&&l.id!==r.id)return jclone(r.id?r:l);
+  if(path.length===2&&path[0]==='pr'&&isObj(l)&&isObj(r))return jclone((Number(r.n)||0)>(Number(l.n)||0)?r:l);
+  if(Array.isArray(l)&&Array.isArray(r))return mergeList(Array.isArray(b)?b:[],l,r);
+  if(isObj(l)&&isObj(r)){
+    const base=isObj(b)?b:{},o={};
+    for(const k of new Set([...Object.keys(l),...Object.keys(r)])){const v=mergeVal(base[k],l[k],r[k],[...path,k]);if(v!==undefined)o[k]=v}
+    return o;
+  }
+  return jclone(l===undefined?r:l);
+}
+function mergeStates(base,local,remote){
+  const o=stateFrom(mergeVal(base||{},local,remote,[]));
+  o.runs.sort((a,b)=>String(b.d).localeCompare(String(a.d))||(Number(b.t)||0)-(Number(a.t)||0));
+  return o;
+}
+async function accountRow(session){
+  const {url}=sbCfg(),id=session.user.id;
+  let response;try{response=await fetch(`${url}/rest/v1/${ACCOUNT_TABLE}?select=state,updated_at&user_id=eq.${encodeURIComponent(id)}&limit=1`,{headers:accountRestHeaders(session)})}catch(e){throw new Error('目前無法連線到雲端資料庫。')}
+  const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
+  if(!response.ok){const err=new Error(data&&(data.message||data.hint||data.details)||`資料庫錯誤（${response.status}）`);err.status=response.status;err.code=data&&data.code;throw err}
+  return Array.isArray(data)&&data.length?data[0]:null;
+}
+async function accountWrite(session,state,prevAt){
+  const {url}=sbCfg(),id=session.user.id;
+  const target=prevAt?`?user_id=eq.${encodeURIComponent(id)}&updated_at=eq.${encodeURIComponent(prevAt)}`:'';
+  let response;try{response=await fetch(`${url}/rest/v1/${ACCOUNT_TABLE}${target}`,{method:prevAt?'PATCH':'POST',headers:accountRestHeaders(session,{prefer:'return=representation'}),body:JSON.stringify(prevAt?{state}:{user_id:id,state})})}catch(e){throw new Error('目前無法連線到雲端資料庫。')}
+  const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
+  if(!prevAt&&response.status===409)return null;
+  if(!response.ok){const err=new Error(data&&(data.message||data.hint||data.details)||`資料庫錯誤（${response.status}）`);err.status=response.status;err.code=data&&data.code;throw err}
+  return Array.isArray(data)&&data.length?data[0]:null;
+}
+/* 把 local 寫上雲端：雲端在上次同步後被別的裝置改過就先合併；force＝直接取代（匯入備份、清除紀錄用） */
+async function pushAccountState(session,local,{force=false}={}){
+  const id=session.user.id;
+  for(let attempt=0;attempt<4;attempt++){
+    const row=await accountRow(session),base=readBase(id);
+    let next=local;
+    if(row&&!force&&!(base&&base.at===row.updated_at))next=base?mergeStates(base.state,local,row.state):local;
+    const saved=await accountWrite(session,next,row&&row.updated_at);
+    if(saved){writeBase(id,next,saved.updated_at);return next}
+  }
+  throw new Error('雲端資料一直被其他裝置更新，稍後會再同步。');
+}
+function applyMergedState(next,snapshot){
+  const current=JSON.stringify(S);
+  if(current===snapshot){if(JSON.stringify(next)===snapshot)return false;S=next}
+  else S=mergeStates(JSON.parse(snapshot),S,next);
+  writeAccountCache(activeUserId,S);
+  if(typeof refreshAfterStateChange==='function')refreshAfterStateChange();
+  return current!==snapshot;
+}
+function syncAccountNow({force=false}={}){
+  if(!accountSession||!activeUserId||noSave&&!force)return Promise.resolve();
   const snapshot=JSON.stringify(S);
   cloudQueue=cloudQueue.catch(()=>{}).then(async()=>{
     if(!accountSession||activeUserId!==accountSession.user.id)return;
-    const session=await freshAccountSession();await accountDataRequest('POST',session,JSON.parse(snapshot));
-    if(activeUserId===session.user.id&&JSON.stringify(S)===snapshot){localStorage.removeItem(dirtyKey(activeUserId));accountSyncMessage='雲端已同步';renderAccount()}
-    else scheduleCloudSave();
+    const session=await freshAccountSession(),next=await pushAccountState(session,JSON.parse(snapshot),{force});
+    if(activeUserId!==session.user.id)return;
+    const changedMeanwhile=applyMergedState(next,snapshot);
+    if(changedMeanwhile){localStorage.setItem(dirtyKey(activeUserId),'1');scheduleCloudSave()}
+    else{localStorage.removeItem(dirtyKey(activeUserId));accountSyncMessage='雲端已同步';renderAccount()}
   }).catch(error=>{accountSyncMessage='同步待處理：'+accountErrorText(error);renderAccount();logErr('account sync '+error.message);throw error});
   return cloudQueue;
 }
+const hasRecords=o=>!!o&&(rpNum(o.reps)>0||rpNum(o.xp)>0||rpNum(o.workSecs)>0||(o.history||[]).length>0||(o.runs||[]).length>0||(o.manual||[]).length>0||Object.keys(o.food||{}).length>0||Object.keys(o.weights||{}).length>0||Object.keys(o.water||{}).length>0);
+const rpNum=v=>Number(v)||0;
 async function activateAccount(rawSession){
-  const session=saveAccountSession(rawSession),id=session.user.id,cached=readAccountCache(id),wasDirty=localStorage.getItem(dirtyKey(id))==='1';
+  const session=saveAccountSession(rawSession),id=session.user.id,cached=readAccountCache(id),wasDirty=localStorage.getItem(dirtyKey(id))==='1',guest=activeUserId?null:stateFrom(JSON.parse(JSON.stringify(S)));
   try{
-    const fresh=await freshAccountSession(),rows=await accountDataRequest('GET',fresh),remote=Array.isArray(rows)&&rows.length?rows[0].state:null;
-    if(remote&&!(wasDirty&&cached))S=normalizeState({...DEF,...remote});
-    else if(cached)S=cached;
-    await accountDataRequest('POST',fresh,S);
-    activeUserId=id;localStorage.setItem(ACTIVE_KEY,id);writeAccountCache(id,S);localStorage.removeItem(dirtyKey(id));
-    location.reload();
+    const fresh=await freshAccountSession(),row=await accountRow(fresh),base=readBase(id);
+    let local,force=false,clearGuest=false;
+    if(cached&&wasDirty&&base)local=cached;
+    else if(row){
+      local=stateFrom(row.state);writeBase(id,row.state,row.updated_at);
+      if(hasRecords(guest)&&confirm('這台裝置有沒登入時留下的紀錄。要把它們合併到這個帳號嗎？\n（合併後，這些紀錄會移到帳號裡；選「取消」則保留在這台裝置的訪客模式）')){local=mergeStates(freshState(),guest,local);clearGuest=true}
+    }else{local=cached||guest||freshState();force=true;clearGuest=!cached&&hasRecords(guest)}
+    const next=await pushAccountState(fresh,local,{force});
+    activeUserId=id;localStorage.setItem(ACTIVE_KEY,id);writeAccountCache(id,next);localStorage.removeItem(dirtyKey(id));
+    if(clearGuest)localStorage.removeItem(KEY);
+    noSave=true;location.reload();
   }catch(error){clearAccountSession();throw error}
 }
 async function initializeAccount(){
@@ -155,10 +232,10 @@ async function initializeAccount(){
   if(!saved||!saved.user||saved.user.id!==activeUserId){localStorage.removeItem(ACTIVE_KEY);activeUserId='';location.reload();return}
   accountSession=saved;
   try{
-    const session=await freshAccountSession(),rows=await accountDataRequest('GET',session),remote=Array.isArray(rows)&&rows.length?rows[0].state:null,cached=readAccountCache(activeUserId),wasDirty=localStorage.getItem(dirtyKey(activeUserId))==='1';
-    if(remote&&wasDirty&&cached){S=cached;await accountDataRequest('POST',session,S);localStorage.removeItem(dirtyKey(activeUserId))}
-    else if(remote){S=normalizeState({...DEF,...remote});writeAccountCache(activeUserId,S);localStorage.removeItem(dirtyKey(activeUserId))}
-    else{await accountDataRequest('POST',session,S);localStorage.removeItem(dirtyKey(activeUserId))}
+    const session=await freshAccountSession(),snapshot=JSON.stringify(S),row=await accountRow(session),base=readBase(activeUserId),wasDirty=localStorage.getItem(dirtyKey(activeUserId))==='1';
+    if(!row||(wasDirty&&base)){const next=await pushAccountState(session,JSON.parse(snapshot),{force:!row});if(applyMergedState(next,snapshot)){localStorage.setItem(dirtyKey(activeUserId),'1');scheduleCloudSave()}else localStorage.removeItem(dirtyKey(activeUserId))}
+    else if(wasDirty){const next=await pushAccountState(session,JSON.parse(snapshot),{force:true});applyMergedState(next,snapshot);localStorage.removeItem(dirtyKey(activeUserId))}
+    else{writeBase(activeUserId,row.state,row.updated_at);applyMergedState(stateFrom(row.state),snapshot);localStorage.removeItem(dirtyKey(activeUserId))}
     accountSyncMessage='雲端已同步';
   }catch(error){accountSyncMessage='同步待處理：'+accountErrorText(error);logErr('account startup '+error.message)}
   renderAccount();
@@ -269,7 +346,7 @@ async function resolveFriendCode(result){
   const direct=validFriendCode(result);
   if(direct)return direct;
   const rows=await rpc('lin_get_board',{p_id:S.me.id,p_exercise_id:null,p_action_name:null,p_period:'weekly'});
-  const mine=Array.isArray(rows)&&rows.find(row=>row.is_me||row.id===S.me.id);
+  const mine=Array.isArray(rows)&&rows.find(row=>row.is_me);
   const recovered=validFriendCode(mine&&mine.code);
   if(recovered)return recovered;
   throw new Error('暱稱已送出，但伺服器沒有回傳好友代碼。請再按一次「儲存」重試。');

@@ -6,3 +6,6 @@
 .venv/
 __pycache__/
 *.pyc
+
+# 本機測試工具產生的檔案
+.playwright-mcp/

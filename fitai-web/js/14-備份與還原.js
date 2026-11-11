@@ -15,13 +15,19 @@ $('#stExport').onclick=()=>{
 $('#stImport').onchange=e=>{
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=()=>{
+  r.onload=async()=>{
+    let o;
     try{
-      const o=JSON.parse(r.result);
+      o=JSON.parse(r.result);
       if(!o||typeof o!=='object'||typeof o.reps!=='number')throw new Error('這不是 Lin AI 的備份檔');
-      if(!confirm('匯入會取代目前這個瀏覽器裡的所有紀錄，確定嗎？'))return;
-      noSave=true;localStorage.setItem(KEY,JSON.stringify(normalizeState({...DEF,...o})));location.reload();
-    }catch(err){toast('匯入失敗：'+err.message)}
+    }catch(err){toast('匯入失敗：'+err.message);return}
+    if(!confirm(accountSession?'匯入會取代這個帳號（包含雲端）的所有紀錄，確定嗎？':'匯入會取代目前這個瀏覽器裡的所有紀錄，確定嗎？'))return;
+    const keep=S;noSave=true;clearTimeout(saveT);saveT=0;
+    try{
+      S=stateFrom(o);
+      if(accountSession&&activeUserId){clearTimeout(cloudSaveT);await syncAccountNow({force:true});localStorage.removeItem(dirtyKey(activeUserId))}
+      localStorage.setItem(stateKey(),JSON.stringify(S));location.reload();
+    }catch(err){S=keep;noSave=false;toast('匯入失敗：'+accountErrorText(err))}
   };
   r.readAsText(f);e.target.value='';
 };

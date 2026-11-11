@@ -78,7 +78,7 @@ function renderMyFoods(){
 }
 $('#fdQuick').innerHTML=FOODS.map((f,i)=>`<button class="btn ghost small" type="button" data-i="${i}" title="約 ${f[1]} 大卡">${esc(f[0])}　${f[1]}</button>`).join('');
 $$('#fdQuick button').forEach(b=>b.onclick=()=>{const f=FOODS[+b.dataset.i];addFood(f[0],f[1],f[2])});
-$('#fdAdd').onclick=()=>{if(addFood($('#fdName').value,$('#fdKcal').value,$('#fdP').value)){$('#fdName').value='';$('#fdKcal').value='';$('#fdP').value=''}};
+$('#fdAdd').onclick=()=>{if(!$('#fdName').value.trim()||$('#fdKcal').value.trim()===''){toast('請輸入食物名稱和大卡');return}if(addFood($('#fdName').value,$('#fdKcal').value,$('#fdP').value)){$('#fdName').value='';$('#fdKcal').value='';$('#fdP').value=''}};
 
 const AIF={photo:null,when:null,items:[],busy:false,meal:'',mealTouched:false,left:null,note:''};
 function aiShow(part){

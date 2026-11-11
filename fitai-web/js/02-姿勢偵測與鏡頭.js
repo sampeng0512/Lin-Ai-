@@ -429,8 +429,8 @@ function tick(){
   }
   scheduleTick();
 }
-async function camStart(view){
-  camStop();
+async function camStart(view,{restart=false}={}){
+  camStop({restart});
   const requestId=cam.requestId;cam.starting=true;cam.view=view;cam.filtered=cam.wfiltered=null;
   view.setMsg('正在準備 AI 視覺教練...');
   try{await loadPose()}catch(e){if(cam.requestId!==requestId)return false;cam.starting=false;view.setMsg('AI 教練暫時無法啟動，請檢查網路後再試一次。');console.error(e);return false}
@@ -447,10 +447,10 @@ async function camStart(view){
   listCams();
   if(view.video.videoWidth)view.stage.style.aspectRatio=`${view.video.videoWidth} / ${view.video.videoHeight}`;   // 手機直拿時畫面比例跟著變，不會被裁掉
   view.setMsg('');cam.view=view;cam.running=true;cam.starting=false;cam.lastT=-1;cam.filtered=cam.wfiltered=null;cam.t0=performance.now();cam.fps=0;if(view===camView)$('#camSession').classList.add('is-running');scheduleTick();
-  try{cam.wake=await navigator.wakeLock?.request('screen')}catch(e){}
+  try{const lock=await navigator.wakeLock?.request('screen');if(lock&&(cam.requestId!==requestId||!cam.running))lock.release().catch(()=>{});else cam.wake=lock}catch(e){}
   return true;
 }
-function camStop(){
+function camStop({restart=false}={}){
   cam.requestId++;cam.starting=false;
   if(rec.on)recStop();
   const was=cam.running;cam.running=false;cancelAnimationFrame(cam.raf);
@@ -460,7 +460,7 @@ function camStop(){
   cam.filtered=cam.wfiltered=null;$('#camSession').classList.remove('is-running','is-loading','is-error');
   if(cam.view){cam.view.video.srcObject=null;const c=cam.view.canvas;c.getContext('2d').clearRect(0,0,c.width,c.height);
     cam.view.chip.className='chip';cam.view.chip.textContent='鏡頭未開啟';cam.view.gaugeEl.style.width='0';cam.view.hintEl.hidden=true;cam.view.setMsg('鏡頭已關閉。')}
-  if(was&&cam.onStop)cam.onStop();
+  if(was&&!restart&&cam.onStop)cam.onStop();
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&(cam.running||cam.starting))camStop()});
 addEventListener('pagehide',()=>{if(cam.running||cam.starting)camStop()});

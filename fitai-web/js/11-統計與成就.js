@@ -12,9 +12,9 @@ const WD=['日','一','二','三','四','五','六'];
 function lastDays(n){const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);a.push({k:dkey(d),d})}return a}
 function renderStatsTab(){
   const exerciseSelect=$('#stExercise');
-  if(!exerciseSelect.options.length){
+  {
     const extra=Object.keys(S.exs).filter(ex=>!ORDER.includes(ex)).sort((a,b)=>a.localeCompare(b));
-    exerciseSelect.innerHTML=optsByCat(ORDER)+extra.map(ex=>`<option value="${esc(ex)}">${esc(ex)}</option>`).join('');
+    if(exerciseSelect.options.length!==ORDER.length+extra.length)exerciseSelect.innerHTML=optsByCat(ORDER)+extra.map(ex=>`<option value="${esc(ex)}">${esc(ex)}</option>`).join('');
   }
   if(![...exerciseSelect.options].some(option=>option.value===S.statsEx))S.statsEx=ORDER[0];
   exerciseSelect.value=S.statsEx;
@@ -80,9 +80,12 @@ $('#manList').onclick=e=>{
   subReps(m.n,m.ex,m.d);S.manual.splice(i,1);save();renderStats();renderStatsTab();
 };
 $('#stGoal').onchange=e=>{S.goal=Math.max(10,Math.min(1000,Math.round(+e.target.value)||50));save();renderStatsTab()};
-$('#stReset').onclick=async()=>{if(!confirm('要清除所有紀錄嗎？次數、等級、成就和統計都會歸零。\n（好友排行榜上的資料不會被清掉，要刪除請到「好友排行」分頁。）'))return;noSave=true;
-  try{if(accountSession){const session=await freshAccountSession();await accountDataRequest('POST',session,{...DEF});localStorage.removeItem(dirtyKey(activeUserId))}localStorage.removeItem(stateKey());location.reload()}
-  catch(error){noSave=false;toast('雲端清除失敗，紀錄沒有刪除：'+accountErrorText(error))}
+$('#stReset').onclick=async()=>{if(!confirm('要清除所有紀錄嗎？次數、等級、成就和統計都會歸零。\n（好友排行榜上的資料不會被清掉，要刪除請到「好友排行」分頁。）'))return;
+  noSave=true;clearTimeout(saveT);saveT=0;
+  try{
+    if(accountSession&&activeUserId){clearTimeout(cloudSaveT);const keep=S;S=freshState();try{await syncAccountNow({force:true})}catch(error){S=keep;throw error}localStorage.removeItem(dirtyKey(activeUserId))}
+    localStorage.removeItem(stateKey());location.reload();
+  }catch(error){noSave=false;toast('雲端清除失敗，紀錄沒有刪除：'+accountErrorText(error))}
 };
 
 /* ================= 每日挑戰 ================= */

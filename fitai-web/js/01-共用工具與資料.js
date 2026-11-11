@@ -21,15 +21,16 @@ let activeUserId=localStorage.getItem(ACTIVE_KEY)||'',accountSession=null;
 const stateKey=()=>activeUserId?`${KEY}:user:${activeUserId}`:KEY;
 const dirtyKey=id=>`${KEY}:dirty:${id}`;
 const DEF={history:[],xp:0,reps:0,workSecs:0,workDays:{},statsEx:'深蹲',bossIdx:0,bossLoop:0,bossHp:null,combo:0,lastMove:null,defeated:0,best:{},log:[],blog:[],days:{},exs:{},badges:{},goal:50,voice:true,water:{},waterLog:[],waterHit:{},waterGoal:2000,stars3:0,formOk:0,prCount:0,pr:{},dayEx:{},dailyDone:{},weights:{},presets:[],ach:{},facing:'user',musicSrc:'built',musicStyle:'energy',musicBpm:135,musicVol:.35,musicAuto:false,holdBest:{},holdSecs:0,holdLog:[],dayForm:{},formBad:0,food:{},myFoods:[],sched:{},schedOn:false,schedTime:'19:00',schedSeen:{},schedNext:0,cam:{use3d:true,vis:.65,win:5,model:'full',conf:.7,show:false,dev:'',mirror:true},me:{id:'',code:'',name:'',friends:0,avatar:''},sb:{url:'',key:''},voiceCfg:{uri:'',rate:1,pitch:1,vol:1,every:1},manual:[],games:{run:{best:0,plays:0,log:[]},pose:{best:0,plays:0,log:[]},pyr:{best:0,plays:0,log:[]},rhythm:{best:0,plays:0,log:[]},dodge:{best:0,plays:0,log:[]}},body:{set:false,sex:'男',age:25,h:170,w:65,act:1.2,goal:'維持'},kx:{},kxHold0:-1,ninja:{best:{},bestCombo:0,hits:0,plays:0,secs:0,log:[]},pyFull:0,runs:[],runCfg:{mode:'gps',voice:true,speed:8}};
+const freshState=()=>JSON.parse(JSON.stringify(DEF));
 let S;
-try{S={...DEF,...JSON.parse(localStorage.getItem(stateKey())||'{}')}}catch(e){S={...DEF}}
+try{S={...freshState(),...JSON.parse(localStorage.getItem(stateKey())||'{}')}}catch(e){S=freshState()}
 /* 讀進來的資料型別不對（舊版備份、手動改壞）時，把那一欄還原成預設值，避免整個網站壞掉 */
 function normalizeState(o){
   for(const [k,d] of Object.entries(DEF)){
     if(d===null)continue;
     const v=o[k],t=Array.isArray(d)?'array':typeof d;
     const ok=t==='array'?Array.isArray(v):t==='object'?(v&&typeof v==='object'&&!Array.isArray(v)):t==='number'?Number.isFinite(v):typeof v===t;
-    if(!ok)o[k]=Array.isArray(d)?[]:(typeof d==='object'?{...d}:d);
+    if(!ok)o[k]=d&&typeof d==='object'?JSON.parse(JSON.stringify(d)):d;
   }
   o.cam={...DEF.cam,...o.cam,use3d:true,vis:.65,win:5,model:'full',conf:.7,show:false,dev:'',mirror:true};o.me={...DEF.me,...o.me};o.sb={...DEF.sb,...o.sb};o.body={...DEF.body,...o.body};o.voiceCfg={...DEF.voiceCfg,...o.voiceCfg};o.runCfg={...DEF.runCfg,...o.runCfg};o.ninja={...JSON.parse(JSON.stringify(DEF.ninja)),...o.ninja};
   {const g=JSON.parse(JSON.stringify(DEF.games));for(const k in g)g[k]={...g[k],...(o.games&&o.games[k])};o.games=g}
@@ -46,6 +47,7 @@ function normalizeState(o){
   return o;
 }
 S=normalizeState(S);
+const stateFrom=o=>normalizeState({...freshState(),...(o&&typeof o==='object'?o:{})});
 /* 頭像：「表情|顏色編號」短字串，或縮小過的照片 data:image/...；沒選的人用名字首字＋由代碼決定的顏色，好友一樣分得出來 */
 const AV_GROUPS={
   '人物':['🧑','👦','👧','👨','👩','🧔','👱','👱‍♀️','🧑‍🦱','👩‍🦰','👨‍🦳','👵','🧑‍🎓','🧑‍💻','🧑‍🚀','🥷','🦸','🦹','🧙','🧛','😎','🤓','😤','🥳'],
@@ -72,8 +74,8 @@ function loadScript(src){return scriptCache[src]||(scriptCache[src]=new Promise(
 let noSave=false,saveT=0;
 const saveNow=()=>{clearTimeout(saveT);saveT=0;if(noSave)return;try{localStorage.setItem(stateKey(),JSON.stringify(S));if(accountSession&&activeUserId){localStorage.setItem(dirtyKey(activeUserId),'1');scheduleCloudSave()}}catch(e){}};
 const save=()=>{if(!saveT)saveT=setTimeout(saveNow,250)};
-addEventListener('pagehide',()=>{saveNow();if(accountSession)syncAccountNow().catch(()=>{})});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){saveNow();if(accountSession)syncAccountNow().catch(()=>{})}});
+addEventListener('pagehide',()=>{if(noSave)return;saveNow();if(accountSession)syncAccountNow().catch(()=>{})});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!noSave){saveNow();if(accountSession)syncAccountNow().catch(()=>{})}});
 const level=()=>Math.floor(S.xp/100)+1;
 const dkey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const dayN=k=>{const [y,m,d]=k.split('-').map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)};
@@ -234,11 +236,7 @@ function renderStats(silent){
     tile('','stats','今日訓練時間',Math.round((Number(S.workDays[dkey(new Date())])||0)/60),'今日訓練（分）','今日累計')+
     tile('','stats','今日消耗熱量',Math.round(kcalToday()),'今日消耗（大卡）','今日估算')+
     tile('','ach',`經驗值 ${S.xp%100} / 100`,`等級 ${level()}`,'目前等級',`${S.xp%100}/100 經驗值`,S.xp%100);
-  const gameCombo=Math.max(0,Number(S.ninja.bestCombo)||0);
-  const gameScore=Math.max(0,Number(S.games.run.best)||0,Number(S.games.pose.best)||0,...Object.values(S.ninja.best||{}).map(value=>Number(value)||0));
-  $('#headerGameCombo').textContent=gameCombo;
-  $('#headerGameScore').textContent=gameScore;
-  $('#headerGameLevel').textContent=`等級 ${level()}`;
+  refreshGameHeader();
   checkDaily();renderDaily();friendSyncSoon();buddyOnStats();
   checkBadges(silent);
   if($('#tab-ach').classList.contains('active'))renderAch();

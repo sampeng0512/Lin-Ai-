@@ -51,6 +51,7 @@ function renderGuide(){
     $('#camEx').value=n;$('#camEx').dispatchEvent(new Event('change'));$('.tab[data-tab=cam]').click();
   });
   $$('#guideList [data-hold]').forEach(b=>b.onclick=()=>{
+    if(document.body.dataset.mode!=='game')enterMode('game');
     $('.tab[data-tab=game]').click();$('#gSub button[data-sub=hold]').click();
     $('#hEx').value=b.dataset.hold;$('#hEx').dispatchEvent(new Event('change'));
   });

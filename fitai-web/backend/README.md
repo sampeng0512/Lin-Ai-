@@ -16,9 +16,9 @@
 
 另需設定 `TEAM_ACCESS_TOKEN` 為自己的組員存取密碼；網頁發問時的密碼彈窗必須輸入相同值。本機與線上後端各自讀取自己的環境變數，使用線上服務時請由部署者設定相同用途的密碼。啟動腳本會檢查這兩項必要設定。
 
-啟動後可在瀏覽器開啟 `http://127.0.0.1:8000/health`。正常時應回傳 `status: ok`、12 筆知識紀錄，以及 `api_key_configured: true`。本機 PWA 預設連線此服務。
+啟動後可在瀏覽器開啟 `http://127.0.0.1:8000/health`。正常時應回傳 `status: ok`、12 筆知識紀錄，以及 `api_key_configured: true`。前端預設連線 Render 上的線上服務；要改連本機，請把 `fitai-web/js/08-AI教練.js` 的 `API_BASE_URL` 暫時改成 `http://127.0.0.1:8000`。
 
-`team_token_configured` 也應為 `true`；健康檢查只確認設定存在，不代表 OpenAI 金鑰或額度已通過實際呼叫驗證。前端請透過 localhost 或 127.0.0.1 的 HTTP 伺服器開啟，直接開啟 HTML 檔會選用線上後端。
+`team_token_configured` 也應為 `true`；健康檢查只確認設定存在，不代表 OpenAI 金鑰或額度已通過實際呼叫驗證。
 
 ## 正式環境
 
@@ -29,7 +29,7 @@ Netlify 網域（`*.netlify.app`）及 localhost 已列入 CORS 規則。若 PWA
 ## 使用量限制
 
 - 每個問題最多 500 字，超過會回 422。
-- 每個 IP 每分鐘最多發問 `RATE_LIMIT_PER_MINUTE` 次（預設 10），超過會回 429。可在 `.env` 或部署環境調整。
+- 每個 IP 每分鐘最多發問 `RATE_LIMIT_PER_MINUTE` 次（預設 10），超過會回 429。密碼錯誤的嘗試也算在內。可在 `.env` 或部署環境調整。
 - 每次回答最多 800 個輸出 token，呼叫 OpenAI 逾時 30 秒。
 
 限流紀錄存在記憶體，伺服器重啟就會清空；只跑一個執行個體時已足夠。
